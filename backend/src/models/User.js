@@ -23,7 +23,6 @@ const userSchema = new mongoose.Schema(
         },
         password: {
             type: String,
-            required: [true, "Please provide a password"],
             minlength: [6, "Password must be at least 6 characters"],
             select: false, // Don't return password by default
         },
@@ -43,6 +42,20 @@ const userSchema = new mongoose.Schema(
         isVerified: {
             type: Boolean,
             default: false,
+        },
+        isBlocked: {
+            type: Boolean,
+            default: false,
+        },
+        googleId: {
+            type: String,
+            unique: true,
+            sparse: true, // Allows null values
+        },
+        authProvider: {
+            type: String,
+            enum: ['local', 'google'],
+            default: 'local',
         },
         resetPasswordToken: String,
         resetPasswordExpire: Date,

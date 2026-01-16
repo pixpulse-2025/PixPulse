@@ -7,7 +7,7 @@ import {
     deleteReport,
     getArtworkReports,
 } from "../controllers/reportController.js";
-import { protect, authorize } from "../middleware/authMiddleware.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -15,10 +15,10 @@ const router = express.Router();
 router.post("/:artworkId", protect, reportArtwork);
 router.get("/my-reports", protect, getMyReports);
 
-// Admin routes (uncomment when admin middleware is ready)
-// router.get("/", protect, authorize("admin"), getAllReports);
-// router.get("/artwork/:artworkId", protect, authorize("admin"), getArtworkReports);
-// router.patch("/:reportId", protect, authorize("admin"), updateReportStatus);
-// router.delete("/:reportId", protect, authorize("admin"), deleteReport);
+// Admin routes
+router.get("/", protect, admin, getAllReports);
+router.get("/artwork/:artworkId", protect, admin, getArtworkReports);
+router.patch("/:reportId", protect, admin, updateReportStatus);
+router.delete("/:reportId", protect, admin, deleteReport);
 
 export default router;

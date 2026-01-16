@@ -4,6 +4,7 @@ import artworkReducer from "./slices/artworkSlice";
 import cartReducer from "./slices/cartSlice";
 import favoritesReducer from "./slices/favoritesSlice";
 import ordersReducer from "./slices/ordersSlice";
+import reportsReducer from "./slices/reportsSlice";
 
 export const store = configureStore({
     reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
         cart: cartReducer,
         favorites: favoritesReducer,
         orders: ordersReducer,
+        reports: reportsReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

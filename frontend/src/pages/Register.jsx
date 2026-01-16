@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { useSelector } from "react-redux";
+import GoogleLoginButton from "../components/GoogleLoginButton";
+
 
 const Register = () => {
     const navigate = useNavigate();
@@ -16,10 +18,19 @@ const Register = () => {
     });
 
     const [validationError, setValidationError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
-        // Clear errors when component mounts
+        // Clear errors and form data when component mounts
         clearError();
+        setFormData({
+            name: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
+        });
+        setValidationError("");
     }, [clearError]);
 
     useEffect(() => {
@@ -32,6 +43,20 @@ const Register = () => {
     useEffect(() => {
         // Redirect to login after successful registration
         if (registerSuccess) {
+            // Clear form data
+            setFormData({
+                name: "",
+                email: "",
+                password: "",
+                confirmPassword: "",
+            });
+
+            // Clear terms checkbox
+            const termsCheckbox = document.getElementById("terms");
+            if (termsCheckbox) {
+                termsCheckbox.checked = false;
+            }
+
             setTimeout(() => {
                 navigate("/login");
             }, 2000);
@@ -136,6 +161,7 @@ const Register = () => {
                                 required
                                 value={formData.name}
                                 onChange={handleChange}
+                                autoComplete="name"
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                 placeholder="John Doe"
                             />
@@ -156,6 +182,7 @@ const Register = () => {
                                 required
                                 value={formData.email}
                                 onChange={handleChange}
+                                autoComplete="email"
                                 className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
                                 placeholder="you@example.com"
                             />
@@ -169,16 +196,34 @@ const Register = () => {
                             >
                                 Password
                             </label>
-                            <input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                value={formData.password}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                placeholder="••••••••"
-                            />
+                            <div className="relative">
+                                <input
+                                    id="password"
+                                    name="password"
+                                    type={showPassword ? "text" : "password"}
+                                    required
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    autoComplete="new-password"
+                                    className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    placeholder="••••••••"
+                                />
+                                <button
+                                    type="button"
+                                    onMouseDown={() => setShowPassword(true)}
+                                    onMouseUp={() => setShowPassword(false)}
+                                    onMouseLeave={() => setShowPassword(false)}
+                                    onTouchStart={() => setShowPassword(true)}
+                                    onTouchEnd={() => setShowPassword(false)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors select-none"
+                                    aria-label="Hold to show password"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Confirm Password */}
@@ -189,16 +234,34 @@ const Register = () => {
                             >
                                 Confirm Password
                             </label>
-                            <input
-                                id="confirmPassword"
-                                name="confirmPassword"
-                                type="password"
-                                required
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                                placeholder="••••••••"
-                            />
+                            <div className="relative">
+                                <input
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    required
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    autoComplete="new-password"
+                                    className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    placeholder="••••••••"
+                                />
+                                <button
+                                    type="button"
+                                    onMouseDown={() => setShowConfirmPassword(true)}
+                                    onMouseUp={() => setShowConfirmPassword(false)}
+                                    onMouseLeave={() => setShowConfirmPassword(false)}
+                                    onTouchStart={() => setShowConfirmPassword(true)}
+                                    onTouchEnd={() => setShowConfirmPassword(false)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors select-none"
+                                    aria-label="Hold to show password"
+                                >
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Terms & Conditions */}
@@ -255,6 +318,21 @@ const Register = () => {
                                 "Create Account"
                             )}
                         </button>
+
+                        {/* OR Divider */}
+                        <div className="relative">
+                            <div className="absolute inset-0 flex items-center">
+                                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                            </div>
+                            <div className="relative flex justify-center text-sm">
+                                <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                                    Or continue with
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Google Login Button */}
+                        <GoogleLoginButton />
                     </div>
 
                     {/* Sign In Link */}

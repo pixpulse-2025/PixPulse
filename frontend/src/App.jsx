@@ -5,6 +5,8 @@ import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import Explore from "./pages/Explore";
 import Community from "./pages/Community";
 import Dashboard from "./pages/Dashboard";
@@ -15,6 +17,12 @@ import ArtworkDetail from "./pages/ArtworkDetail";
 import Favorites from "./pages/Favorites";
 import Cart from "./pages/Cart";
 import MyPurchases from "./pages/MyPurchases";
+import MyReports from "./pages/MyReports";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/Users";
+import AdminArtworks from "./pages/admin/Artworks";
+import AdminReports from "./pages/admin/Reports";
+import AdminAnalytics from "./pages/admin/Analytics";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./hooks/useAuth";
@@ -42,6 +50,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/community" element={<Community />} />
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/artwork/:id" element={<ArtworkDetail />} />
@@ -98,6 +108,54 @@ function App() {
           element={
             <ProtectedRoute>
               <Explore />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-reports"
+          element={
+            <ProtectedRoute>
+              <MyReports />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <ProtectedRoute>
+              <AdminUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/artworks"
+          element={
+            <ProtectedRoute>
+              <AdminArtworks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/analytics"
+          element={
+            <ProtectedRoute>
+              <AdminAnalytics />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/reports"
+          element={
+            <ProtectedRoute>
+              <AdminReports />
             </ProtectedRoute>
           }
         />

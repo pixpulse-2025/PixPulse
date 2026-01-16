@@ -1,14 +1,15 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import app from "./app.js";
 import connectDB from "./config/db.js";
-
-dotenv.config();
+import { verifyEmailConfig } from "./utils/emailService.js";
 
 // Database connection
 connectDB();
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
+  // Verify Email Config
+  await verifyEmailConfig();
 });

@@ -1,10 +1,18 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState("overview");
+
+    // Redirect admins to admin dashboard
+    useEffect(() => {
+        if (user?.role === 'admin') {
+            navigate('/admin', { replace: true });
+        }
+    }, [user, navigate]);
 
     // Mock data for the dashboard
     const stats = [
@@ -72,6 +80,12 @@ const Dashboard = () => {
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'orders' ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
                             >
                                 <span>🛍️</span> My Purchases
+                            </Link>
+                            <Link
+                                to="/my-reports"
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === 'reports' ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'}`}
+                            >
+                                <span>🚩</span> My Reports
                             </Link>
                             <button
                                 onClick={() => setActiveTab("settings")}

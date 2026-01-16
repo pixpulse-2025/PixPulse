@@ -17,6 +17,8 @@ const ArtworkDetail = () => {
     const [showPreview, setShowPreview] = useState(false);
     const [isFavorited, setIsFavorited] = useState(false);
     const [showReportModal, setShowReportModal] = useState(false);
+    const [isAddingToCart, setIsAddingToCart] = useState(false);
+    const [isBuyingNow, setIsBuyingNow] = useState(false);
 
     useEffect(() => {
         dispatch(fetchArtworkById(id));
@@ -29,6 +31,18 @@ const ArtworkDetail = () => {
             setIsFavorited(favorited);
         }
     }, [favorites, artwork, user]);
+
+    // Close preview modal with ESC key
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === 'Escape' && showPreview) {
+                setShowPreview(false);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [showPreview]);
 
     const handleToggleFavorite = async () => {
         if (!user) {
@@ -61,13 +75,65 @@ const ArtworkDetail = () => {
         }
 
         try {
+            setIsAddingToCart(true);
+
+            // Add to cart
             await dispatch(addToCartAction({
                 artworkId: id,
                 licenseType: artwork.licenseType
             })).unwrap();
-            alert("Added to cart!");
+
+            // Auto-add to favorites if not already favorited
+            if (!isFavorited) {
+                try {
+                    await dispatch(addToFavorites(id));
+                    setIsFavorited(true);
+                } catch (favError) {
+                    // Silently fail if favorite add fails
+                    console.log("Could not add to favorites:", favError);
+                }
+            }
+
+            // Show success message
+            const successDiv = document.createElement('div');
+            successDiv.className = 'fixed top-24 right-6 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 animate-slide-in';
+            successDiv.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span>✓</span>
+                    <div>
+                        <p class="font-bold">Added to cart!</p>
+                        ${!isFavorited ? '<p class="text-xs opacity-90">Also added to favorites ❤️</p>' : ''}
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(successDiv);
+            setTimeout(() => successDiv.remove(), 3000);
         } catch (error) {
             alert(error || "Failed to add to cart");
+        } finally {
+            setIsAddingToCart(false);
+        }
+    };
+
+    const handleBuyNow = async () => {
+        if (!user) {
+            navigate("/login", { state: { from: { pathname: `/artwork/${id}` } } });
+            return;
+        }
+
+        try {
+            setIsBuyingNow(true);
+            // Add to cart
+            await dispatch(addToCartAction({
+                artworkId: id,
+                licenseType: artwork.licenseType
+            })).unwrap();
+
+            // Redirect to cart/checkout
+            navigate("/cart");
+        } catch (error) {
+            alert(error || "Failed to process purchase");
+            setIsBuyingNow(false);
         }
     };
 
@@ -116,32 +182,60 @@ const ArtworkDetail = () => {
                     {/* Main Content - Image/Preview */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Preview Image */}
-                        <div className="glass rounded-3xl overflow-hidden">
+                        <div className="glass rounded-3xl overflow-hidden group">
                             <div className="relative aspect-video bg-gray-900 flex items-center justify-center">
                                 <img
                                     src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`}
                                     alt={artwork.title}
-                                    className="max-w-full max-h-full object-contain"
+                                    className="max-w-full max-h-full object-contain cursor-pointer transition-transform group-hover:scale-105"
+                                    onClick={() => setShowPreview(true)}
                                     onError={(e) => {
                                         e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
                                     }}
                                 />
-                                {/* Preview Overlay for Paid Items */}
+
+                                {/* Watermark Overlay for Paid Items */}
                                 {artwork.priceType === "Paid" && (
-                                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                                        <div className="text-center text-white">
-                                            <div className="text-6xl mb-4">🔒</div>
-                                            <h3 className="text-2xl font-bold mb-2">Premium Content</h3>
-                                            <p className="text-sm opacity-80 mb-4">Purchase to unlock full resolution</p>
-                                            <button
-                                                onClick={() => setShowPreview(true)}
-                                                className="px-6 py-3 bg-white text-gray-900 font-bold rounded-xl hover:bg-gray-100 transition-all"
-                                            >
-                                                Preview Mode
-                                            </button>
+                                    <>
+                                        {/* Diagonal Watermark */}
+                                        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                            <div className="text-white/20 text-6xl md:text-8xl font-bold transform -rotate-45 select-none">
+                                                PREVIEW
+                                            </div>
                                         </div>
+
+                                        {/* Bottom Info Bar */}
+                                        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6">
+                                            <div className="flex items-center justify-between text-white">
+                                                <div>
+                                                    <p className="text-sm opacity-80 mb-1">🔒 Premium Content</p>
+                                                    <p className="font-bold">Purchase to unlock full resolution</p>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShowPreview(true);
+                                                    }}
+                                                    className="px-4 py-2 bg-white/20 backdrop-blur-sm text-white font-medium rounded-lg hover:bg-white/30 transition-all"
+                                                >
+                                                    👁️ View Preview
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Free Content Badge */}
+                                {artwork.priceType === "Free" && (
+                                    <div className="absolute top-4 right-4 px-4 py-2 bg-green-500 text-white font-bold rounded-full shadow-lg">
+                                        ✓ FREE
                                     </div>
                                 )}
+
+                                {/* Click to Enlarge Hint */}
+                                <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/50 backdrop-blur-sm text-white text-xs rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                    🔍 Click to enlarge
+                                </div>
                             </div>
                         </div>
 
@@ -245,21 +339,44 @@ const ArtworkDetail = () => {
                                     <>
                                         <button
                                             onClick={handleAddToCart}
-                                            className="w-full py-4 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2"
+                                            disabled={isAddingToCart || isBuyingNow}
+                                            className="w-full py-4 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            🛒 Add to Cart
+                                            {isAddingToCart ? (
+                                                <>
+                                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                    </svg>
+                                                    Adding...
+                                                </>
+                                            ) : (
+                                                <>🛒 Add to Cart</>
+                                            )}
                                         </button>
                                         <button
-                                            onClick={handleDownload}
-                                            className="w-full py-4 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                                            onClick={handleBuyNow}
+                                            disabled={isAddingToCart || isBuyingNow}
+                                            className="w-full py-4 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-bold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
-                                            Buy Now
+                                            {isBuyingNow ? (
+                                                <>
+                                                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                    </svg>
+                                                    Processing...
+                                                </>
+                                            ) : (
+                                                <>⚡ Buy Now</>
+                                            )}
                                         </button>
                                     </>
                                 )}
                                 <button
                                     onClick={handleToggleFavorite}
-                                    className={`w-full py-4 border-2 font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${isFavorited
+                                    disabled={isAddingToCart || isBuyingNow}
+                                    className={`w-full py-4 border-2 font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${isFavorited
                                         ? "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30"
                                         : "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                                         }`}
@@ -307,27 +424,95 @@ const ArtworkDetail = () => {
                 onClose={() => setShowReportModal(false)}
             />
 
-            {/* Preview Modal */}
+            {/* Enhanced Preview Modal */}
             {showPreview && (
-                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onClick={() => setShowPreview(false)}>
-                    <div className="relative max-w-6xl w-full" onClick={(e) => e.stopPropagation()}>
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowPreview(false)}>
+                    <div className="relative max-w-7xl w-full" onClick={(e) => e.stopPropagation()}>
+                        {/* Close Button */}
                         <button
                             onClick={() => setShowPreview(false)}
-                            className="absolute -top-12 right-0 text-white text-4xl hover:text-gray-300"
+                            className="absolute -top-14 right-0 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 text-white rounded-full transition-all"
+                            title="Close (Esc)"
                         >
                             ✕
                         </button>
-                        <img
-                            src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`}
-                            alt={artwork.title}
-                            className="w-full h-auto rounded-2xl"
-                            onError={(e) => {
-                                e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
-                            }}
-                        />
-                        <div className="mt-4 text-center text-white">
-                            <p className="text-sm opacity-80">Preview Mode - Watermarked Version</p>
+
+                        {/* Image Container */}
+                        <div className="relative bg-gray-900 rounded-2xl overflow-hidden">
+                            <img
+                                src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`}
+                                alt={artwork.title}
+                                className="w-full h-auto max-h-[80vh] object-contain"
+                                onError={(e) => {
+                                    e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
+                                }}
+                            />
+
+                            {/* Watermark for Paid Content */}
+                            {artwork.priceType === "Paid" && (
+                                <>
+                                    {/* Diagonal Watermark */}
+                                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                                        <div className="text-white/15 text-9xl font-bold transform -rotate-45 select-none">
+                                            PREVIEW
+                                        </div>
+                                    </div>
+
+                                    {/* Corner Watermarks */}
+                                    <div className="absolute top-4 left-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white text-xs rounded-full">
+                                        🔒 Preview Only
+                                    </div>
+                                    <div className="absolute top-4 right-4 px-3 py-1.5 bg-black/60 backdrop-blur-sm text-white text-xs rounded-full">
+                                        Watermarked
+                                    </div>
+                                </>
+                            )}
                         </div>
+
+                        {/* Info Bar */}
+                        <div className="mt-4 glass rounded-2xl p-4">
+                            <div className="flex items-center justify-between flex-wrap gap-4">
+                                <div className="text-white">
+                                    <h3 className="font-bold text-lg mb-1">{artwork.title}</h3>
+                                    <p className="text-sm opacity-80">
+                                        {artwork.priceType === "Paid"
+                                            ? "Preview Mode - Purchase to unlock full resolution"
+                                            : "Full Resolution Preview"}
+                                    </p>
+                                </div>
+
+                                {/* Quick Actions */}
+                                {artwork.priceType === "Paid" && (
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setShowPreview(false);
+                                                handleAddToCart();
+                                            }}
+                                            disabled={isAddingToCart}
+                                            className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-all disabled:opacity-50"
+                                        >
+                                            🛒 Add to Cart
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setShowPreview(false);
+                                                handleBuyNow();
+                                            }}
+                                            disabled={isBuyingNow}
+                                            className="px-4 py-2 bg-white hover:bg-gray-100 text-gray-900 font-medium rounded-lg transition-all disabled:opacity-50"
+                                        >
+                                            ⚡ Buy Now - ${artwork.price}
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Keyboard Hint */}
+                        <p className="text-center text-white/60 text-xs mt-3">
+                            Press ESC to close
+                        </p>
                     </div>
                 </div>
             )}

@@ -1,16 +1,18 @@
+import { useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
-    login,
-    register,
-    logout,
-    loadUser,
-    updateProfile,
+    login as loginAction,
+    googleLogin as googleLoginAction,
+    register as registerAction,
+    logout as logoutAction,
+    loadUser as loadUserAction,
+    updateProfile as updateProfileAction,
     selectUser,
     selectIsAuthenticated,
     selectAuthLoading,
     selectAuthError,
-    clearError,
-    clearRegisterSuccess,
+    clearError as clearErrorAction,
+    clearRegisterSuccess as clearRegisterSuccessAction,
 } from "../redux/slices/authSlice";
 
 /**
@@ -24,6 +26,15 @@ export const useAuth = () => {
     const loading = useSelector(selectAuthLoading);
     const error = useSelector(selectAuthError);
 
+    const login = useCallback((credentials) => dispatch(loginAction(credentials)), [dispatch]);
+    const googleLogin = useCallback((googleData) => dispatch(googleLoginAction(googleData)), [dispatch]);
+    const register = useCallback((userData) => dispatch(registerAction(userData)), [dispatch]);
+    const logout = useCallback(() => dispatch(logoutAction()), [dispatch]);
+    const loadUser = useCallback(() => dispatch(loadUserAction()), [dispatch]);
+    const updateProfile = useCallback((userData) => dispatch(updateProfileAction(userData)), [dispatch]);
+    const clearError = useCallback(() => dispatch(clearErrorAction()), [dispatch]);
+    const clearRegisterSuccess = useCallback(() => dispatch(clearRegisterSuccessAction()), [dispatch]);
+
     return {
         // State
         user,
@@ -32,13 +43,14 @@ export const useAuth = () => {
         error,
 
         // Actions
-        login: (credentials) => dispatch(login(credentials)),
-        register: (userData) => dispatch(register(userData)),
-        logout: () => dispatch(logout()),
-        loadUser: () => dispatch(loadUser()),
-        updateProfile: (userData) => dispatch(updateProfile(userData)),
-        clearError: () => dispatch(clearError()),
-        clearRegisterSuccess: () => dispatch(clearRegisterSuccess()),
+        login,
+        googleLogin,
+        register,
+        logout,
+        loadUser,
+        updateProfile,
+        clearError,
+        clearRegisterSuccess,
     };
 };
 

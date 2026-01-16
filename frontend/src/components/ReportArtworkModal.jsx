@@ -1,8 +1,13 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    reportArtwork,
+    clearError,
+    clearSuccess,
+    selectReportsLoading,
+    selectReportsError,
+    selectReportsSuccess
+} from "../redux/slices/reportsSlice";
 
 const REPORT_REASONS = [
     "Copyright Infringement",
@@ -15,50 +20,62 @@ const REPORT_REASONS = [
 ];
 
 const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
-    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const loading = useSelector(selectReportsLoading);
+    const error = useSelector(selectReportsError);
+    const success = useSelector(selectReportsSuccess);
+
     const [formData, setFormData] = useState({
         reason: "",
         description: "",
     });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [validationError, setValidationError] = useState(null);
+
+    // Handle success
+    useEffect(() => {
+        if (success) {
+            alert("Report submitted successfully. We will review it shortly.");
+            setFormData({ reason: "", description: "" });
+            onClose();
+            dispatch(clearSuccess());
+        }
+    }, [success, onClose, dispatch]);
+
+    // Clear errors when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            dispatch(clearError());
+            setValidationError(null);
+            setFormData({ reason: "", description: "" });
+        }
+    }, [isOpen, dispatch]);
 
     const handleChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value,
         });
-        setError(null);
+        setValidationError(null);
+        dispatch(clearError());
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.reason) {
-            setError("Please select a reason");
+            setValidationError("Please select a reason");
             return;
         }
 
         if (!formData.description || formData.description.trim().length < 10) {
-            setError("Please provide at least 10 characters of description");
+            setValidationError("Please provide at least 10 characters of description");
             return;
         }
 
-        try {
-            setLoading(true);
-            setError(null);
-
-            await axios.post(`${API_URL}/reports/${artworkId}`, formData);
-
-            // Success
-            alert("Report submitted successfully. We will review it shortly.");
-            onClose();
-            setFormData({ reason: "", description: "" });
-        } catch (err) {
-            setError(err.response?.data?.message || "Failed to submit report");
-        } finally {
-            setLoading(false);
-        }
+        dispatch(reportArtwork({
+            artworkId,
+            reportData: formData
+        }));
     };
 
     if (!isOpen) return null;
@@ -133,9 +150,9 @@ const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
                     </div>
 
                     {/* Error Message */}
-                    {error && (
+                    {(validationError || error) && (
                         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
-                            {error}
+                            {validationError || error}
                         </div>
                     )}
 
