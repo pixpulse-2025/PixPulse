@@ -5,96 +5,99 @@ const Community = () => {
     const { isAuthenticated, user } = useAuth();
     const [activeTab, setActiveTab] = useState("feed");
 
-    // Mock data - replace with Redux state later
-    const posts = Array.from({ length: 5 }, (_, i) => ({
-        id: i + 1,
-        author: `Artist ${i + 1}`,
-        avatar: `https://ui-avatars.com/api/?name=Artist+${i + 1}&background=random`,
-        content: `Just finished working on this amazing piece! What do you think? #digitalart #creative`,
-        image: `https://picsum.photos/600/400?random=${i}`,
-        likes: Math.floor(Math.random() * 500),
-        comments: Math.floor(Math.random() * 50),
-        timestamp: `${i + 1}h ago`,
-    }));
+    // Mock data
+    const posts = [
+        {
+            id: 1,
+            author: "Astrid Luna",
+            avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop",
+            content: "Just finalized the new neon collection. Color theory at its peak. #neon #vivid #community",
+            image: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2570&auto=format&fit=crop",
+            likes: 1240,
+            comments: 42,
+            timestamp: "2h ago",
+        },
+        {
+            id: 2,
+            author: "Kaito Design",
+            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop",
+            content: "Experimental motion tracking with these fluid shapes. #motion #3d #render",
+            image: "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=2564&auto=format&fit=crop",
+            likes: 850,
+            comments: 15,
+            timestamp: "5h ago",
+        },
+    ];
 
     const trendingTopics = [
-        { tag: "digitalart", posts: 1234 },
-        { tag: "illustration", posts: 892 },
-        { tag: "photography", posts: 756 },
-        { tag: "3dart", posts: 543 },
-        { tag: "abstract", posts: 421 },
+        { tag: "vibrant", posts: 1234 },
+        { tag: "modernism", posts: 892 },
+        { tag: "motion", posts: 756 },
+        { tag: "3drender", posts: 543 },
+        { tag: "colorflow", posts: 421 },
     ];
 
     return (
-        <div className="flex-grow pt-32 pb-12 px-6">
-            <div className="container mx-auto max-w-7xl">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
+            <div className="container mx-auto max-w-[1400px] px-6">
                 {/* Header */}
                 <div className="mb-12">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600">
-                        Community
+                    <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2">
+                        Community Feed
                     </h1>
-                    <p className="text-xl text-gray-600 dark:text-gray-400">
-                        Connect with fellow artists and share your creative journey
+                    <p className="text-base text-gray-600 dark:text-gray-400">
+                        Share and connect with creators worldwide
                     </p>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-6">
-                        {/* Tabs */}
-                        <div className="glass rounded-2xl p-2 flex gap-2">
-                            <button
-                                onClick={() => setActiveTab("feed")}
-                                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "feed"
-                                        ? "bg-primary-600 text-white shadow-lg"
-                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    }`}
-                            >
-                                Feed
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("trending")}
-                                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "trending"
-                                        ? "bg-primary-600 text-white shadow-lg"
-                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    }`}
-                            >
-                                Trending
-                            </button>
-                            <button
-                                onClick={() => setActiveTab("following")}
-                                className={`flex-1 px-6 py-3 rounded-xl font-semibold transition-all ${activeTab === "following"
-                                        ? "bg-primary-600 text-white shadow-lg"
-                                        : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                    }`}
-                            >
-                                Following
-                            </button>
+                <div className="grid lg:grid-cols-12 gap-8">
+                    {/* Primary Feed */}
+                    <div className="lg:col-span-8 space-y-6">
+                        {/* Tab System */}
+                        <div className="flex gap-4 bg-white dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
+                            {[
+                                { id: "feed", label: "Feed" },
+                                { id: "trending", label: "Trending" },
+                                { id: "following", label: "Following" }
+                            ].map(tab => (
+                                <button
+                                    key={tab.id}
+                                    onClick={() => setActiveTab(tab.id)}
+                                    className={`flex-1 text-sm font-semibold px-4 py-2 rounded-md transition-all ${activeTab === tab.id
+                                            ? "bg-primary text-white dark:bg-accent"
+                                            : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                        }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
                         </div>
 
-                        {/* Create Post */}
+                        {/* Composer */}
                         {isAuthenticated && (
-                            <div className="glass rounded-2xl p-6">
+                            <div className="card-surface p-6">
                                 <div className="flex gap-4">
-                                    <img
-                                        src={`https://ui-avatars.com/api/?name=${user?.name || "User"}&background=random`}
-                                        alt="Your avatar"
-                                        className="w-12 h-12 rounded-full"
-                                    />
+                                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-200">
+                                        <img
+                                            src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name || "User"}&background=0369a1&color=fff`}
+                                            alt="Your avatar"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
                                     <div className="flex-1">
                                         <textarea
-                                            placeholder="Share your thoughts or latest work..."
-                                            className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none"
+                                            placeholder="Share your work or thoughts..."
+                                            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                                             rows="3"
                                         />
-                                        <div className="flex gap-2 mt-3">
-                                            <button className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg font-semibold transition-colors">
+                                        <div className="flex justify-between items-center mt-4">
+                                            <div className="flex gap-2">
+                                                <button className="p-2 text-gray-400 hover:text-primary transition-colors">
+                                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                </button>
+                                            </div>
+                                            <button className="btn-primary text-sm px-6 py-2">
                                                 Post
-                                            </button>
-                                            <button className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
                                             </button>
                                         </div>
                                     </div>
@@ -102,124 +105,77 @@ const Community = () => {
                             </div>
                         )}
 
-                        {/* Posts Feed */}
-                        <div className="space-y-6">
-                            {posts.map((post) => (
-                                <div key={post.id} className="glass rounded-2xl p-6">
-                                    {/* Post Header */}
+                        {/* Posts */}
+                        {posts.map(post => (
+                            <div key={post.id} className="card-surface overflow-hidden">
+                                <div className="p-6">
                                     <div className="flex items-center gap-3 mb-4">
                                         <img
                                             src={post.avatar}
                                             alt={post.author}
-                                            className="w-12 h-12 rounded-full"
+                                            className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                                         />
-                                        <div className="flex-1">
-                                            <h3 className="font-bold text-gray-900 dark:text-white">
-                                                {post.author}
-                                            </h3>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                {post.timestamp}
-                                            </p>
+                                        <div>
+                                            <h3 className="font-semibold text-gray-900">{post.author}</h3>
+                                            <p className="text-sm text-gray-500">{post.timestamp}</p>
                                         </div>
-                                        <button className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-                                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                                            </svg>
-                                        </button>
                                     </div>
-
-                                    {/* Post Content */}
-                                    <p className="text-gray-700 dark:text-gray-300 mb-4">
-                                        {post.content}
-                                    </p>
-
-                                    {/* Post Image */}
-                                    <div className="rounded-xl overflow-hidden mb-4">
-                                        <img
-                                            src={post.image}
-                                            alt="Post"
-                                            className="w-full h-auto"
-                                        />
-                                    </div>
-
-                                    {/* Post Actions */}
-                                    <div className="flex items-center gap-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                            </svg>
-                                            <span className="font-medium">{post.likes}</span>
-                                        </button>
-                                        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                            </svg>
-                                            <span className="font-medium">{post.comments}</span>
-                                        </button>
-                                        <button className="flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors ml-auto">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                            </svg>
-                                        </button>
-                                    </div>
+                                    <p className="text-gray-700 mb-4">{post.content}</p>
                                 </div>
-                            ))}
-                        </div>
+                                {post.image && (
+                                    <img
+                                        src={post.image}
+                                        alt="Post content"
+                                        className="w-full aspect-video object-cover"
+                                    />
+                                )}
+                                <div className="p-6 border-t border-gray-200 flex items-center gap-6">
+                                    <button className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                                        <span className="text-sm font-medium">{post.likes}</span>
+                                    </button>
+                                    <button className="flex items-center gap-2 text-gray-600 hover:text-primary transition-colors">
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                                        <span className="text-sm font-medium">{post.comments}</span>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
                     {/* Sidebar */}
-                    <div className="space-y-6">
+                    <div className="lg:col-span-4 space-y-6">
                         {/* Trending Topics */}
-                        <div className="glass rounded-2xl p-6">
-                            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                                Trending Topics
-                            </h3>
+                        <div className="card-surface p-6">
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Trending Topics</h2>
                             <div className="space-y-3">
                                 {trendingTopics.map((topic, index) => (
-                                    <div
-                                        key={topic.tag}
-                                        className="flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                                    <button
+                                        key={index}
+                                        className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors text-left"
                                     >
                                         <div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
-                                                    #{index + 1}
-                                                </span>
-                                                <span className="font-semibold text-primary-600 dark:text-primary-400">
-                                                    #{topic.tag}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                {topic.posts} posts
-                                            </p>
+                                            <p className="font-semibold text-gray-900">#{topic.tag}</p>
+                                            <p className="text-sm text-gray-500">{topic.posts} posts</p>
                                         </div>
-                                    </div>
+                                        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                                    </button>
                                 ))}
                             </div>
                         </div>
 
                         {/* Suggested Artists */}
-                        <div className="glass rounded-2xl p-6">
-                            <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white">
-                                Suggested Artists
-                            </h3>
+                        <div className="card-surface p-6">
+                            <h2 className="text-lg font-bold text-gray-900 mb-4">Suggested Artists</h2>
                             <div className="space-y-4">
                                 {[1, 2, 3].map((i) => (
                                     <div key={i} className="flex items-center gap-3">
-                                        <img
-                                            src={`https://ui-avatars.com/api/?name=Suggested+${i}&background=random`}
-                                            alt={`Suggested ${i}`}
-                                            className="w-12 h-12 rounded-full"
-                                        />
+                                        <div className="w-10 h-10 rounded-full bg-gray-200"></div>
                                         <div className="flex-1">
-                                            <h4 className="font-semibold text-gray-900 dark:text-white">
-                                                Suggested Artist {i}
-                                            </h4>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                {Math.floor(Math.random() * 10)}K followers
-                                            </p>
+                                            <p className="font-semibold text-gray-900 text-sm">Artist Name</p>
+                                            <p className="text-xs text-gray-500">Digital Artist</p>
                                         </div>
-                                        <button className="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg text-sm font-semibold transition-colors">
+                                        <button className="btn-secondary text-xs px-3 py-1.5">
                                             Follow
                                         </button>
                                     </div>

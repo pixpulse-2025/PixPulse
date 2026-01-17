@@ -1,3 +1,8 @@
+/**
+ * @file app.js
+ * @description Main Express application configuration. Sets up middleware, routes, and error handling.
+ */
+
 import express from "express";
 import cors from "cors";
 import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
@@ -11,72 +16,97 @@ import reportRoutes from "./routes/reportRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
+// Get directory name in ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Initialize app
+// Initialize the Express application
 const app = express();
 
-/* ======================
+/* ==========================================================================
    CORS CONFIGURATION
-====================== */
+   Allows the frontend to communicate with the backend from specific origins.
+   ========================================================================== */
 const allowedOrigins = [
-  "http://localhost:5173", // React (Vite)
-  "http://localhost:5174", // React (Vite - Backup port)
+  "http://localhost:5173", // React (Vite) - Primary development port
+  "http://localhost:5174", // React (Vite) - Backup development port
   "http://localhost:3000", // React (CRA)
-  process.env.CLIENT_URL   // Production frontend
+  process.env.CLIENT_URL   // Production frontend URL from environment variables
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // allow requests with no origin (Postman, mobile apps)
+    // Allow requests with no origin (like Postman or mobile apps)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true,
+  credentials: true, // Allow cookies and authorization headers
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"]
 };
 
 app.use(cors(corsOptions));
 
-/* ======================
-   STATIC SERVING
-====================== */
+/* ==========================================================================
+   STATIC FILE SERVING
+   Exposes the 'uploads' directory so that images/files can be accessed via URL.
+   ========================================================================== */
 app.use("/uploads", express.static(path.join(path.resolve(), "uploads")));
 
-/* ======================
-   BODY PARSER
-====================== */
+/* ==========================================================================
+   BODY PARSER MIDDLEWARE
+   Enables the application to parse JSON and URL-encoded data in request bodies.
+   ========================================================================== */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ======================
+/* ==========================================================================
    BASE TEST ROUTE
-====================== */
+   A simple route to check if the API is up and running.
+   ========================================================================== */
 app.get("/", (req, res) => {
   res.send("🚀 PixPulse API running");
 });
 
-/* ======================
+/* ==========================================================================
    API ROUTES
-====================== */
+   Defines the various endpoints available in the application.
+   ========================================================================== */
+// User authentication (Register, Login, Password Reset)
 app.use("/api/auth", authRoutes);
+
+// Artwork management (Upload, Fetch, Edit, Delete)
 app.use("/api/artworks", artworkRoutes);
+
+// Favorite artworks for users
 app.use("/api/favorites", favoriteRoutes);
+
+// Shopping cart functionality
 app.use("/api/cart", cartRoutes);
+
+// Checkout and Order processing
 app.use("/api/checkout", checkoutRoutes);
+
+// Downloading purchased artworks
 app.use("/api/download", downloadRoutes);
+
+// Reporting problematic or copyright-infringing content
 app.use("/api/reports", reportRoutes);
+
+// Future Admin Dashboard routes
 // app.use("/api/admin", adminRoutes);
 
-/* ======================
-   ERROR HANDLING
-====================== */
+/* ==========================================================================
+   ERROR HANDLING MIDDLEWARE
+   Catches 404 errors and handles all other exceptions globally.
+   ========================================================================== */
+// Handle 404 Not Found errors
 app.use(notFound);
+
+// Global error handler for custom and internal errors
 app.use(errorHandler);
 
 export default app;

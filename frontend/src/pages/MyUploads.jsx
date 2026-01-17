@@ -68,9 +68,10 @@ const MyUploads = () => {
                     </div>
                     <Link
                         to="/upload"
-                        className="px-6 py-3 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transition-all"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5B8DEF] hover:bg-[#4F7CFF] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
                     >
-                        + Upload New
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                        Upload New
                     </Link>
                 </div>
 
@@ -87,8 +88,9 @@ const MyUploads = () => {
                         <p className="text-gray-500 dark:text-gray-400 mb-6">Start sharing your creative work with the world!</p>
                         <Link
                             to="/upload"
-                            className="inline-block px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-all"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-[#5B8DEF] hover:bg-[#4F7CFF] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
                         >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                             Upload Your First Artwork
                         </Link>
                     </div>
@@ -149,8 +151,9 @@ const MyUploads = () => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => handleSaveEdit(artwork._id)}
-                                                        className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#5B8DEF] hover:bg-[#4F7CFF] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
                                                     >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                                         Save
                                                     </button>
                                                     <button
@@ -190,8 +193,8 @@ const MyUploads = () => {
                                                     <div className="flex items-center gap-2 ml-4">
                                                         <span
                                                             className={`px-3 py-1 rounded-full text-xs font-bold ${artwork.isPublic
-                                                                    ? "bg-green-100 dark:bg-green-900/20 text-green-600"
-                                                                    : "bg-gray-100 dark:bg-gray-800 text-gray-600"
+                                                                ? "bg-green-100 dark:bg-green-900/20 text-green-600"
+                                                                : "bg-gray-100 dark:bg-gray-800 text-gray-600"
                                                                 }`}
                                                         >
                                                             {artwork.isPublic ? "Public" : "Hidden"}

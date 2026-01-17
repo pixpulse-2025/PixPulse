@@ -1,11 +1,11 @@
 import Report from "../models/Report.js";
 import Artwork from "../models/Artwork.js";
 
-/* ======================
-   @desc    Report artwork
-   @route   POST /api/reports/:artworkId
-   @access  Private
-====================== */
+/**
+ * Submits a new violation report for a specific artwork.
+ * @route POST /api/reports/:artworkId
+ * @access Private
+ */
 export const reportArtwork = async (req, res, next) => {
     try {
         const { artworkId } = req.params;
@@ -57,11 +57,11 @@ export const reportArtwork = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get user's reports
-   @route   GET /api/reports/my-reports
-   @access  Private
-====================== */
+/**
+ * Retrieves all reports submitted by the currently authenticated user.
+ * @route GET /api/reports/my-reports
+ * @access Private
+ */
 export const getMyReports = async (req, res, next) => {
     try {
         const reports = await Report.find({ reporter: req.user._id })
@@ -78,11 +78,12 @@ export const getMyReports = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get all reports (Admin only)
-   @route   GET /api/reports
-   @access  Private/Admin
-====================== */
+/**
+ * Retrieves all reports in the system. Filterable by status.
+ * Restricted to administrators.
+ * @route GET /api/reports
+ * @access Private/Admin
+ */
 export const getAllReports = async (req, res, next) => {
     try {
         const { status } = req.query;
@@ -108,11 +109,12 @@ export const getAllReports = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Update report status (Admin only)
-   @route   PATCH /api/reports/:reportId
-   @access  Private/Admin
-====================== */
+/**
+ * Updates the status and adds admin notes to a specific report.
+ * Restricted to administrators.
+ * @route PATCH /api/reports/:reportId
+ * @access Private/Admin
+ */
 export const updateReportStatus = async (req, res, next) => {
     try {
         const { reportId } = req.params;
@@ -153,11 +155,12 @@ export const updateReportStatus = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Delete report (Admin only)
-   @route   DELETE /api/reports/:reportId
-   @access  Private/Admin
-====================== */
+/**
+ * Permanently deletes a report from the database.
+ * Restricted to administrators.
+ * @route DELETE /api/reports/:reportId
+ * @access Private/Admin
+ */
 export const deleteReport = async (req, res, next) => {
     try {
         const { reportId } = req.params;
@@ -182,11 +185,12 @@ export const deleteReport = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get reports for specific artwork
-   @route   GET /api/reports/artwork/:artworkId
-   @access  Private/Admin
-====================== */
+/**
+ * Retrieves all reports associated with a specific artwork.
+ * Restricted to administrators.
+ * @route GET /api/reports/artwork/:artworkId
+ * @access Private/Admin
+ */
 export const getArtworkReports = async (req, res, next) => {
     try {
         const { artworkId } = req.params;

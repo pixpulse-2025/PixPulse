@@ -1,3 +1,8 @@
+/**
+ * @file authRoutes.js
+ * @description Routes for user authentication and profile management.
+ */
+
 import express from "express";
 import {
     register,
@@ -19,16 +24,38 @@ import {
 
 const router = express.Router();
 
-// Public routes
+/* ==========================================================================
+   PUBLIC ROUTES
+   No authentication required to access these endpoints.
+   ========================================================================== */
+
+// Register a new user with input validation
 router.post("/register", registerValidation, validate, register);
+
+// Log in an existing user with input validation
 router.post("/login", loginValidation, validate, login);
+
+// Handle Google OAuth authentication
 router.post("/google", googleAuth);
+
+// Initiate forgot password process (sends email)
 router.post("/forgot-password", forgotPassword);
+
+// Reset password using a token from the email
 router.post("/reset-password/:token", resetPassword);
 
-// Protected routes
+/* ==========================================================================
+   PROTECTED ROUTES
+   Requires a valid JWT token in the Authorization header.
+   ========================================================================== */
+
+// Get current user's details
 router.get("/me", protect, getMe);
+
+// Update current user's profile information with validation
 router.put("/profile", protect, updateProfileValidation, validate, updateProfile);
+
+// Log out the current user (token invalidation should be handled on client side)
 router.post("/logout", protect, logout);
 
 export default router;

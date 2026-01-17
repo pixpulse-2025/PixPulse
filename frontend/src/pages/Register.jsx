@@ -4,7 +4,6 @@ import { useAuth } from "../hooks/useAuth";
 import { useSelector } from "react-redux";
 import GoogleLoginButton from "../components/GoogleLoginButton";
 
-
 const Register = () => {
     const navigate = useNavigate();
     const { register, isAuthenticated, loading, error, clearError } = useAuth();
@@ -43,20 +42,6 @@ const Register = () => {
     useEffect(() => {
         // Redirect to login after successful registration
         if (registerSuccess) {
-            // Clear form data
-            setFormData({
-                name: "",
-                email: "",
-                password: "",
-                confirmPassword: "",
-            });
-
-            // Clear terms checkbox
-            const termsCheckbox = document.getElementById("terms");
-            if (termsCheckbox) {
-                termsCheckbox.checked = false;
-            }
-
             setTimeout(() => {
                 navigate("/login");
             }, 2000);
@@ -117,31 +102,31 @@ const Register = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-12">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-32">
             <div className="max-w-md w-full space-y-8">
                 {/* Header */}
                 <div className="text-center">
-                    <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600">
-                        Join PixPulse
+                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
+                        Create Account
                     </h2>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400">
+                    <p className="mt-4 text-gray-600 dark:text-gray-400 text-base">
                         Create your account and start your creative journey
                     </p>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                    <div className="glass rounded-2xl p-8 space-y-6">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 space-y-6 shadow-sm">
                         {/* Success Message */}
                         {registerSuccess && (
-                            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-lg text-sm">
+                            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded-xl text-sm">
                                 Registration successful! Redirecting to login...
                             </div>
                         )}
 
                         {/* Error Message */}
                         {(error || validationError) && (
-                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
                                 {error || validationError}
                             </div>
                         )}
@@ -150,7 +135,7 @@ const Register = () => {
                         <div>
                             <label
                                 htmlFor="name"
-                                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                className="block text-[10px] font-black uppercase tracking-widest text-text/40 mb-2"
                             >
                                 Full Name
                             </label>
@@ -162,7 +147,7 @@ const Register = () => {
                                 value={formData.name}
                                 onChange={handleChange}
                                 autoComplete="name"
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                className="input-field"
                                 placeholder="John Doe"
                             />
                         </div>
@@ -171,7 +156,7 @@ const Register = () => {
                         <div>
                             <label
                                 htmlFor="email"
-                                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                className="block text-[10px] font-black uppercase tracking-widest text-text/40 mb-2"
                             >
                                 Email Address
                             </label>
@@ -183,7 +168,7 @@ const Register = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 autoComplete="email"
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                className="input-field"
                                 placeholder="you@example.com"
                             />
                         </div>
@@ -192,7 +177,7 @@ const Register = () => {
                         <div>
                             <label
                                 htmlFor="password"
-                                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                className="block text-[10px] font-black uppercase tracking-widest text-text/40 mb-2"
                             >
                                 Password
                             </label>
@@ -205,18 +190,14 @@ const Register = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     autoComplete="new-password"
-                                    className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    className="input-field pr-12"
                                     placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
                                     onMouseDown={() => setShowPassword(true)}
                                     onMouseUp={() => setShowPassword(false)}
-                                    onMouseLeave={() => setShowPassword(false)}
-                                    onTouchStart={() => setShowPassword(true)}
-                                    onTouchEnd={() => setShowPassword(false)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors select-none"
-                                    aria-label="Hold to show password"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text/20 hover:text-text transition-colors select-none"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -230,7 +211,7 @@ const Register = () => {
                         <div>
                             <label
                                 htmlFor="confirmPassword"
-                                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                className="block text-[10px] font-black uppercase tracking-widest text-text/40 mb-2"
                             >
                                 Confirm Password
                             </label>
@@ -243,18 +224,14 @@ const Register = () => {
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     autoComplete="new-password"
-                                    className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    className="input-field pr-12"
                                     placeholder="••••••••"
                                 />
                                 <button
                                     type="button"
                                     onMouseDown={() => setShowConfirmPassword(true)}
                                     onMouseUp={() => setShowConfirmPassword(false)}
-                                    onMouseLeave={() => setShowConfirmPassword(false)}
-                                    onTouchStart={() => setShowConfirmPassword(true)}
-                                    onTouchEnd={() => setShowConfirmPassword(false)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors select-none"
-                                    aria-label="Hold to show password"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text/20 hover:text-text transition-colors select-none"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -271,18 +248,18 @@ const Register = () => {
                                 name="terms"
                                 type="checkbox"
                                 required
-                                className="h-4 w-4 mt-1 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                className="h-4 w-4 mt-1 bg-background border-text/10 rounded cursor-pointer accent-text"
                             />
                             <label
                                 htmlFor="terms"
-                                className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                                className="ml-2 block text-[10px] font-black uppercase tracking-widest text-text/40 leading-relaxed"
                             >
                                 I agree to the{" "}
-                                <Link to="/terms" className="text-primary-600 hover:text-primary-500">
+                                <Link to="/terms" className="text-text border-b border-text/10 hover:border-text">
                                     Terms and Conditions
                                 </Link>{" "}
                                 and{" "}
-                                <Link to="/privacy" className="text-primary-600 hover:text-primary-500">
+                                <Link to="/privacy" className="text-text border-b border-text/10 hover:border-text">
                                     Privacy Policy
                                 </Link>
                             </label>
@@ -292,25 +269,13 @@ const Register = () => {
                         <button
                             type="submit"
                             disabled={loading || registerSuccess}
-                            className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                            fill="none"
-                                        />
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        />
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
                                     Creating account...
                                 </span>
@@ -322,10 +287,10 @@ const Register = () => {
                         {/* OR Divider */}
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                                <div className="w-full border-t border-text/5"></div>
                             </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                            <div className="relative flex justify-center text-[10px]">
+                                <span className="px-4 bg-background text-text/20 font-black uppercase tracking-widest">
                                     Or continue with
                                 </span>
                             </div>
@@ -337,11 +302,11 @@ const Register = () => {
 
                     {/* Sign In Link */}
                     <div className="text-center">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text/40">
                             Already have an account?{" "}
                             <Link
                                 to="/login"
-                                className="font-medium text-primary-600 hover:text-primary-500"
+                                className="ml-2 text-text border-b border-text/10 hover:border-text transition-all"
                             >
                                 Sign in
                             </Link>

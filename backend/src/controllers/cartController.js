@@ -1,11 +1,12 @@
 import CartItem from "../models/CartItem.js";
 import Artwork from "../models/Artwork.js";
 
-/* ======================
-   @desc    Add item to cart
-   @route   POST /api/cart/:artworkId
-   @access  Private
-====================== */
+/**
+ * Adds an artwork to the user's shopping cart.
+ * Only paid artworks are allowed in the cart. Checks for duplicates before adding.
+ * @route POST /api/cart/:artworkId
+ * @access Private
+ */
 export const addToCart = async (req, res, next) => {
     try {
         const { artworkId } = req.params;
@@ -68,11 +69,11 @@ export const addToCart = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Remove item from cart
-   @route   DELETE /api/cart/:itemId
-   @access  Private
-====================== */
+/**
+ * Removes a specific item from the user's shopping cart.
+ * @route DELETE /api/cart/:itemId
+ * @access Private
+ */
 export const removeFromCart = async (req, res, next) => {
     try {
         const { itemId } = req.params;
@@ -100,11 +101,12 @@ export const removeFromCart = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get user's cart
-   @route   GET /api/cart
-   @access  Private
-====================== */
+/**
+ * Retrieves all items in the currently authenticated user's shopping cart.
+ * Calculates the total price of all items in the cart.
+ * @route GET /api/cart
+ * @access Private
+ */
 export const getCart = async (req, res, next) => {
     try {
         const cartItems = await CartItem.find({ user: req.user._id })
@@ -131,11 +133,11 @@ export const getCart = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Clear cart
-   @route   DELETE /api/cart
-   @access  Private
-====================== */
+/**
+ * Removes all items from the user's shopping cart.
+ * @route DELETE /api/cart
+ * @access Private
+ */
 export const clearCart = async (req, res, next) => {
     try {
         await CartItem.deleteMany({ user: req.user._id });

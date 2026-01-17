@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,13 +6,21 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Clean Professional Theme */
+    --bg-color: #F8F9FA;
+    --primary-color: #0369A1;
+    --accent-color: #0EA5E9;
+    --text-color: #1F2937;
+    --primary-rgb: 3, 105, 161;
   }
 
   .dark {
-    --background: 222.2 47.4% 11.2%;
-    --foreground: 210 40% 98%;
+    /* Dark Mode */
+    --bg-color: #111827;
+    --primary-color: #0EA5E9;
+    --accent-color: #38BDF8;
+    --text-color: #F9FAFB;
+    --primary-rgb: 14, 165, 233;
   }
 
   html {
@@ -20,28 +28,58 @@
   }
 
   body {
-    @apply bg-white dark:bg-gray-950 text-slate-900 dark:text-slate-100 font-sans antialiased;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    @apply font-sans antialiased transition-colors duration-300;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-b border-gray-200/50 dark:border-gray-800/50;
+    @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200 dark:border-gray-700 shadow-sm;
   }
 
-  @keyframes slide-in {
-    from {
-      transform: translateX(100%);
-      opacity: 0;
+  .btn-primary {
+    @apply bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold px-6 py-3 rounded-lg border border-[#0369A1] dark:border-[#0EA5E9] shadow-sm hover:shadow-md transition-all duration-200 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 font-semibold px-6 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md transition-all duration-200 active:scale-95;
+  }
+
+  .btn-gradient {
+    @apply bg-gradient-to-r from-[#0369A1] to-[#0EA5E9] hover:from-[#075985] hover:to-[#0284C7] text-white font-semibold transition-all duration-200;
+  }
+
+  .btn-gradient:hover {
+    box-shadow: 0 4px 12px rgba(3, 105, 161, 0.25);
+  }
+
+  .card-surface {
+    @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm hover:shadow-md transition-all duration-300;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-[#0EA5E9] focus:border-transparent transition-all outline-none;
+  }
+
+  .beat-hit {
+    @apply active:scale-95 transition-transform duration-75 ease-out;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0);
     }
 
-    to {
-      transform: translateX(0);
-      opacity: 1;
+    50% {
+      transform: translateY(-10px);
     }
   }
 
-  .animate-slide-in {
-    animation: slide-in 0.3s ease-out;
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
   }
 }

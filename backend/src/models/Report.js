@@ -1,5 +1,14 @@
+/**
+ * @file Report.js
+ * @description Mongoose model for Content Reports. Allows users to flag artworks for various violations.
+ */
+
 import mongoose from "mongoose";
 
+/**
+ * Report Schema definition.
+ * Links a reporter (user) to a reported artwork. Includes the reason, description, and status.
+ */
 const reportSchema = new mongoose.Schema(
     {
         artwork: {
@@ -40,7 +49,7 @@ const reportSchema = new mongoose.Schema(
         },
         resolvedBy: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "User", // Admin who resolved the report
         },
         resolvedAt: {
             type: Date,
@@ -51,11 +60,16 @@ const reportSchema = new mongoose.Schema(
     }
 );
 
-// Index for faster queries
+/**
+ * Indexes for optimized querying by status and date.
+ */
 reportSchema.index({ artwork: 1, reporter: 1 });
 reportSchema.index({ status: 1, createdAt: -1 });
 
-// Prevent duplicate reports from same user for same artwork
+/**
+ * Unique index on artwork and reporter.
+ * Prevents a single user from reporting the same artwork multiple times.
+ */
 reportSchema.index({ artwork: 1, reporter: 1 }, { unique: true });
 
 const Report = mongoose.model("Report", reportSchema);

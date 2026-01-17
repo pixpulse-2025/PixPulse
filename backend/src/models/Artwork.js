@@ -1,5 +1,15 @@
+/**
+ * @file Artwork.js
+ * @description Mongoose model for Artworks. Stores information about creative assets uploaded by artists.
+ */
+
 import mongoose from "mongoose";
 
+/**
+ * Artwork Schema definition.
+ * Covers metadata (title, description), classification (category, subCategory),
+ * licensing/pricing (priceType, price, licenseType), and file management (fileUrl, previewUrl).
+ */
 const artworkSchema = new mongoose.Schema(
     {
         title: {
@@ -37,6 +47,7 @@ const artworkSchema = new mongoose.Schema(
             type: Number,
             default: 0,
             validate: {
+                // custom validator to ensure paid artworks have a price > 0
                 validator: function (val) {
                     if (this.priceType === "Paid" && val <= 0) return false;
                     return true;
@@ -67,7 +78,7 @@ const artworkSchema = new mongoose.Schema(
             type: String,
         },
         fileSize: {
-            type: Number, // in bytes
+            type: Number, // Stores size in bytes
         },
         artist: {
             type: mongoose.Schema.Types.ObjectId,
@@ -94,11 +105,14 @@ const artworkSchema = new mongoose.Schema(
         },
     },
     {
-        timestamps: true,
+        timestamps: true, // Automatically track creation and update times
     }
 );
 
-// Index for search
+/**
+ * Define a text index on title, description, and tags.
+ * This enables full-text search capability across these fields.
+ */
 artworkSchema.index({ title: "text", description: "text", tags: "text" });
 
 const Artwork = mongoose.model("Artwork", artworkSchema);

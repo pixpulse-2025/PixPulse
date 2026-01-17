@@ -7,11 +7,12 @@ import { fileURLToPath } from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-/* ======================
-   @desc    Secure download artwork file
-   @route   GET /api/download/:artworkId
-   @access  Private
-====================== */
+/**
+ * Handles the secure streaming/download of an artwork file.
+ * Verifies that the user has either purchased the artwork or it is free.
+ * @route GET /api/download/:artworkId
+ * @access Private
+ */
 export const secureDownload = async (req, res, next) => {
     try {
         const { artworkId } = req.params;
@@ -87,11 +88,12 @@ export const secureDownload = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Generate temporary download token
-   @route   POST /api/download/token/:artworkId
-   @access  Private
-====================== */
+/**
+ * Generates a temporary, one-time-use token for downloading an artwork.
+ * Useful for providing temporary access links.
+ * @route POST /api/download/token/:artworkId
+ * @access Private
+ */
 export const generateDownloadToken = async (req, res, next) => {
     try {
         const { artworkId } = req.params;
@@ -154,11 +156,12 @@ export const generateDownloadToken = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Download with token
-   @route   GET /api/download/file/:token
-   @access  Public (but requires valid token)
-====================== */
+/**
+ * Allows downloading a file using a pre-generated temporary token.
+ * This endpoint is public so it can be used in dynamic link structures.
+ * @route GET /api/download/file/:token
+ * @access Public (but requires valid token)
+ */
 export const downloadWithToken = async (req, res, next) => {
     try {
         const { token } = req.params;
@@ -220,11 +223,12 @@ export const downloadWithToken = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Check download eligibility
-   @route   GET /api/download/check/:artworkId
-   @access  Private
-====================== */
+/**
+ * Checks if the currently authenticated user is eligible to download a specific artwork.
+ * Returns true if the artwork is free or the user has a completed order for it.
+ * @route GET /api/download/check/:artworkId
+ * @access Private
+ */
 export const checkDownloadEligibility = async (req, res, next) => {
     try {
         const { artworkId } = req.params;

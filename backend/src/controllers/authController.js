@@ -1,22 +1,31 @@
+/**
+ * @file authController.js
+ * @description Controller for handling user authentication, profile management, and password reset flows.
+ */
+
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import User from "../models/User.js";
 import { sendPasswordResetEmail } from "../utils/emailService.js";
 
-/* ======================
-   HELPER: Generate JWT Token
-====================== */
+/**
+ * Helper function to generate a JSON Web Token (JWT) for a user.
+ * Tokens are used for authorizing subsequent requests.
+ * @param {string} userId - The ID of the user to encode in the token.
+ * @returns {string} The signed JWT.
+ */
 const generateToken = (userId) => {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
         expiresIn: "30d",
     });
 };
 
-/* ======================
-   @desc    Register new user
-   @route   POST /api/auth/register
-   @access  Public
-====================== */
+/**
+ * Registers a new user in the system.
+ * Checks for duplicate emails, creates a user record, and returns a JWT.
+ * @route POST /api/auth/register
+ * @access Public
+ */
 export const register = async (req, res, next) => {
     try {
         const { name, email, password } = req.body;
@@ -69,11 +78,12 @@ export const register = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Login user
-   @route   POST /api/auth/login
-   @access  Public
-====================== */
+/**
+ * Authenticates an existing user with email and password.
+ * Returns a JWT and user profile data on success.
+ * @route POST /api/auth/login
+ * @access Public
+ */
 export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
@@ -129,11 +139,11 @@ export const login = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get current user
-   @route   GET /api/auth/me
-   @access  Private
-====================== */
+/**
+ * Fetches the currently authenticated user's profile information.
+ * @route GET /api/auth/me
+ * @access Private
+ */
 export const getMe = async (req, res, next) => {
     try {
         const user = await User.findById(req.user.id);
@@ -167,11 +177,11 @@ export const getMe = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Update user profile
-   @route   PUT /api/auth/profile
-   @access  Private
-====================== */
+/**
+ * Updates the profile fields (name, bio, avatar) of the currently logged-in user.
+ * @route PUT /api/auth/profile
+ * @access Private
+ */
 export const updateProfile = async (req, res, next) => {
     try {
         const { name, bio, avatar } = req.body;
@@ -213,11 +223,12 @@ export const updateProfile = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Logout user (client-side token removal)
-   @route   POST /api/auth/logout
-   @access  Private
-====================== */
+/**
+ * Logs out the user. 
+ * Since JWT is stateless, this primarily sends a success response; client must delete the token locally.
+ * @route POST /api/auth/logout
+ * @access Private
+ */
 export const logout = async (req, res, next) => {
     try {
         // In JWT auth, logout is typically handled client-side
@@ -235,11 +246,12 @@ export const logout = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Google OAuth Login/Register
-   @route   POST /api/auth/google
-   @access  Public
-====================== */
+/**
+ * Handles Google OAuth login and registration.
+ * Either creates a new user or links to an existing account based on Google ID/email.
+ * @route POST /api/auth/google
+ * @access Public
+ */
 export const googleAuth = async (req, res) => {
     try {
         const { googleId, email, name, picture } = req.body;
@@ -299,11 +311,12 @@ export const googleAuth = async (req, res) => {
     }
 };
 
-/* ======================
-   @desc    Forgot Password
-   @route   POST /api/auth/forgot-password
-   @access  Public
-====================== */
+/**
+ * Sends a password reset link to the user's email address.
+ * Generates a temporary hashed token and sets an expiration time.
+ * @route POST /api/auth/forgot-password
+ * @access Public
+ */
 export const forgotPassword = async (req, res) => {
     try {
         let { email } = req.body;
@@ -375,11 +388,12 @@ export const forgotPassword = async (req, res) => {
     }
 };
 
-/* ======================
-   @desc    Reset Password
-   @route   POST /api/auth/reset-password/:token
-   @access  Public
-====================== */
+/**
+ * Resets the user's password using the token sent via email.
+ * Verifies the token's validity and expiration before updating the password.
+ * @route POST /api/auth/reset-password/:token
+ * @access Public
+ */
 export const resetPassword = async (req, res) => {
     try {
         const { token } = req.params;

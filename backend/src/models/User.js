@@ -1,6 +1,16 @@
+/**
+ * @file User.js
+ * @description Mongoose model for User. Handles user profiles, authentication data, and roles.
+ */
+
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
+/**
+ * User Schema definition.
+ * Includes basic info (name, email), authentication (password, googleId), 
+ * roles (user, artist, admin), and state (isVerified, isBlocked).
+ */
 const userSchema = new mongoose.Schema(
     {
         name: {
@@ -24,7 +34,7 @@ const userSchema = new mongoose.Schema(
         password: {
             type: String,
             minlength: [6, "Password must be at least 6 characters"],
-            select: false, // Don't return password by default
+            select: false, // Prevents password from being returned in queries by default
         },
         role: {
             type: String,
@@ -50,7 +60,7 @@ const userSchema = new mongoose.Schema(
         googleId: {
             type: String,
             unique: true,
-            sparse: true, // Allows null values
+            sparse: true, // Needed because googleId is optional but must be unique if present
         },
         authProvider: {
             type: String,
@@ -61,13 +71,16 @@ const userSchema = new mongoose.Schema(
         resetPasswordExpire: Date,
     },
     {
-        timestamps: true,
+        timestamps: true, // Automatically adds 'createdAt' and 'updatedAt' fields
     }
 );
 
-// Hash password before saving
+/**
+ * Pre-save middleware (hook) to hash the password before it is saved to the database.
+ * Only runs if the password field has been modified.
+ */
 userSchema.pre("save", async function () {
-    // Only hash if password is modified
+    // Skip hashing if the password has not been changed
     if (!this.isModified("password")) {
         return;
     }
@@ -76,7 +89,11 @@ userSchema.pre("save", async function () {
     this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Method to compare passwords
+/**
+ * Compares a plain text password with the hashed password stored in the database.
+ * @param {string} candidatePassword - The plain text password to check.
+ * @returns {Promise<boolean>} True if passwords match, false otherwise.
+ */
 userSchema.methods.comparePassword = async function (candidatePassword) {
     try {
         return await bcrypt.compare(candidatePassword, this.password);
@@ -85,7 +102,10 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
     }
 };
 
-// Method to get user without password
+/**
+ * Customizes the toJSON output for the User model.
+ * Removes sensitive fields like password and reset tokens before sending data to the client.
+ */
 userSchema.methods.toJSON = function () {
     const user = this.toObject();
     delete user.password;

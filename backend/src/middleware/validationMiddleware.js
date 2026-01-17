@@ -1,23 +1,30 @@
+/**
+ * @file validationMiddleware.js
+ * @description Middleware for validating incoming request bodies using express-validator.
+ */
+
 import { body, validationResult } from "express-validator";
 
-/* ======================
-   Validation Result Handler
-====================== */
+/**
+ * Middleware to check for validation errors after expressing validation rules.
+ * If errors exist, it sends a 400 Bad Request response with the error details.
+ */
 export const validate = (req, res, next) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({
             success: false,
-            message: errors.array()[0].msg, // Return the first error message
+            message: errors.array()[0].msg, // Return the first error message for simplicity
             errors: errors.array(),
         });
     }
     next();
 };
 
-/* ======================
-   Registration Validation
-====================== */
+/**
+ * Validation rules for user registration.
+ * Checks name, email (valid format), and password (length and complexity).
+ */
 export const registerValidation = [
     body("name")
         .trim()
@@ -35,9 +42,10 @@ export const registerValidation = [
         .matches(/[a-zA-Z]/).withMessage("Password must contain at least one letter"),
 ];
 
-/* ======================
-   Login Validation
-====================== */
+/**
+ * Validation rules for user login.
+ * Ensures email and password are provided and email is in the correct format.
+ */
 export const loginValidation = [
     body("email")
         .trim()
@@ -47,9 +55,10 @@ export const loginValidation = [
         .notEmpty().withMessage("Password is required"),
 ];
 
-/* ======================
-   Profile Update Validation
-====================== */
+/**
+ * Validation rules for updating a user profile.
+ * Fields are optional but must meet length requirements if provided.
+ */
 export const updateProfileValidation = [
     body("name")
         .optional()

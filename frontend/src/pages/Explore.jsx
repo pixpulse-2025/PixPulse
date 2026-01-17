@@ -1,151 +1,209 @@
-import { useState } from "react";
-import { useAuth } from "../hooks/useAuth";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+    fetchArtworks,
+    selectArtworks,
+    selectArtworkLoading,
+    selectArtworkPagination,
+    setFilters,
+    selectArtworkFilters
+} from "../redux/slices/artworkSlice";
+import ArtworkGrid from "../components/artwork/ArtworkGrid";
 
 const Explore = () => {
-    const { isAuthenticated } = useAuth();
-    const [selectedCategory, setSelectedCategory] = useState("all");
-    const [sortBy, setSortBy] = useState("newest");
+    const dispatch = useDispatch();
+    const artworks = useSelector(selectArtworks);
+    const loading = useSelector(selectArtworkLoading);
+    const pagination = useSelector(selectArtworkPagination);
+    const filters = useSelector(selectArtworkFilters);
+
+    const [page, setPage] = useState(1);
+    const [searchTerm, setSearchTerm] = useState(filters.search || "");
+    const observer = useRef();
+
+    const lastArtworkElementRef = useCallback(node => {
+        if (loading) return;
+        if (observer.current) observer.current.disconnect();
+        observer.current = new IntersectionObserver(entries => {
+            if (entries[0].isIntersecting && pagination.totalPages > page) {
+                setPage(prevPageCount => prevPageCount + 1);
+            }
+        });
+        if (node) observer.current.observe(node);
+    }, [loading, pagination.totalPages, page]);
 
     const categories = [
-        { id: "all", name: "All Artworks", icon: "🎨" },
-        { id: "digital", name: "Digital Art", icon: "💻" },
-        { id: "photography", name: "Photography", icon: "📷" },
-        { id: "illustration", name: "Illustration", icon: "✏️" },
-        { id: "3d", name: "3D Art", icon: "🎭" },
-        { id: "abstract", name: "Abstract", icon: "🌈" },
+        { id: "all", name: "All Works" },
+        { id: "visual-art", name: "Visual Art" },
+        { id: "audio", name: "Audio" },
+        { id: "video-animation", name: "Video/Animation" },
+        { id: "presets-resources", name: "Presets/Resources" },
+        { id: "other-assets", name: "Other Assets" },
     ];
 
-    // Mock artwork data - replace with Redux state later
-    const artworks = Array.from({ length: 12 }, (_, i) => ({
-        id: i + 1,
-        title: `Artwork ${i + 1}`,
-        artist: `Artist ${i + 1}`,
-        price: Math.floor(Math.random() * 500) + 50,
-        likes: Math.floor(Math.random() * 1000),
-        image: `https://picsum.photos/400/400?random=${i}`,
-    }));
+    const subCategories = {
+        "visual-art": [
+            "Digital Paintings", "Illustrations", "Concept Art", "Photography",
+            "3D Models", "Vector Art", "Pixel Art", "Abstract", "Anime/Manga",
+            "Mixed Media", "Posters", "Wallpapers", "Motion Graphics"
+        ],
+        "audio": ["Music tracks", "Beats", "Sound Effects", "Loops", "Voice Samples"],
+        "video-animation": ["Short Animations", "Motion Templates", "VFX"],
+        "presets-resources": ["Lightroom Presets", "Photoshop Brushes", "LUTs", "3D/Animation Presets"],
+        "other-assets": ["Fonts", "Icons", "UI Kits", "Background Textures"]
+    };
+
+    const [selectedSubCategory, setSelectedSubCategory] = useState("all");
+
+    useEffect(() => {
+        dispatch(fetchArtworks({
+            page,
+            category: filters.category,
+            sortBy: filters.sortBy,
+            search: filters.search
+        }));
+    }, [dispatch, page, filters]);
+
+    const handleCategoryChange = (categoryId) => {
+        dispatch(setFilters({ category: categoryId }));
+        setSelectedSubCategory("all"); // Reset subcategory when main category changes
+        setPage(1);
+    };
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        dispatch(setFilters({ search: searchTerm }));
+        setPage(1);
+    };
 
     return (
-        <div className="flex-grow pt-32 pb-12 px-6">
-            <div className="container mx-auto max-w-7xl">
-                {/* Header */}
-                <div className="mb-12">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600">
-                        Explore Artworks
-                    </h1>
-                    <p className="text-xl text-gray-600 dark:text-gray-400">
-                        Discover amazing digital art from talented creators worldwide
-                    </p>
-                </div>
+        <div className="flex-grow bg-gray-50 dark:bg-gray-900 min-h-screen">
+            <div className="pt-32 pb-10 px-6 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <div className="container mx-auto max-w-[1400px]">
+                    <div className="flex flex-col lg:flex-row items-end justify-between gap-10 mb-8">
+                        <div className="space-y-2">
+                            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+                                Explore Artworks
+                            </h1>
+                            <p className="text-base text-gray-600 dark:text-gray-400">
+                                Discover amazing digital creations from talented artists
+                            </p>
+                        </div>
 
-                {/* Filters */}
-                <div className="glass rounded-2xl p-6 mb-8">
-                    <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
-                        {/* Categories */}
-                        <div className="flex-1 w-full">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                Category
-                            </label>
-                            <div className="flex flex-wrap gap-2">
-                                {categories.map((category) => (
+                        <form onSubmit={handleSearch} className="w-full max-w-lg">
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Search artworks..."
+                                    className="input-field pr-12"
+                                />
+                                <button className="absolute right-3 top-1/2 -translate-y-1/2 p-2 text-gray-400 hover:text-primary transition-colors">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-6">
+                        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                            {categories.map((cat) => (
+                                <button
+                                    key={cat.id}
+                                    onClick={() => handleCategoryChange(cat.id)}
+                                    className={`text-sm font-semibold px-4 py-2 rounded-lg transition-all whitespace-nowrap ${filters.category === cat.id
+                                        ? "bg-primary text-white dark:bg-accent"
+                                        : "bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600"
+                                        }`}
+                                >
+                                    {cat.name}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Subcategory Filter - Shows when a main category is selected */}
+                        {filters.category !== "all" && subCategories[filters.category] && (
+                            <div className="flex items-center gap-2 overflow-x-auto pb-2">
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400 whitespace-nowrap">Type:</span>
+                                <button
+                                    onClick={() => setSelectedSubCategory("all")}
+                                    className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${selectedSubCategory === "all"
+                                        ? "bg-accent text-white"
+                                        : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
+                                        }`}
+                                >
+                                    All
+                                </button>
+                                {subCategories[filters.category].map((subCat) => (
                                     <button
-                                        key={category.id}
-                                        onClick={() => setSelectedCategory(category.id)}
-                                        className={`px-4 py-2 rounded-lg font-medium transition-all ${selectedCategory === category.id
-                                                ? "bg-primary-600 text-white shadow-lg shadow-primary-500/30"
-                                                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                        key={subCat}
+                                        onClick={() => setSelectedSubCategory(subCat)}
+                                        className={`text-sm font-medium px-3 py-1.5 rounded-md transition-all whitespace-nowrap ${selectedSubCategory === subCat
+                                            ? "bg-accent text-white"
+                                            : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600"
                                             }`}
                                     >
-                                        <span className="mr-2">{category.icon}</span>
-                                        {category.name}
+                                        {subCat}
                                     </button>
                                 ))}
                             </div>
-                        </div>
+                        )}
 
-                        {/* Sort */}
-                        <div className="w-full lg:w-auto">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                Sort By
-                            </label>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Sort by:</span>
                             <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="w-full lg:w-48 px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                value={filters.sortBy}
+                                onChange={(e) => dispatch(setFilters({ sortBy: e.target.value }))}
+                                className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                             >
-                                <option value="newest">Newest First</option>
-                                <option value="popular">Most Popular</option>
+                                <option value="popular">Popular</option>
+                                <option value="newest">Newest</option>
+                                <option value="oldest">Oldest</option>
                                 <option value="price-low">Price: Low to High</option>
                                 <option value="price-high">Price: High to Low</option>
+                                <option value="most-viewed">Most Viewed</option>
+                                <option value="most-downloaded">Most Downloaded</option>
+                                <option value="rating">Highest Rated</option>
+                            </select>
+
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Price:</span>
+                            <select
+                                className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                                <option value="all">All Prices</option>
+                                <option value="free">Free</option>
+                                <option value="under-10">Under $10</option>
+                                <option value="10-50">$10 - $50</option>
+                                <option value="50-100">$50 - $100</option>
+                                <option value="over-100">Over $100</option>
+                            </select>
+
+                            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">Rating:</span>
+                            <select
+                                className="bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                            >
+                                <option value="all">All Ratings</option>
+                                <option value="5">⭐⭐⭐⭐⭐ Only</option>
+                                <option value="4">⭐⭐⭐⭐ & Up</option>
+                                <option value="3">⭐⭐⭐ & Up</option>
                             </select>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                {/* Artwork Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {artworks.map((artwork) => (
-                        <div
-                            key={artwork.id}
-                            className="glass rounded-2xl overflow-hidden group cursor-pointer hover:shadow-xl transition-all hover:scale-105"
-                        >
-                            {/* Image */}
-                            <div className="relative aspect-square overflow-hidden bg-gray-200 dark:bg-gray-800">
-                                <img
-                                    src={artwork.image}
-                                    alt={artwork.title}
-                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                                />
-                                {/* Overlay on hover */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <div className="absolute bottom-4 left-4 right-4 flex gap-2">
-                                        <button className="flex-1 px-4 py-2 bg-white text-gray-900 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
-                                            View
-                                        </button>
-                                        {isAuthenticated && (
-                                            <button className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
-                                                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" />
-                                                </svg>
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+            <div className="container mx-auto max-w-[1400px] px-6 py-12">
+                <ArtworkGrid artworks={artworks} loading={loading && page === 1} />
 
-                            {/* Info */}
-                            <div className="p-4">
-                                <h3 className="font-bold text-lg text-gray-900 dark:text-white mb-1 truncate">
-                                    {artwork.title}
-                                </h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                                    by {artwork.artist}
-                                </p>
-                                <div className="flex items-center justify-between">
-                                    <span className="text-lg font-bold text-primary-600 dark:text-primary-400">
-                                        ${artwork.price}
-                                    </span>
-                                    <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
-                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                                fillRule="evenodd"
-                                                d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-                                                clipRule="evenodd"
-                                            />
-                                        </svg>
-                                        <span className="text-sm">{artwork.likes}</span>
-                                    </div>
-                                </div>
-                            </div>
+                <div ref={lastArtworkElementRef} className="h-20 flex justify-center items-center mt-12">
+                    {loading && (
+                        <div className="flex items-center gap-2 text-gray-600">
+                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                            <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                         </div>
-                    ))}
-                </div>
-
-                {/* Load More */}
-                <div className="text-center mt-12">
-                    <button className="px-8 py-4 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/30 transition-all hover:scale-105 active:scale-95">
-                        Load More Artworks
-                    </button>
+                    )}
                 </div>
             </div>
         </div>

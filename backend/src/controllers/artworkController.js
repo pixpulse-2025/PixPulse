@@ -1,10 +1,16 @@
+/**
+ * @file artworkController.js
+ * @description Controller for managing artwork uploads, discovery, and administration.
+ */
+
 import Artwork from "../models/Artwork.js";
 
-/* ======================
-   @desc    Upload new artwork
-   @route   POST /api/artworks
-   @access  Private
-====================== */
+/**
+ * Creates and saves a new artwork.
+ * Handles metadata processing and links the artwork to the authenticated artist.
+ * @route POST /api/artworks
+ * @access Private
+ */
 export const createArtwork = async (req, res, next) => {
     try {
         const {
@@ -66,11 +72,12 @@ export const createArtwork = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get all artworks (with filtering)
-   @route   GET /api/artworks
-   @access  Public
-====================== */
+/**
+ * Retrieves a list of artworks based on filters (search query, category, price type).
+ * Supports full-text search and sorting by date, views, and price.
+ * @route GET /api/artworks
+ * @access Public
+ */
 export const getArtworks = async (req, res, next) => {
     try {
         const { category, priceType, sort, search } = req.query;
@@ -113,11 +120,12 @@ export const getArtworks = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get single artwork
-   @route   GET /api/artworks/:id
-   @access  Public
-====================== */
+/**
+ * Retrieves the details of a single artwork by its unique ID.
+ * Increments the view count for the artwork on each retrieval.
+ * @route GET /api/artworks/:id
+ * @access Public
+ */
 export const getArtworkById = async (req, res, next) => {
     try {
         const artwork = await Artwork.findById(req.params.id).populate("artist", "name avatar bio");
@@ -142,11 +150,11 @@ export const getArtworkById = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get artworks by artist (user)
-   @route   GET /api/artworks/my-uploads
-   @access  Private
-====================== */
+/**
+ * Retrieves all artworks uploaded by the currently authenticated user.
+ * @route GET /api/artworks/my-uploads
+ * @access Private
+ */
 export const getMyArtworks = async (req, res, next) => {
     try {
         const artworks = await Artwork.find({ artist: req.user._id }).sort("-createdAt");
@@ -161,11 +169,12 @@ export const getMyArtworks = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Update artwork
-   @route   PUT /api/artworks/:id
-   @access  Private
-====================== */
+/**
+ * Updates an existing artwork's details.
+ * Ensures that only the owner (the artist) can update their artwork.
+ * @route PUT /api/artworks/:id
+ * @access Private
+ */
 export const updateArtwork = async (req, res, next) => {
     try {
         let artwork = await Artwork.findById(req.params.id);
@@ -215,11 +224,11 @@ export const updateArtwork = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Toggle artwork visibility
-   @route   PATCH /api/artworks/:id/visibility
-   @access  Private
-====================== */
+/**
+ * Toggles whether an artwork is public or private.
+ * @route PATCH /api/artworks/:id/visibility
+ * @access Private
+ */
 export const toggleArtworkVisibility = async (req, res, next) => {
     try {
         const artwork = await Artwork.findById(req.params.id);
@@ -251,11 +260,12 @@ export const toggleArtworkVisibility = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Delete artwork
-   @route   DELETE /api/artworks/:id
-   @access  Private
-====================== */
+/**
+ * Deletes an artwork from the system.
+ * Verifies that the requester is the owner of the artwork.
+ * @route DELETE /api/artworks/:id
+ * @access Private
+ */
 export const deleteArtwork = async (req, res, next) => {
     try {
         const artwork = await Artwork.findById(req.params.id);

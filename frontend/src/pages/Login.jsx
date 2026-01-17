@@ -50,34 +50,31 @@ const Login = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 px-4 py-12">
+        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-32">
             <div className="max-w-md w-full space-y-8">
                 {/* Header */}
                 <div className="text-center">
-                    <h2 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-indigo-600">
+                    <h2 className="text-4xl font-bold text-gray-900 dark:text-white">
                         Welcome Back
                     </h2>
-                    <p className="mt-2 text-gray-600 dark:text-gray-400">
+                    <p className="mt-4 text-gray-600 dark:text-gray-400 text-base">
                         Sign in to your account to continue
                     </p>
                 </div>
 
                 {/* Form */}
                 <form onSubmit={handleSubmit} className="mt-8 space-y-6">
-                    <div className="glass rounded-2xl p-8 space-y-6">
+                    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-8 space-y-6 shadow-sm">
                         {/* Error Message */}
                         {error && (
-                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-lg text-sm">
+                            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
                                 {error}
                             </div>
                         )}
 
                         {/* Email */}
                         <div>
-                            <label
-                                htmlFor="email"
-                                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-                            >
+                            <label htmlFor="email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                                 Email Address
                             </label>
                             <input
@@ -88,7 +85,7 @@ const Login = () => {
                                 value={formData.email}
                                 onChange={handleChange}
                                 autoComplete="email"
-                                className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                className="input-field"
                                 placeholder="you@example.com"
                             />
                         </div>
@@ -97,7 +94,7 @@ const Login = () => {
                         <div>
                             <label
                                 htmlFor="password"
-                                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                                className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
                             >
                                 Password
                             </label>
@@ -110,7 +107,7 @@ const Login = () => {
                                     value={formData.password}
                                     onChange={handleChange}
                                     autoComplete="current-password"
-                                    className="w-full px-4 py-3 pr-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+                                    className="input-field pr-12"
                                     placeholder="••••••••"
                                 />
                                 <button
@@ -118,9 +115,7 @@ const Login = () => {
                                     onMouseDown={() => setShowPassword(true)}
                                     onMouseUp={() => setShowPassword(false)}
                                     onMouseLeave={() => setShowPassword(false)}
-                                    onTouchStart={() => setShowPassword(true)}
-                                    onTouchEnd={() => setShowPassword(false)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors select-none"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-text/20 hover:text-text transition-colors select-none"
                                     aria-label="Hold to show password"
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,11 +133,11 @@ const Login = () => {
                                     id="remember-me"
                                     name="remember-me"
                                     type="checkbox"
-                                    className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                                    className="h-4 w-4 bg-background border-text/10 rounded cursor-pointer accent-text"
                                 />
                                 <label
                                     htmlFor="remember-me"
-                                    className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                                    className="ml-2 block text-[10px] font-black uppercase tracking-widest text-text/40"
                                 >
                                     Remember me
                                 </label>
@@ -150,7 +145,7 @@ const Login = () => {
 
                             <Link
                                 to="/forgot-password"
-                                className="text-sm font-medium text-primary-600 hover:text-primary-500"
+                                className="text-[10px] font-black uppercase tracking-widest text-text hover:opacity-60 transition-all border-b border-transparent hover:border-text"
                             >
                                 Forgot password?
                             </Link>
@@ -160,25 +155,13 @@ const Login = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg shadow-primary-500/30 transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? (
                                 <span className="flex items-center justify-center gap-2">
                                     <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                        <circle
-                                            className="opacity-25"
-                                            cx="12"
-                                            cy="12"
-                                            r="10"
-                                            stroke="currentColor"
-                                            strokeWidth="4"
-                                            fill="none"
-                                        />
-                                        <path
-                                            className="opacity-75"
-                                            fill="currentColor"
-                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                        />
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                     </svg>
                                     Signing in...
                                 </span>
@@ -190,15 +173,14 @@ const Login = () => {
                         {/* OR Divider */}
                         <div className="relative">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                                <div className="w-full border-t border-text/5"></div>
                             </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400">
+                            <div className="relative flex justify-center text-[10px]">
+                                <span className="px-4 bg-background text-text/20 font-black uppercase tracking-widest">
                                     Or continue with
                                 </span>
                             </div>
                         </div>
-
 
                         {/* Google Login Button */}
                         <GoogleLoginButton />
@@ -206,13 +188,13 @@ const Login = () => {
 
                     {/* Sign Up Link */}
                     <div className="text-center">
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text/40">
                             Don't have an account?{" "}
                             <Link
                                 to="/register"
-                                className="font-medium text-primary-600 hover:text-primary-500"
+                                className="ml-2 text-text border-b border-text/10 hover:border-text transition-all"
                             >
-                                Sign up for free
+                                Register for free
                             </Link>
                         </p>
                     </div>

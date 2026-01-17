@@ -1,3 +1,9 @@
+/**
+ * @file App.jsx
+ * @description Main application component that defines the routing structure and layout.
+ * It also handles the initial authentication check when the app loads.
+ */
+
 import { Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
 import Navbar from "./components/layout/Navbar";
@@ -12,7 +18,6 @@ import Community from "./pages/Community";
 import Dashboard from "./pages/Dashboard";
 import Upload from "./pages/Upload";
 import MyUploads from "./pages/MyUploads";
-import Marketplace from "./pages/Marketplace";
 import ArtworkDetail from "./pages/ArtworkDetail";
 import Favorites from "./pages/Favorites";
 import Cart from "./pages/Cart";
@@ -23,14 +28,23 @@ import AdminUsers from "./pages/admin/Users";
 import AdminArtworks from "./pages/admin/Artworks";
 import AdminReports from "./pages/admin/Reports";
 import AdminAnalytics from "./pages/admin/Analytics";
+import Profile from "./pages/Profile";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuth } from "./hooks/useAuth";
 
-
+/**
+ * The root component of the React application.
+ * Manages the layout (Navbar/Footer) and all route definitions.
+ */
 function App() {
   const { loadUser, isAuthenticated } = useAuth();
 
+  /**
+   * Effect hook to verify the user's session on initial load.
+   * If a JWT token exists in localStorage, it attempts to fetch the user profile.
+   */
   useEffect(() => {
     // Load user on app mount if token exists
     const token = localStorage.getItem("token");
@@ -41,25 +55,48 @@ function App() {
 
   return (
     <div className="min-h-screen flex flex-col
-                    bg-gray-50 dark:bg-gray-950
-                    text-gray-900 dark:text-gray-100
-                    transition-colors font-sans selection:bg-primary-500 selection:text-white">
+                    bg-background text-text
+                    transition-colors font-sans selection:bg-primary/30 selection:text-text">
+      {/* Persistent Navigation Bar */}
       <Navbar />
 
+      {/* Main Route Definitions */}
       <Routes>
+        {/* ==========================================================================
+           PUBLIC ROUTES
+           ========================================================================== */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/community" element={<Community />} />
-        <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/artwork/:id" element={<ArtworkDetail />} />
+
+        {/* ==========================================================================
+           PROTECTED ROUTES (Require Authentication)
+           ========================================================================== */}
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />
@@ -119,6 +156,10 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* ==========================================================================
+           ADMIN ROUTES (Require Admin Privileges)
+           ========================================================================== */ }
         <Route
           path="/admin"
           element={
@@ -159,9 +200,12 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Fallback 404 Route */}
         <Route path="*" element={<NotFound />} />
       </Routes>
 
+      {/* Persistent Footer */}
       <Footer />
     </div>
   );

@@ -1,17 +1,35 @@
+/**
+ * @file authSlice.js
+ * @description Redux slice for managing user authentication state, tokens, and profile data.
+ * Handles async transitions for login, registration, and session persistence.
+ */
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 // API base URL - update this based on your backend
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-// Helper function to get token from localStorage
+/**
+ * Helper to get the JWT token from browser localStorage.
+ */
 const getStoredToken = () => localStorage.getItem("token");
+
+/**
+ * Helper to get user profile data from browser localStorage.
+ */
 const getStoredUser = () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
 };
 
-// Initial state
+/**
+ * Initial State for Authentication.
+ * user: The current authenticated user object.
+ * token: The current JWT.
+ * isAuthenticated: Boolean flag for quick access check.
+ * registerSuccess: Tracks the completion of a registration event.
+ */
 const initialState = {
     user: getStoredUser(),
     token: getStoredToken(),
@@ -120,10 +138,13 @@ export const loadUser = createAsyncThunk(
             const response = await axios.get(`${API_URL}/auth/me`);
             return response.data;
         } catch (error) {
-            // Clear invalid token
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            delete axios.defaults.headers.common["Authorization"];
+            // Only clear token if unauthorized (401)
+            // If it's a network error (no response), keep the token
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                delete axios.defaults.headers.common["Authorization"];
+            }
 
             return rejectWithValue(
                 error.response?.data?.message || "Failed to load user"
@@ -289,7 +310,11 @@ const authSlice = createSlice({
 
 export const { clearError, clearRegisterSuccess, setCredentials } = authSlice.actions;
 
-// Selectors
+/* ==========================================================================
+   SELECTORS
+   Memoized functions to extract specific pieces of authentication state.
+   ========================================================================== */
+
 export const selectAuth = (state) => state.auth;
 export const selectUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;

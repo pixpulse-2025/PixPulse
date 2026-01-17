@@ -2,11 +2,12 @@ import Order from "../models/Order.js";
 import CartItem from "../models/CartItem.js";
 import Artwork from "../models/Artwork.js";
 
-/* ======================
-   @desc    Create order from cart
-   @route   POST /api/checkout
-   @access  Private
-====================== */
+/**
+ * Creates a new order based on the user's current shopping cart.
+ * Transitions items from CartItem to Order records and prepares for payment.
+ * @route POST /api/checkout
+ * @access Private
+ */
 export const createOrder = async (req, res, next) => {
     try {
         const { billingDetails, paymentMethod } = req.body;
@@ -79,11 +80,12 @@ export const createOrder = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Complete order (after payment)
-   @route   POST /api/checkout/complete/:orderId
-   @access  Private
-====================== */
+/**
+ * Finalizes an order after a successful payment has been processed.
+ * Generates download links, increments download counts, and clears the cart.
+ * @route POST /api/checkout/complete/:orderId
+ * @access Private
+ */
 export const completeOrder = async (req, res, next) => {
     try {
         const { orderId } = req.params;
@@ -145,11 +147,11 @@ export const completeOrder = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get user's orders
-   @route   GET /api/checkout/orders
-   @access  Private
-====================== */
+/**
+ * Retrieves a list of all orders placed by the currently authenticated user.
+ * @route GET /api/checkout/orders
+ * @access Private
+ */
 export const getMyOrders = async (req, res, next) => {
     try {
         const orders = await Order.find({ user: req.user._id })
@@ -166,11 +168,11 @@ export const getMyOrders = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get single order
-   @route   GET /api/checkout/orders/:orderId
-   @access  Private
-====================== */
+/**
+ * Retrieves the details of a specific order by its unique ID.
+ * @route GET /api/checkout/orders/:orderId
+ * @access Private
+ */
 export const getOrderById = async (req, res, next) => {
     try {
         const { orderId } = req.params;
@@ -201,11 +203,11 @@ export const getOrderById = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Cancel order
-   @route   PATCH /api/checkout/orders/:orderId/cancel
-   @access  Private
-====================== */
+/**
+ * Cancels a pending order before completion.
+ * @route PATCH /api/checkout/orders/:orderId/cancel
+ * @access Private
+ */
 export const cancelOrder = async (req, res, next) => {
     try {
         const { orderId } = req.params;

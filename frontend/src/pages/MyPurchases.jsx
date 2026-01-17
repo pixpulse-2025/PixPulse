@@ -9,7 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const MyPurchases = () => {
     const dispatch = useDispatch();
     const { orders, loading, error } = useSelector((state) => state.orders);
-    const [filter, setFilter] = useState("all"); // all, completed, pending
+    const [filter, setFilter] = useState("all");
     const [downloading, setDownloading] = useState(null);
 
     useEffect(() => {
@@ -19,13 +19,9 @@ const MyPurchases = () => {
     const handleDownload = async (artworkId, artworkTitle) => {
         try {
             setDownloading(artworkId);
-
-            // Use secure download endpoint
             const response = await axios.get(`${API_URL}/download/${artworkId}`, {
                 responseType: 'blob',
             });
-
-            // Create download link
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -48,21 +44,21 @@ const MyPurchases = () => {
         return true;
     });
 
-    const getStatusBadge = (status) => {
-        const badges = {
-            completed: "bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400",
-            pending: "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400",
-            failed: "bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400",
-            cancelled: "bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400",
+    const getStatusStyles = (status) => {
+        const styles = {
+            completed: "text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800",
+            pending: "text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800",
+            failed: "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800",
+            cancelled: "text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900/20 border-gray-200 dark:border-gray-700",
         };
-        return badges[status] || badges.pending;
+        return styles[status] || styles.pending;
     };
 
     if (loading && orders.length === 0) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-40 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                    <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-600 dark:text-gray-400">Loading purchases...</p>
                 </div>
             </div>
@@ -70,195 +66,143 @@ const MyPurchases = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
-            <div className="container mx-auto px-6">
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">My Purchases</h1>
-                    <p className="text-gray-500 dark:text-gray-400">
-                        {orders.length} {orders.length === 1 ? 'order' : 'orders'} total
-                    </p>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
+            <div className="container mx-auto max-w-[1400px] px-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
+                    <div>
+                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                            My Purchases
+                        </h1>
+                        <p className="text-base text-gray-600 dark:text-gray-400">
+                            {orders.length} {orders.length === 1 ? 'order' : 'orders'} in your purchase history
+                        </p>
+                    </div>
                 </div>
 
                 {/* Filters */}
-                <div className="flex gap-2 mb-8">
-                    <button
-                        onClick={() => setFilter("all")}
-                        className={`px-6 py-3 rounded-xl font-medium transition-all ${filter === "all"
-                            ? "bg-primary-600 text-white shadow-lg"
-                            : "glass text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                            }`}
-                    >
-                        All Orders
-                    </button>
-                    <button
-                        onClick={() => setFilter("completed")}
-                        className={`px-6 py-3 rounded-xl font-medium transition-all ${filter === "completed"
-                            ? "bg-primary-600 text-white shadow-lg"
-                            : "glass text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                            }`}
-                    >
-                        Completed
-                    </button>
-                    <button
-                        onClick={() => setFilter("pending")}
-                        className={`px-6 py-3 rounded-xl font-medium transition-all ${filter === "pending"
-                            ? "bg-primary-600 text-white shadow-lg"
-                            : "glass text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                            }`}
-                    >
-                        Pending
-                    </button>
+                <div className="flex flex-wrap gap-3 mb-8">
+                    {[
+                        { id: "all", label: "All Orders" },
+                        { id: "completed", label: "Completed" },
+                        { id: "pending", label: "Pending" }
+                    ].map((f) => (
+                        <button
+                            key={f.id}
+                            onClick={() => setFilter(f.id)}
+                            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${filter === f.id
+                                    ? "bg-primary dark:bg-accent text-white shadow-md"
+                                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
+                                }`}
+                        >
+                            {f.label}
+                        </button>
+                    ))}
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-6 py-4 rounded-2xl mb-8">
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-6 py-4 rounded-lg mb-6">
                         {error}
                     </div>
                 )}
 
                 {filteredOrders.length === 0 ? (
-                    <div className="glass rounded-3xl p-16 text-center">
-                        <div className="text-6xl mb-4">📦</div>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                            {filter === "all" ? "No purchases yet" : `No ${filter} orders`}
-                        </h3>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6">
-                            Start exploring and purchasing amazing artworks!
-                        </p>
-                        <Link
-                            to="/marketplace"
-                            className="inline-block px-8 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-all"
-                        >
-                            Browse Marketplace
+                    <div className="card-surface py-20 text-center">
+                        <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No purchases yet</h3>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">Start building your collection today</p>
+                        <Link to="/explore" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                            Explore Artworks
                         </Link>
                     </div>
                 ) : (
                     <div className="space-y-6">
                         {filteredOrders.map((order) => (
-                            <div key={order._id} className="glass rounded-3xl overflow-hidden">
+                            <div key={order._id} className="card-surface p-6">
                                 {/* Order Header */}
-                                <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 border-b border-gray-200 dark:border-gray-800">
-                                    <div className="flex flex-wrap items-center justify-between gap-4">
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                                                    Order #{order.orderNumber}
-                                                </h3>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-bold ${getStatusBadge(order.paymentStatus)}`}>
-                                                    {order.paymentStatus.toUpperCase()}
-                                                </span>
-                                            </div>
-                                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                                                {new Date(order.createdAt).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "long",
-                                                    day: "numeric",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </p>
+                                <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                                    <div className="space-y-1">
+                                        <div className="flex items-center gap-3">
+                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                                Order #{order.orderNumber}
+                                            </h3>
+                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyles(order.paymentStatus)}`}>
+                                                {order.paymentStatus}
+                                            </span>
                                         </div>
-                                        <div className="text-right">
-                                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total</p>
-                                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                                ${order.totalAmount.toFixed(2)}
-                                            </p>
-                                        </div>
+                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            {new Date(order.createdAt).toLocaleDateString("en-US", {
+                                                year: "numeric",
+                                                month: "long",
+                                                day: "numeric",
+                                            })}
+                                        </p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                                            ${order.totalAmount.toFixed(2)}
+                                        </p>
                                     </div>
                                 </div>
 
                                 {/* Order Items */}
-                                <div className="p-6">
-                                    <div className="space-y-4">
-                                        {order.items.map((item, idx) => {
-                                            const artwork = item.artwork;
-                                            return (
-                                                <div key={idx} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-900/30 rounded-2xl">
-                                                    {/* Thumbnail */}
-                                                    <Link
-                                                        to={artwork ? `/artwork/${artwork._id}` : "#"}
-                                                        className="w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden bg-gray-200 dark:bg-gray-800"
-                                                    >
-                                                        <img
-                                                            src={
-                                                                artwork
-                                                                    ? `http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`
-                                                                    : item.previewUrl
-                                                                        ? `http://localhost:5000${item.previewUrl}`
-                                                                        : "http://localhost:5000/uploads/placeholders/default-preview.png"
-                                                            }
-                                                            alt={item.title}
-                                                            className="w-full h-full object-cover hover:opacity-90 transition-opacity"
-                                                            onError={(e) => {
-                                                                e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
-                                                            }}
-                                                        />
-                                                    </Link>
+                                <div className="space-y-4">
+                                    {order.items.map((item, idx) => {
+                                        const artwork = item.artwork;
+                                        const imageUrl = artwork?.imageUrl ? (artwork.imageUrl.startsWith('http') ? artwork.imageUrl : `http://localhost:5000${artwork.imageUrl}`) : `https://picsum.photos/400/400?random=${idx}`;
 
-                                                    {/* Details */}
-                                                    <div className="flex-1">
-                                                        <h4 className="font-bold text-gray-900 dark:text-white mb-1">
+                                        return (
+                                            <div key={idx} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                                                {/* Thumbnail */}
+                                                <Link
+                                                    to={artwork ? `/artwork/${artwork._id}` : "#"}
+                                                    className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700"
+                                                >
+                                                    <img
+                                                        src={imageUrl}
+                                                        alt={item.title}
+                                                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                                    />
+                                                </Link>
+
+                                                {/* Details */}
+                                                <div className="flex-1 flex flex-col justify-between">
+                                                    <div>
+                                                        <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
                                                             {item.title}
                                                         </h4>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                                        <p className="text-sm text-gray-600 dark:text-gray-400">
                                                             {item.licenseType} License
                                                         </p>
-                                                        {artwork && (
-                                                            <div className="flex items-center gap-2">
-                                                                <img
-                                                                    src={artwork.artist?.avatar || `https://ui-avatars.com/api/?name=${artwork.artist?.name}&background=random`}
-                                                                    alt={artwork.artist?.name}
-                                                                    className="w-5 h-5 rounded-full"
-                                                                />
-                                                                <span className="text-xs text-gray-600 dark:text-gray-300">
-                                                                    {artwork.artist?.name || "Anonymous"}
-                                                                </span>
-                                                            </div>
-                                                        )}
                                                     </div>
 
-                                                    {/* Price & Download */}
-                                                    <div className="text-right">
-                                                        <p className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                            ${item.price.toFixed(2)}
-                                                        </p>
-                                                        {order.paymentStatus === "completed" && order.downloadLinks && (
+                                                    <div className="flex items-center justify-between mt-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded-full overflow-hidden">
+                                                                <img
+                                                                    src={artwork?.artist?.avatar || `https://ui-avatars.com/api/?name=${artwork?.artist?.name}&background=random`}
+                                                                    alt={artwork?.artist?.name}
+                                                                    className="w-full h-full object-cover"
+                                                                />
+                                                            </div>
+                                                            <span className="text-sm text-gray-600 dark:text-gray-400">{artwork?.artist?.name || "Anonymous"}</span>
+                                                        </div>
+                                                        {order.paymentStatus === "completed" && (
                                                             <button
                                                                 onClick={() => handleDownload(artwork?._id || item.artwork, item.title)}
                                                                 disabled={downloading === (artwork?._id || item.artwork)}
-                                                                className="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white text-sm font-bold rounded-lg hover:bg-primary-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             >
-                                                                {downloading === (artwork?._id || item.artwork) ? '⏳ Downloading...' : '📥 Download'}
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                                {downloading === (artwork?._id || item.artwork) ? 'Downloading...' : 'Download'}
                                                             </button>
                                                         )}
                                                     </div>
                                                 </div>
-                                            );
-                                        })}
-                                    </div>
-
-                                    {/* Download All Button */}
-                                    {order.paymentStatus === "completed" && order.items.length > 1 && (
-                                        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-800">
-                                            <button className="w-full py-3 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transition-all">
-                                                📥 Download All Files
-                                            </button>
-                                        </div>
-                                    )}
-
-                                    {/* Expiration Notice */}
-                                    {order.paymentStatus === "completed" && order.downloadLinks && order.downloadLinks.length > 0 && (
-                                        <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-800 rounded-xl">
-                                            <p className="text-sm text-yellow-800 dark:text-yellow-400">
-                                                ⏰ Download links expire on{" "}
-                                                {new Date(order.downloadLinks[0].expiresAt).toLocaleDateString("en-US", {
-                                                    year: "numeric",
-                                                    month: "long",
-                                                    day: "numeric",
-                                                })}
-                                            </p>
-                                        </div>
-                                    )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         ))}

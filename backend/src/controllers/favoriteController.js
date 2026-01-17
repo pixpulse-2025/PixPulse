@@ -1,11 +1,11 @@
 import Favorite from "../models/Favorite.js";
 import Artwork from "../models/Artwork.js";
 
-/* ======================
-   @desc    Add artwork to favorites
-   @route   POST /api/favorites/:artworkId
-   @access  Private
-====================== */
+/**
+ * Adds an artwork to the user's favorites list.
+ * @route POST /api/favorites/:artworkId
+ * @access Private
+ */
 export const addToFavorites = async (req, res, next) => {
     try {
         const { artworkId } = req.params;
@@ -47,11 +47,11 @@ export const addToFavorites = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Remove artwork from favorites
-   @route   DELETE /api/favorites/:artworkId
-   @access  Private
-====================== */
+/**
+ * Removes an artwork from the user's favorites list.
+ * @route DELETE /api/favorites/:artworkId
+ * @access Private
+ */
 export const removeFromFavorites = async (req, res, next) => {
     try {
         const { artworkId } = req.params;
@@ -77,11 +77,11 @@ export const removeFromFavorites = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Get user's favorites
-   @route   GET /api/favorites
-   @access  Private
-====================== */
+/**
+ * Retrieves all artworks favorited by the currently authenticated user.
+ * @route GET /api/favorites
+ * @access Private
+ */
 export const getFavorites = async (req, res, next) => {
     try {
         const favorites = await Favorite.find({ user: req.user._id })
@@ -104,11 +104,11 @@ export const getFavorites = async (req, res, next) => {
     }
 };
 
-/* ======================
-   @desc    Check if artwork is favorited
-   @route   GET /api/favorites/check/:artworkId
-   @access  Private
-====================== */
+/**
+ * Checks whether a specific artwork is in the user's favorites list.
+ * @route GET /api/favorites/check/:artworkId
+ * @access Private
+ */
 export const checkFavorite = async (req, res, next) => {
     try {
         const { artworkId } = req.params;

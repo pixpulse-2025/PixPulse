@@ -67,6 +67,27 @@ export const checkFavorite = createAsyncThunk(
     }
 );
 
+export const toggleFavorite = createAsyncThunk(
+    "favorites/toggleFavorite",
+    async (artworkId, { getState, dispatch, rejectWithValue }) => {
+        const state = getState();
+        const favorites = state.favorites.favorites;
+        const isFavorite = favorites.some((fav) => fav.artwork?._id === artworkId || fav.artwork === artworkId);
+
+        try {
+            if (isFavorite) {
+                await dispatch(removeFromFavorites(artworkId)).unwrap();
+                return { artworkId, removed: true };
+            } else {
+                const response = await dispatch(addToFavorites(artworkId)).unwrap();
+                return { artworkId, added: true, data: response.data };
+            }
+        } catch (error) {
+            return rejectWithValue(error || "Toggle favorite failed");
+        }
+    }
+);
+
 // Favorites slice
 const favoritesSlice = createSlice({
     name: "favorites",
@@ -99,7 +120,11 @@ const favoritesSlice = createSlice({
             })
             .addCase(addToFavorites.fulfilled, (state, action) => {
                 state.loading = false;
-                state.favorites = [action.payload.data, ...state.favorites];
+                // Add if not already there
+                const exists = state.favorites.some(fav => fav.artwork?._id === action.payload.data?.artwork?._id);
+                if (!exists) {
+                    state.favorites = [action.payload.data, ...state.favorites];
+                }
             })
             .addCase(addToFavorites.rejected, (state, action) => {
                 state.loading = false;
@@ -109,7 +134,7 @@ const favoritesSlice = createSlice({
             // Remove from Favorites
             .addCase(removeFromFavorites.fulfilled, (state, action) => {
                 state.favorites = state.favorites.filter(
-                    (fav) => fav.artwork._id !== action.payload.artworkId
+                    (fav) => (fav.artwork?._id || fav.artwork) !== action.payload.artworkId
                 );
             });
     },
@@ -121,5 +146,8 @@ export const { clearError } = favoritesSlice.actions;
 export const selectFavorites = (state) => state.favorites.favorites;
 export const selectFavoritesLoading = (state) => state.favorites.loading;
 export const selectFavoritesError = (state) => state.favorites.error;
+
+export const selectIsFavorite = (state, artworkId) =>
+    state.favorites.favorites.some(fav => (fav.artwork?._id === artworkId || fav.artwork === artworkId));
 
 export default favoritesSlice.reducer;
