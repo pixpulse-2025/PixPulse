@@ -21,13 +21,15 @@ export const addToCart = async (req, res, next) => {
             });
         }
 
+
         // Only paid artworks can be added to cart
-        if (artwork.priceType === "Free") {
+        if (!artwork.price || artwork.price === 0) {
             return res.status(400).json({
                 success: false,
                 message: "Free artworks cannot be added to cart",
             });
         }
+
 
         // Check if already in cart
         const existingItem = await CartItem.findOne({

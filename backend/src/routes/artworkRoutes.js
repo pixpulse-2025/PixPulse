@@ -5,15 +5,15 @@
 
 import express from "express";
 import {
-    createArtwork,
-    getArtworks,
-    getArtworkById,
-    getMyArtworks,
-    updateArtwork,
-    toggleArtworkVisibility,
-    deleteArtwork,
+   createArtwork,
+   getArtworks,
+   getArtworkById,
+   getMyArtworks,
+   updateArtwork,
+   toggleArtworkVisibility,
+   deleteArtwork,
 } from "../controllers/artworkController.js";
-import { protect } from "../middleware/authMiddleware.js";
+import { protect, identifyUser } from "../middleware/authMiddleware.js";
 import { uploadArtwork } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
@@ -26,8 +26,13 @@ const router = express.Router();
 // Fetch all public artworks with optional filters (search, category, etc.)
 router.get("/", getArtworks);
 
-// Fetch details of a single artwork by its ID
-router.get("/single/:id", getArtworkById);
+// Fetch details of a single artwork by its ID (two routes for compatibility)
+// Fetch artworks uploaded by the currently logged-in user (MUST be before /:id)
+router.get("/my-uploads", protect, getMyArtworks);
+
+// Fetch details of a single artwork by its ID (two routes for compatibility)
+router.get("/single/:id", identifyUser, getArtworkById);
+router.get("/:id", identifyUser, getArtworkById);
 
 /* ==========================================================================
    PRIVATE ROUTES
@@ -37,8 +42,7 @@ router.get("/single/:id", getArtworkById);
 // Upload a new artwork (handles multiple file types via uploadArtwork middleware)
 router.post("/", protect, uploadArtwork.single("file"), createArtwork);
 
-// Fetch artworks uploaded by the currently logged-in user
-router.get("/my-uploads", protect, getMyArtworks);
+
 
 // Update details of an existing artwork
 router.put("/:id", protect, updateArtwork);

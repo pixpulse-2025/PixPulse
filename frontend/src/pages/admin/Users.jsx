@@ -19,7 +19,12 @@ const AdminUsers = () => {
     const fetchUsers = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`${API_URL}/users`);
+            const token = localStorage.getItem("token");
+            const { data } = await axios.get(`${API_URL}/users`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setUsers(data.data || []);
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -34,8 +39,13 @@ const AdminUsers = () => {
         }
 
         try {
+            const token = localStorage.getItem("token");
             await axios.patch(`${API_URL}/users/${userId}`, {
                 isBlocked: !isBlocked
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             // Update local state
@@ -57,7 +67,12 @@ const AdminUsers = () => {
         }
 
         try {
-            await axios.delete(`${API_URL}/users/${userId}`);
+            const token = localStorage.getItem("token");
+            await axios.delete(`${API_URL}/users/${userId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setUsers(users.filter(u => u._id !== userId));
             alert('User deleted successfully');
         } catch (error) {
@@ -67,8 +82,13 @@ const AdminUsers = () => {
 
     const handleChangeRole = async (userId, newRole) => {
         try {
+            const token = localStorage.getItem("token");
             await axios.patch(`${API_URL}/users/${userId}`, {
                 role: newRole
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             setUsers(users.map(u =>
@@ -92,7 +112,6 @@ const AdminUsers = () => {
 
         // Role/status filter
         if (filter === "users") return user.role === "user";
-        if (filter === "artists") return user.role === "artist";
         if (filter === "blocked") return user.isBlocked;
         return true; // all
     });
@@ -101,7 +120,6 @@ const AdminUsers = () => {
     const stats = {
         total: users.length,
         users: users.filter(u => u.role === "user").length,
-        artists: users.filter(u => u.role === "artist").length,
         blocked: users.filter(u => u.isBlocked).length
     };
 
@@ -138,7 +156,7 @@ const AdminUsers = () => {
                 </div>
 
                 {/* Statistics */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <div className="glass rounded-xl p-4">
                         <p className="text-sm text-gray-500 dark:text-gray-400">Total Users</p>
                         <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
@@ -146,10 +164,6 @@ const AdminUsers = () => {
                     <div className="glass rounded-xl p-4">
                         <p className="text-sm text-gray-500 dark:text-gray-400">Regular Users</p>
                         <p className="text-2xl font-bold text-blue-600">{stats.users}</p>
-                    </div>
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Artists</p>
-                        <p className="text-2xl font-bold text-purple-600">{stats.artists}</p>
                     </div>
                     <div className="glass rounded-xl p-4">
                         <p className="text-sm text-gray-500 dark:text-gray-400">Blocked</p>
@@ -173,13 +187,13 @@ const AdminUsers = () => {
 
                         {/* Filter Tabs */}
                         <div className="flex gap-2">
-                            {["all", "users", "artists", "blocked"].map((f) => (
+                            {["all", "users", "blocked"].map((f) => (
                                 <button
                                     key={f}
                                     onClick={() => setFilter(f)}
                                     className={`px-4 py-2 rounded-lg font-medium transition-all ${filter === f
-                                            ? "bg-primary-600 text-white"
-                                            : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
+                                        ? "bg-primary-600 text-white"
+                                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
                                         }`}
                                 >
                                     {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -241,10 +255,10 @@ const AdminUsers = () => {
                                                         setShowModal(true);
                                                     }}
                                                     className={`px-3 py-1 rounded-full text-xs font-medium ${user.role === "admin"
-                                                            ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-                                                            : user.role === "artist"
-                                                                ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
-                                                                : "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                                                        ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
+                                                        : user.role === "artist"
+                                                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
+                                                            : "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
                                                         }`}
                                                 >
                                                     {user.role}
@@ -269,8 +283,8 @@ const AdminUsers = () => {
                                                     <button
                                                         onClick={() => handleBlockUser(user._id, user.isBlocked)}
                                                         className={`px-3 py-1 rounded-lg font-medium transition-colors ${user.isBlocked
-                                                                ? "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400"
-                                                                : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                                            ? "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400"
+                                                            : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400"
                                                             }`}
                                                     >
                                                         {user.isBlocked ? "Unblock" : "Block"}
@@ -308,13 +322,13 @@ const AdminUsers = () => {
                                 Change role for <span className="font-medium">{selectedUser.name}</span>
                             </p>
                             <div className="space-y-3">
-                                {["user", "artist", "admin"].map((role) => (
+                                {["user", "admin"].map((role) => (
                                     <button
                                         key={role}
                                         onClick={() => handleChangeRole(selectedUser._id, role)}
                                         className={`w-full px-4 py-3 rounded-lg font-medium transition-all ${selectedUser.role === role
-                                                ? "bg-primary-600 text-white"
-                                                : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                            ? "bg-primary-600 text-white"
+                                            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
                                             }`}
                                     >
                                         {role.charAt(0).toUpperCase() + role.slice(1)}

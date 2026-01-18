@@ -93,3 +93,33 @@ export const artist = (req, res, next) => {
         });
     }
 };
+
+/**
+ * Optional identification middleware.
+ * Attempts to identify the user via JWT but allows the request to proceed even if unauthenticated.
+ * Used for public routes that need to track user actions (e.g. view counting).
+ */
+export const identifyUser = async (req, res, next) => {
+    try {
+        let token;
+        if (
+            req.headers.authorization &&
+            req.headers.authorization.startsWith("Bearer")
+        ) {
+            token = req.headers.authorization.split(" ")[1];
+        }
+
+        if (token) {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                req.user = await User.findById(decoded.id).select("-password");
+            } catch (error) {
+                // Invalid token - ignore and proceed as guest
+                req.user = null;
+            }
+        }
+        next();
+    } catch (error) {
+        next();
+    }
+};

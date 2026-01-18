@@ -20,7 +20,7 @@ const AdminArtworks = () => {
         try {
             setLoading(true);
             const { data } = await axios.get(`${API_URL}/artworks`);
-            setArtworks(data.data || []);
+            setArtworks(data.artworks || data.data || []);
         } catch (error) {
             console.error("Error fetching artworks:", error);
         } finally {
@@ -165,8 +165,8 @@ const AdminArtworks = () => {
                                     key={f}
                                     onClick={() => setFilter(f)}
                                     className={`px-4 py-2 rounded-lg font-medium transition-all ${filter === f
-                                            ? "bg-primary-600 text-white"
-                                            : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
+                                        ? "bg-primary-600 text-white"
+                                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
                                         }`}
                                 >
                                     {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -248,8 +248,8 @@ const AdminArtworks = () => {
                                         <button
                                             onClick={() => handleToggleVisibility(artwork._id, artwork.isPublic)}
                                             className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-colors ${artwork.isPublic
-                                                    ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400"
-                                                    : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400"
+                                                ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400"
+                                                : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400"
                                                 }`}
                                         >
                                             {artwork.isPublic ? "Hide" : "Show"}

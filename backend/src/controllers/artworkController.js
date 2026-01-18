@@ -113,7 +113,7 @@ export const getArtworks = async (req, res, next) => {
         res.status(200).json({
             success: true,
             count: artworks.length,
-            data: artworks,
+            artworks: artworks,
         });
     } catch (error) {
         next(error);
@@ -137,9 +137,25 @@ export const getArtworkById = async (req, res, next) => {
             });
         }
 
-        // Increment views
-        artwork.views += 1;
-        await artwork.save();
+        // Increment views unique to user
+        let shouldIncrement = true;
+
+        if (req.user) {
+            // Check if user has already viewed
+            const alreadyViewed = artwork.viewedBy.some(
+                (id) => id.toString() === req.user._id.toString()
+            );
+            if (alreadyViewed) {
+                shouldIncrement = false;
+            } else {
+                artwork.viewedBy.push(req.user._id);
+            }
+        }
+
+        if (shouldIncrement) {
+            artwork.views += 1;
+            await artwork.save();
+        }
 
         res.status(200).json({
             success: true,

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const Dashboard = () => {
     const { user } = useAuth();
@@ -14,19 +17,88 @@ const Dashboard = () => {
         }
     }, [user, navigate]);
 
-    // Mock data for the dashboard
+    const [overviewStats, setOverviewStats] = useState({
+        artworks: 0,
+        views: 0,
+        downloads: 0,
+        revenue: 0
+    });
+    const [performance, setPerformance] = useState([]);
+    const [recentActivity, setRecentActivity] = useState([]);
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            if (!user) return;
+            try {
+                // Fetch user's artworks
+                const artworksRes = await axios.get(`${API_URL}/artworks/my-uploads`);
+                const artworks = artworksRes.data.data || [];
+
+                // Fetch user's purchases (orders)
+                const ordersRes = await axios.get(`${API_URL}/checkout/orders`).catch(() => ({ data: { data: [] } }));
+                const orders = ordersRes.data.data || [];
+
+                // Calculate Stats
+                const totalViews = artworks.reduce((sum, art) => sum + (art.views || 0), 0);
+                const totalRevenue = 0; // Placeholder until seller orders are implemented
+
+                setOverviewStats({
+                    artworks: artworks.length,
+                    views: totalViews,
+                    downloads: 0,
+                    revenue: totalRevenue
+                });
+
+                // Calculate Performance (Top 3 viewed artworks)
+                const sortedArtworks = [...artworks].sort((a, b) => (b.views || 0) - (a.views || 0));
+                setPerformance(sortedArtworks.slice(0, 3));
+
+                // Calculate Recent Activity (Uploads + Purchases)
+                const activities = [];
+
+                // Add uploads
+                artworks.forEach(art => {
+                    activities.push({
+                        type: 'uploaded',
+                        target: art.title,
+                        time: art.createdAt,
+                        rawTime: new Date(art.createdAt)
+                    });
+                });
+
+                // Add purchases
+                orders.forEach(order => {
+                    if (order.items && order.items.length > 0) {
+                        activities.push({
+                            type: 'purchased',
+                            target: `${order.items.length} item${order.items.length > 1 ? 's' : ''}`,
+                            time: order.createdAt,
+                            rawTime: new Date(order.createdAt)
+                        });
+                    }
+                });
+
+                // Sort by time desc and take top 5
+                activities.sort((a, b) => b.rawTime - a.rawTime);
+                setRecentActivity(activities.slice(0, 5));
+
+            } catch (error) {
+                console.error("Error fetching dashboard stats:", error);
+            }
+        };
+
+        fetchStats();
+    }, [user]);
+
+    // Real data for the dashboard
     const stats = [
-        { label: "Total Artworks", value: "12", trend: "+2 this month", icon: "📊" },
-        { label: "Total Views", value: "1.2k", trend: "+15% growth", icon: "👁️" },
-        { label: "Downloads", value: "450", trend: "+5 today", icon: "⬇️" },
-        { label: "Revenue", value: "$1,240", trend: "+$240 weekly", icon: "💰" },
+        { label: "Total Artworks", value: overviewStats.artworks, trend: "Lifetime count", icon: "📊" },
+        { label: "Total Views", value: overviewStats.views, trend: "Across all uploads", icon: "👁️" },
+        { label: "Downloads", value: overviewStats.downloads, trend: "Total downloads", icon: "⬇️" },
+        { label: "Revenue", value: `$${overviewStats.revenue}`, trend: "Total earned", icon: "💰" },
     ];
 
-    const activities = [
-        { id: 1, type: "liked", user: "Sarah Chen", target: "Neon Dreams", time: "2h ago" },
-        { id: 2, type: "downloaded", user: "Mark Wilson", target: "Cyber Sunset", time: "5h ago" },
-        { id: 3, type: "followed", user: "Alex Rivera", target: "you", time: "Yesterday" },
-    ];
+
 
     return (
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
@@ -115,33 +187,68 @@ const Dashboard = () => {
                         </div>
 
                         <div className="grid lg:grid-cols-3 gap-6">
-                            {/* Performance Chart */}
+                            {/* Performance Overview (Top Viewed Artworks) */}
                             <div className="lg:col-span-2 card-surface p-8">
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Performance Overview</h3>
-                                <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-900 rounded-lg">
-                                    <div className="text-center">
-                                        <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                                        <p className="text-gray-500 dark:text-gray-400 font-medium">No data available yet</p>
-                                        <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Upload artworks to see your performance</p>
+                                {performance.length > 0 ? (
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-12 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                                            <div className="col-span-6">Artwork</div>
+                                            <div className="col-span-3 text-right">Views</div>
+                                            <div className="col-span-3 text-right">Downloads</div>
+                                        </div>
+                                        {performance.map((artwork) => (
+                                            <div key={artwork._id} className="grid grid-cols-12 items-center gap-4 py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                                                <div className="col-span-6 flex items-center gap-3">
+                                                    <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 overflow-hidden flex-shrink-0">
+                                                        <img src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`} alt={artwork.title} className="w-full h-full object-cover" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="font-medium text-gray-900 dark:text-white truncate">{artwork.title}</p>
+                                                        <p className="text-xs text-gray-500 dark:text-gray-400">{artwork.category}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="col-span-3 text-right font-medium text-gray-900 dark:text-white">
+                                                    {artwork.views}
+                                                </div>
+                                                <div className="col-span-3 text-right font-medium text-gray-900 dark:text-white">
+                                                    {artwork.downloads}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                        <div className="text-center">
+                                            <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                                            <p className="text-gray-500 dark:text-gray-400 font-medium">No performance data available</p>
+                                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Upload artworks to see stats</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {/* Recent Activity */}
                             <div className="card-surface p-6">
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
                                 <div className="space-y-4">
-                                    {activities.map((activity) => (
-                                        <div key={activity.id} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
-                                            <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
-                                            <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                    <span className="font-semibold">{activity.user}</span> {activity.type} <span className="font-semibold">{activity.target}</span>
-                                                </p>
-                                                <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{activity.time}</p>
+                                    {recentActivity.length > 0 ? (
+                                        recentActivity.map((activity, index) => (
+                                            <div key={index} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
+                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.type === 'uploaded' ? 'bg-blue-500' : 'bg-green-500'}`} />
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                                        <span className="font-semibold text-gray-500 dark:text-gray-400 capitalize">{activity.type}</span> <span className="font-semibold">{activity.target}</span>
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                        {new Date(activity.time).toLocaleDateString()}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))
+                                    ) : (
+                                        <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
+                                    )}
                                 </div>
                                 <button className="btn-secondary w-full mt-4 text-sm">
                                     View All Activity

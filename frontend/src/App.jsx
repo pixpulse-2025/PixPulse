@@ -6,6 +6,7 @@
 
 import { Routes, Route } from "react-router-dom";
 import { useEffect } from "react";
+import axios from "axios";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import Home from "./pages/Home";
@@ -32,7 +33,15 @@ import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 import { useAuth } from "./hooks/useAuth";
+
+// Set axios Authorization header immediately if token exists
+// This runs before any components mount, ensuring all API calls have the token
+const token = localStorage.getItem("token");
+if (token) {
+  axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+}
 
 /**
  * The root component of the React application.
@@ -48,8 +57,13 @@ function App() {
   useEffect(() => {
     // Load user on app mount if token exists
     const token = localStorage.getItem("token");
-    if (token && !isAuthenticated) {
-      loadUser();
+    if (token) {
+      // Set axios default header for all requests
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
+      if (!isAuthenticated) {
+        loadUser();
+      }
     }
   }, [loadUser, isAuthenticated]);
 
@@ -163,41 +177,41 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AdminDashboard />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/admin/users"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AdminUsers />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/admin/artworks"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AdminArtworks />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/admin/analytics"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AdminAnalytics />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
         <Route
           path="/admin/reports"
           element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AdminReports />
-            </ProtectedRoute>
+            </AdminRoute>
           }
         />
 

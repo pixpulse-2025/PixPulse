@@ -46,7 +46,7 @@ const AdminDashboard = () => {
             };
 
             // Calculate artwork stats
-            const artworks = artworksRes.data.data || [];
+            const artworks = artworksRes.data.artworks || artworksRes.data.data || [];
             const artworkStats = {
                 total: artworks.length,
                 paid: artworks.filter(a => a.priceType === 'Paid').length,
@@ -214,10 +214,7 @@ const AdminDashboard = () => {
                             <span className="text-2xl">👤</span>
                         </div>
                         <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Artists</span>
-                                <span className="font-bold text-gray-900 dark:text-white">{stats.users.artists}</span>
-                            </div>
+
                             <div className="flex justify-between items-center">
                                 <span className="text-sm text-gray-600 dark:text-gray-400">Regular Users</span>
                                 <span className="font-bold text-gray-900 dark:text-white">

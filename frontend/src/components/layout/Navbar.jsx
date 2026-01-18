@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ThemeToggle from "./ThemeToggle";
 import { logout as logoutAction, selectUser, selectIsAuthenticated } from "../../redux/slices/authSlice";
@@ -9,12 +9,14 @@ const Navbar = () => {
   const user = useSelector(selectUser);
   const isAuthenticated = useSelector(selectIsAuthenticated);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logoutAction());
+    navigate("/");
   };
 
   useEffect(() => {
@@ -111,7 +113,7 @@ const Navbar = () => {
                       onClick={handleLogout}
                       className="w-full text-left px-6 py-3 text-xs font-black uppercase tracking-widest text-red-500 hover:bg-red-500/5 transition-all"
                     >
-                      Sign Out
+                      Logout
                     </button>
                   </div>
                 </div>
@@ -150,6 +152,29 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+
+            <div className="h-px bg-[#3D52A0]/5 my-2"></div>
+
+            {user ? (
+              <>
+                <Link to="/upload" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-primary uppercase tracking-widest">Upload</Link>
+                <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-text uppercase tracking-widest">Profile</Link>
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="text-xl font-bold text-red-500 uppercase tracking-widest text-left"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-text uppercase tracking-widest">Login</Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-primary uppercase tracking-widest">Sign Up</Link>
+              </>
+            )}
             <div className="h-px bg-[#3D52A0]/5 my-4"></div>
             <div className="flex justify-between items-center text-text/40 uppercase text-[10px] font-black tracking-widest">
               <span>Mode</span>

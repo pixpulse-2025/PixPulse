@@ -2,14 +2,18 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { fetchCart, removeFromCart, clearCart } from "../redux/slices/cartSlice";
+import { useAuth } from "../hooks/useAuth";
 
 const Cart = () => {
     const dispatch = useDispatch();
+    const { user } = useAuth();
     const { items, total, loading, error } = useSelector((state) => state.cart);
 
     useEffect(() => {
-        dispatch(fetchCart());
-    }, [dispatch]);
+        if (user) {
+            dispatch(fetchCart());
+        }
+    }, [dispatch, user]);
 
     const handleRemove = (itemId) => {
         if (window.confirm("Remove this item from your cart?")) {

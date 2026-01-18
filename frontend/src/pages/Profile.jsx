@@ -51,7 +51,7 @@ const Profile = () => {
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-3">
-                                <Link to="/upload" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95">
+                                <Link to="/upload" className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95">
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                                     Upload Artwork
                                 </Link>
@@ -97,7 +97,7 @@ const Profile = () => {
                                     <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No artworks yet</h3>
                                     <p className="text-gray-600 dark:text-gray-400 mb-6">Start sharing your creative work with the community</p>
-                                    <Link to="/upload" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95">
+                                    <Link to="/upload" className="inline-flex items-center gap-2 px-6 py-3 bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95">
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                                         Upload Your First Artwork
                                     </Link>

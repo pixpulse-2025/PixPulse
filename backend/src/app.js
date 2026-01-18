@@ -13,6 +13,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import checkoutRoutes from "./routes/checkoutRoutes.js";
 import downloadRoutes from "./routes/downloadRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -96,8 +97,8 @@ app.use("/api/download", downloadRoutes);
 // Reporting problematic or copyright-infringing content
 app.use("/api/reports", reportRoutes);
 
-// Future Admin Dashboard routes
-// app.use("/api/admin", adminRoutes);
+// Admin Dashboard routes (User Management, Statistics)
+app.use("/api", adminRoutes);
 
 /* ==========================================================================
    ERROR HANDLING MIDDLEWARE

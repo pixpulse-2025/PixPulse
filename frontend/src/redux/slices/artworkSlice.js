@@ -63,7 +63,7 @@ export const fetchArtworkById = createAsyncThunk(
     "artwork/fetchArtworkById",
     async (id, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`${API_URL}/artworks/single/${id}`);
+            const response = await axios.get(`${API_URL}/artworks/${id}`);
             return response.data;
         } catch (error) {
             return rejectWithValue(
@@ -189,7 +189,7 @@ const artworkSlice = createSlice({
             })
             .addCase(fetchArtworkById.fulfilled, (state, action) => {
                 state.loading = false;
-                state.currentArtwork = action.payload.artwork;
+                state.currentArtwork = action.payload.data;
             })
             .addCase(fetchArtworkById.rejected, (state, action) => {
                 state.loading = false;

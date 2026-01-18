@@ -274,11 +274,10 @@ const Upload = () => {
                             />
                         </div>
 
-                        {/* Submit */}
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-[#5B8DEF] hover:bg-[#4F7CFF] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md disabled:active:scale-100"
+                            className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md disabled:active:scale-100"
                         >
                             {loading ? (
                                 <>
