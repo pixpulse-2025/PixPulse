@@ -22,15 +22,45 @@ const MyPurchases = () => {
             const response = await axios.get(`${API_URL}/download/${artworkId}`, {
                 responseType: 'blob',
             });
-            const url = window.URL.createObjectURL(new Blob([response.data]));
+
+            const blob = new Blob([response.data]);
+            const url = window.URL.createObjectURL(blob);
+
+            // Determine extension from Content-Type
+            const mimeType = response.headers['content-type'];
+            let extension = 'jpg'; // Default
+
+            if (mimeType) {
+                const mimeMap = {
+                    'image/jpeg': 'jpg',
+                    'image/png': 'png',
+                    'image/gif': 'gif',
+                    'image/webp': 'webp',
+                    'video/mp4': 'mp4',
+                    'video/webm': 'webm',
+                    'video/quicktime': 'mov',
+                    'audio/mpeg': 'mp3',
+                    'audio/wav': 'wav',
+                    'audio/ogg': 'ogg',
+                    'application/pdf': 'pdf'
+                };
+                if (mimeMap[mimeType]) {
+                    extension = mimeMap[mimeType];
+                }
+            }
+
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', artworkTitle || 'artwork');
+            // Clean title and append extension
+            const safeTitle = (artworkTitle || 'artwork').replace(/[^a-z0-9]/gi, '_');
+            link.setAttribute('download', `${safeTitle}.${extension}`);
+
             document.body.appendChild(link);
             link.click();
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch (error) {
+            console.error(error);
             alert(error.response?.data?.message || 'Download failed. Please try again.');
         } finally {
             setDownloading(null);
@@ -90,8 +120,8 @@ const MyPurchases = () => {
                             key={f.id}
                             onClick={() => setFilter(f.id)}
                             className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${filter === f.id
-                                    ? "bg-primary dark:bg-accent text-white shadow-md"
-                                    : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
+                                ? "bg-primary dark:bg-accent text-white shadow-md"
+                                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
                                 }`}
                         >
                             {f.label}
@@ -150,20 +180,53 @@ const MyPurchases = () => {
                                 <div className="space-y-4">
                                     {order.items.map((item, idx) => {
                                         const artwork = item.artwork;
-                                        const imageUrl = artwork?.imageUrl ? (artwork.imageUrl.startsWith('http') ? artwork.imageUrl : `http://localhost:5000${artwork.imageUrl}`) : `https://picsum.photos/400/400?random=${idx}`;
+                                        // Determine media url and type
+                                        const mediaUrl = artwork?.fileUrl ? (artwork.fileUrl.startsWith('http') ? artwork.fileUrl : `http://localhost:5000${artwork.fileUrl}`) : null;
+                                        const previewUrl = artwork?.previewUrl ? (artwork.previewUrl.startsWith('http') ? artwork.previewUrl : `http://localhost:5000${artwork.previewUrl}`) : null;
+
+                                        // Prefer preview, then file. 
+                                        const displayUrl = previewUrl || mediaUrl || `https://picsum.photos/400/400?random=${idx}`;
+
+                                        const ext = displayUrl.split('.').pop().toLowerCase().split('?')[0];
+                                        const isVideo = ['mp4', 'webm', 'ogg', 'mov'].includes(ext) || artwork?.category === 'Video';
+                                        const isAudio = ['mp3', 'wav', 'mpeg'].includes(ext) || artwork?.category === 'Audio';
 
                                         return (
                                             <div key={idx} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
                                                 {/* Thumbnail */}
                                                 <Link
                                                     to={artwork ? `/artwork/${artwork._id}` : "#"}
-                                                    className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700"
+                                                    className="w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden bg-gray-900 flex items-center justify-center group"
                                                 >
-                                                    <img
-                                                        src={imageUrl}
-                                                        alt={item.title}
-                                                        className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
-                                                    />
+                                                    {(() => {
+                                                        if (isVideo) {
+                                                            return (
+                                                                <video
+                                                                    src={displayUrl}
+                                                                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                                                    muted
+                                                                    onMouseOver={e => e.target.play().catch(() => { })}
+                                                                    onMouseOut={e => { e.target.pause(); e.target.currentTime = 0; }}
+                                                                />
+                                                            );
+                                                        } else if (isAudio) {
+                                                            return (
+                                                                <div className="w-full h-full flex items-center justify-center bg-gray-800 text-primary">
+                                                                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 10l12-3" />
+                                                                    </svg>
+                                                                </div>
+                                                            );
+                                                        } else {
+                                                            return (
+                                                                <img
+                                                                    src={displayUrl}
+                                                                    alt={item.title}
+                                                                    className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
+                                                                />
+                                                            );
+                                                        }
+                                                    })()}
                                                 </Link>
 
                                                 {/* Details */}
@@ -179,7 +242,7 @@ const MyPurchases = () => {
 
                                                     <div className="flex items-center justify-between mt-2">
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-6 h-6 rounded-full overflow-hidden">
+                                                            <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700">
                                                                 <img
                                                                     src={artwork?.artist?.avatar || `https://ui-avatars.com/api/?name=${artwork?.artist?.name}&background=random`}
                                                                     alt={artwork?.artist?.name}

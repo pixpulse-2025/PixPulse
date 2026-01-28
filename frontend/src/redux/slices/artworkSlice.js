@@ -30,7 +30,7 @@ const initialState = {
         totalPages: 0,
     },
     filters: {
-        category: "all",
+        category: "Visual Art",
         sortBy: "newest",
         search: "",
     },
@@ -39,12 +39,14 @@ const initialState = {
 // Async thunks
 export const fetchArtworks = createAsyncThunk(
     "artwork/fetchArtworks",
-    async ({ page = 1, limit = 12, category, sortBy, search }, { rejectWithValue }) => {
+    async ({ page = 1, limit = 12, category, subCategory, priceRange, sortBy, search }, { rejectWithValue }) => {
         try {
             const params = new URLSearchParams({
                 page,
                 limit,
                 ...(category && category !== "all" && { category }),
+                ...(subCategory && subCategory !== "all" && { subCategory }),
+                ...(priceRange && priceRange !== "all" && { priceRange }),
                 ...(sortBy && { sortBy }),
                 ...(search && { search }),
             });

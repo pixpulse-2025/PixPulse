@@ -24,7 +24,10 @@ export const createArtwork = async (req, res, next) => {
             licenseType,
         } = req.body;
 
-        if (!req.file) {
+        const mainFile = req.files?.file ? req.files.file[0] : null;
+        const previewFile = req.files?.preview ? req.files.preview[0] : null;
+
+        if (!mainFile) {
             return res.status(400).json({
                 success: false,
                 message: "Please upload a file",
@@ -38,12 +41,16 @@ export const createArtwork = async (req, res, next) => {
         }
 
         // Generate preview URL
-        // For images, use the uploaded file itself
-        // For other types, use a placeholder (in a real app, you'd generate a thumbnail)
-        let previewUrl = `/uploads/artworks/${req.file.filename}`;
+        let previewUrl;
 
-        if (!req.file.mimetype.startsWith("image/")) {
-            // Logic for non-image previews (placeholder for now)
+        if (previewFile) {
+            // Use explicitly uploaded preview
+            previewUrl = `/uploads/artworks/${previewFile.filename}`;
+        } else if (mainFile.mimetype.startsWith("image/")) {
+            // For images, use the uploaded file itself as preview
+            previewUrl = `/uploads/artworks/${mainFile.filename}`;
+        } else {
+            // For other types without custom preview, use placeholder
             previewUrl = "/uploads/placeholders/default-preview.png";
         }
 
@@ -56,12 +63,13 @@ export const createArtwork = async (req, res, next) => {
             price: priceType === "Free" ? 0 : price,
             tags: tagsArray,
             licenseType,
-            fileUrl: `/uploads/artworks/${req.file.filename}`,
+            fileUrl: `/uploads/artworks/${mainFile.filename}`,
             previewUrl: previewUrl,
-            fileFormat: req.file.mimetype,
-            fileSize: req.file.size,
+            fileFormat: mainFile.mimetype,
+            fileSize: mainFile.size,
             artist: req.user._id,
         });
+
 
         res.status(201).json({
             success: true,
@@ -80,11 +88,37 @@ export const createArtwork = async (req, res, next) => {
  */
 export const getArtworks = async (req, res, next) => {
     try {
-        const { category, priceType, sort, search } = req.query;
+        const { category, subCategory, priceType, priceRange, sort, search } = req.query;
         let query = {};
 
-        if (category) query.category = category;
-        if (priceType) query.priceType = priceType;
+        if (category && category !== 'all') query.category = category;
+        if (subCategory && subCategory !== 'all') query.subCategory = subCategory;
+
+        // Price Filtering
+        if (priceRange) {
+            switch (priceRange) {
+                case 'free':
+                    query.price = 0;
+                    break;
+                case 'under-10':
+                    query.price = { $lt: 10, $gt: 0 };
+                    break;
+                case '10-50':
+                    query.price = { $gte: 10, $lte: 50 };
+                    break;
+                case '50-100':
+                    query.price = { $gte: 50, $lte: 100 };
+                    break;
+                case 'over-100':
+                    query.price = { $gt: 100 };
+                    break;
+                default:
+                    break;
+            }
+        } else if (priceType && priceType !== 'all') {
+            query.priceType = priceType;
+        }
+
         if (search) {
             query.$or = [
                 { title: { $regex: search, $options: "i" } },
@@ -96,16 +130,30 @@ export const getArtworks = async (req, res, next) => {
         let artworksQuery = Artwork.find(query).populate("artist", "name avatar");
 
         // Sorting
-        if (sort === "newest") {
-            artworksQuery = artworksQuery.sort("-createdAt");
-        } else if (sort === "popular") {
-            artworksQuery = artworksQuery.sort("-views");
-        } else if (sort === "price_low") {
-            artworksQuery = artworksQuery.sort("price");
-        } else if (sort === "price_high") {
-            artworksQuery = artworksQuery.sort("-price");
-        } else {
-            artworksQuery = artworksQuery.sort("-createdAt");
+        switch (sort) {
+            case 'newest':
+                artworksQuery = artworksQuery.sort("-createdAt");
+                break;
+            case 'oldest':
+                artworksQuery = artworksQuery.sort("createdAt");
+                break;
+            case 'popular':
+            case 'most-viewed':
+                artworksQuery = artworksQuery.sort("-views");
+                break;
+            case 'most-downloaded':
+                artworksQuery = artworksQuery.sort("-downloads");
+                break;
+            case 'price_low':
+            case 'price-low':
+                artworksQuery = artworksQuery.sort("price");
+                break;
+            case 'price_high':
+            case 'price-high':
+                artworksQuery = artworksQuery.sort("-price");
+                break;
+            default:
+                artworksQuery = artworksQuery.sort("-createdAt");
         }
 
         const artworks = await artworksQuery;

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../hooks/useAuth";
 import { fetchArtworks, selectArtworks, selectArtworkLoading } from "../redux/slices/artworkSlice";
 import { motion, useScroll, useTransform } from "framer-motion";
+import ArtworkCard from "../components/artwork/ArtworkCard";
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -16,8 +17,12 @@ const Home = () => {
     const y1 = useTransform(scrollYProgress, [0, 1], [0, -200]);
 
     useEffect(() => {
-        dispatch(fetchArtworks({ limit: 8, sortBy: "popular" }));
+        dispatch(fetchArtworks({ limit: 20, sortBy: "popular" }));
     }, [dispatch]);
+
+    // Separate artworks by category
+    const visualWorks = artworks.filter(art => art.category !== 'Audio');
+    const audioWorks = artworks.filter(art => art.category === 'Audio');
 
     const marqueeImages = [
         "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
@@ -26,47 +31,6 @@ const Home = () => {
         "https://images.unsplash.com/photo-1633167606207-d840b5070fc2?q=80&w=2564&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1604871000636-074fa5117945?q=80&w=2564&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=2570&auto=format&fit=crop",
-    ];
-
-    const sampleArts = [
-        {
-            id: 'sample-1',
-            title: 'Electric Sky',
-            artist: 'Alex Rivera',
-            image: marqueeImages[2],
-            category: 'Digital Art',
-            color: 'from-[#3D52A0]/40'
-        },
-        {
-            id: 'sample-2',
-            title: 'Indigo Waves',
-            artist: 'Sarah Chen',
-            image: marqueeImages[3],
-            category: '3D Art',
-            color: 'from-[#7091E6]/40'
-        },
-        {
-            id: 'sample-3',
-            title: 'Night Glow',
-            artist: 'Mark Wilson',
-            image: marqueeImages[0],
-            category: 'Abstract',
-            color: 'from-[#8697C4]/40'
-        },
-        {
-            id: 'sample-4',
-            title: 'Neon Pulse',
-            artist: 'Emma Davis',
-            image: marqueeImages[1],
-            category: 'Illustration',
-            color: 'from-[#ADBBDA]/40'
-        }
-    ];
-
-    const sampleBeats = [
-        { id: 1, title: "Midnight Lofi", bpm: "88 BPM", duration: "2:45", artist: "OceanWaves", color: "bg-[#3D52A0]" },
-        { id: 2, title: "Neon Drive", bpm: "124 BPM", duration: "3:12", artist: "SynthLord", color: "bg-[#7091E6]" },
-        { id: 3, title: "Deep Pulse", bpm: "140 BPM", duration: "2:30", artist: "SubAtomic", color: "bg-[#8697C4]" },
     ];
 
     return (
@@ -132,7 +96,7 @@ const Home = () => {
                 </motion.div>
             </div>
 
-            {/* New Art Section */}
+            {/* Visual Arts Section */}
             <section className="py-40 px-6">
                 <div className="container mx-auto max-w-[1400px]">
                     <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
@@ -144,75 +108,56 @@ const Home = () => {
                                 Discover our latest curated visual artworks
                             </p>
                         </div>
-                        <Link to="/explore" className="text-lg font-bold uppercase tracking-widest border-b-4 border-[#7091E6] pb-2 hover:text-[#3D52A0] transition-all">
+                        <Link to="/explore?category=Visual Art" className="text-lg font-bold uppercase tracking-widest border-b-4 border-[#7091E6] pb-2 hover:text-[#3D52A0] transition-all">
                             See More
                         </Link>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {sampleArts.map((art) => (
-                            <div
-                                key={art.id}
-                                className="group relative bg-[#ADBBDA]/10 dark:bg-white/5 rounded-[2.5rem] overflow-hidden aspect-[4/5] border border-[#3D52A0]/5 hover:shadow-[0_40px_80px_rgba(61,82,160,0.15)] transition-all duration-700"
-                            >
-                                <img
-                                    src={art.image}
-                                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                                    alt={art.title}
-                                />
-                                <div className={`absolute inset-0 bg-gradient-to-t ${art.color} to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
-
-                                <div className="absolute inset-x-0 bottom-0 p-8 opacity-0 group-hover:opacity-100 transition-all duration-500 bg-gradient-to-t from-[#3D52A0] via-[#3D52A0]/80 to-transparent">
-                                    <p className="text-[10px] font-bold uppercase tracking-widest text-[#EDE8F5]/60 mb-2">{art.category}</p>
-                                    <h3 className="text-3xl font-black uppercase tracking-tighter text-white leading-none italic">{art.title}</h3>
-                                    <p className="text-xs font-bold text-white/40 mt-3 flex items-center gap-2">
-                                        <span className="w-4 h-px bg-white/20"></span>
-                                        {art.artist}
-                                    </p>
-                                </div>
-                            </div>
-                        ))}
+                        {loading ? (
+                            [...Array(4)].map((_, i) => (
+                                <div key={i} className="aspect-[3/4] rounded-2xl bg-gray-200 dark:bg-gray-800 animate-pulse" />
+                            ))
+                        ) : visualWorks.length > 0 ? (
+                            visualWorks.slice(0, 8).map((artwork) => (
+                                <ArtworkCard key={artwork._id} artwork={artwork} />
+                            ))
+                        ) : (
+                            <p className="col-span-full text-center text-gray-500">No visual artworks found.</p>
+                        )}
                     </div>
                 </div>
             </section>
 
-            {/* Music Section */}
+            {/* Music/Audio Section */}
             <section className="py-20 px-6 bg-gray-50 dark:bg-gray-800">
                 <div className="container mx-auto max-w-[1400px]">
-                    <div className="mb-12">
-                        <h1 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white leading-tight mb-6">
-                            Music Samples
-                        </h1>
-                        <p className="text-base text-gray-600">
-                            Premium audio productions for creators
-                        </p>
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
+                        <div className="space-y-4">
+                            <h2 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
+                                Music Samples
+                            </h2>
+                            <p className="text-base text-gray-600">
+                                Premium audio productions for creators
+                            </p>
+                        </div>
+                        <Link to="/explore?category=Audio" className="text-lg font-bold uppercase tracking-widest border-b-4 border-[#7091E6] pb-2 hover:text-[#3D52A0] transition-all">
+                            Browse Audio
+                        </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        {sampleBeats.map((beat) => (
-                            <div key={beat.id} className="card-surface p-6 hover:shadow-lg transition-all duration-300">
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-start">
-                                        <div className={`w-12 h-12 ${beat.color} rounded-lg flex items-center justify-center shadow-sm`}>
-                                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" /></svg>
-                                        </div>
-                                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{beat.bpm}</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-1">{beat.title}</h3>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">{beat.artist}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center justify-between pt-6 mt-6 border-t border-gray-200 dark:border-gray-700">
-                                    <div className="flex items-center gap-3">
-                                        <button className="w-10 h-10 rounded-full bg-primary dark:bg-accent text-white flex items-center justify-center hover:bg-[#075985] dark:hover:bg-[#0284C7] transition-all shadow-sm active:scale-95">
-                                            <svg className="w-4 h-4 fill-current ml-0.5" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                                        </button>
-                                        <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{beat.duration}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {loading ? (
+                            [...Array(4)].map((_, i) => (
+                                <div key={i} className="aspect-[3/4] rounded-2xl bg-gray-200 dark:bg-gray-800 animate-pulse" />
+                            ))
+                        ) : audioWorks.length > 0 ? (
+                            audioWorks.slice(0, 8).map((artwork) => (
+                                <ArtworkCard key={artwork._id} artwork={artwork} />
+                            ))
+                        ) : (
+                            <p className="col-span-full text-center text-gray-500">No audio tracks found.</p>
+                        )}
                     </div>
                 </div>
             </section>

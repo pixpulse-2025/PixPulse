@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchArtworkById } from "../redux/slices/artworkSlice";
@@ -18,6 +18,57 @@ const ArtworkDetail = () => {
     const cartItems = useSelector((state) => state.cart.items);
     const [showPreview, setShowPreview] = useState(false);
     const [isFavorited, setIsFavorited] = useState(false);
+
+    // Custom Player Logic
+    const audioRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [waveform, setWaveform] = useState([]);
+
+    useEffect(() => {
+        setWaveform([...Array(64)].map(() => Math.random() * 60 + 20));
+    }, []);
+
+    const formatTime = (time) => {
+        if (!time || isNaN(time)) return "0:00";
+        const min = Math.floor(time / 60);
+        const sec = Math.floor(time % 60);
+        return `${min}:${sec < 10 ? '0' + sec : sec}`;
+    };
+
+    const togglePlay = () => {
+        if (audioRef.current) {
+            if (isPlaying) {
+                audioRef.current.pause();
+                setIsPlaying(false);
+            } else {
+                audioRef.current.play().catch(e => console.log("Play failed", e));
+                setIsPlaying(true);
+            }
+        }
+    };
+
+    const handleTimeUpdate = () => {
+        if (audioRef.current) setCurrentTime(audioRef.current.currentTime);
+    };
+
+    const handleLoadedMetadata = () => {
+        if (audioRef.current) setDuration(audioRef.current.duration);
+    };
+
+    const handleSeek = (e) => {
+        if (!duration) return;
+        const container = e.currentTarget;
+        const rect = container.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const percentage = Math.max(0, Math.min(1, x / rect.width));
+        const newTime = percentage * duration;
+        if (audioRef.current) {
+            audioRef.current.currentTime = newTime;
+            setCurrentTime(newTime);
+        }
+    };
     const [showReportModal, setShowReportModal] = useState(false);
     const [isAddingToCart, setIsAddingToCart] = useState(false);
     const [isBuyingNow, setIsBuyingNow] = useState(false);
@@ -105,26 +156,52 @@ const ArtworkDetail = () => {
 
     const handleDownload = async () => {
         try {
-            // Use the SAME logic as the image display to get the correct URL
             const BASE_URL = "http://localhost:5000";
-            let imageUrl;
+            // Prefer fileUrl for the actual download content
+            let downloadUrl;
 
-            if (artwork.previewUrl || artwork.fileUrl) {
-                imageUrl = `${BASE_URL}${artwork.previewUrl || artwork.fileUrl}`;
+            if (artwork.fileUrl) {
+                downloadUrl = `${BASE_URL}${artwork.fileUrl}`;
+            } else if (artwork.previewUrl) {
+                downloadUrl = `${BASE_URL}${artwork.previewUrl}`;
             } else {
-                // Use placeholder if no image
-                imageUrl = `https://picsum.photos/1200/800?random=${artwork._id}`;
+                downloadUrl = `https://picsum.photos/1200/800?random=${artwork._id}`;
             }
 
-            // Fetch the image and create a blob for download
-            const response = await fetch(imageUrl);
+            // Fetch the file and create a blob for download
+            const response = await fetch(downloadUrl);
             const blob = await response.blob();
             const blobUrl = URL.createObjectURL(blob);
+
+            // Determine extension
+            let extension = 'jpg';
+            // Use mime type from blob or fileFormat from artwork
+            const mimeType = blob.type || artwork.fileFormat;
+
+            if (mimeType) {
+                const mimeMap = {
+                    'image/jpeg': 'jpg',
+                    'image/png': 'png',
+                    'image/gif': 'gif',
+                    'video/mp4': 'mp4',
+                    'video/webm': 'webm',
+                    'audio/mpeg': 'mp3',
+                    'audio/wav': 'wav',
+                    'application/pdf': 'pdf'
+                };
+                if (mimeMap[mimeType]) {
+                    extension = mimeMap[mimeType];
+                }
+            } else {
+                // Fallback to url extension
+                const urlExt = downloadUrl.split('.').pop().split('?')[0].toLowerCase();
+                if (urlExt && urlExt.length < 5) extension = urlExt;
+            }
 
             // Create download link
             const link = document.createElement('a');
             link.href = blobUrl;
-            link.download = `${artwork.title.replace(/[^a-z0-9]/gi, '_')}.jpg`;
+            link.download = `${artwork.title.replace(/[^a-z0-9]/gi, '_')}.${extension}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -133,7 +210,7 @@ const ArtworkDetail = () => {
             setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
         } catch (error) {
             console.error('Download failed:', error);
-            alert('Failed to download image. Please try again.');
+            alert('Failed to download file. Please try again.');
         }
     };
 
@@ -165,9 +242,38 @@ const ArtworkDetail = () => {
     }
 
     const BASE_URL = "http://localhost:5000";
-    const imageUrl = artwork.previewUrl || artwork.fileUrl
-        ? `${BASE_URL}${artwork.previewUrl || artwork.fileUrl}`
-        : `https://picsum.photos/1200/800?random=${artwork._id}`;
+
+    // Correctly distinguish between the media file (for playing) and the preview image (for display)
+    const mediaUrl = artwork.fileUrl ? `${BASE_URL}${artwork.fileUrl}` : null;
+
+    const isImageFile = (url, format) => {
+        if (format?.startsWith('image/')) return true;
+        if (!url) return false;
+        const ext = url.split('.').pop().toLowerCase().split('?')[0];
+        return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+    };
+
+    const hasValidPreview = artwork.previewUrl && !artwork.previewUrl.includes('default-preview');
+
+    const coverUrl = hasValidPreview
+        ? `${BASE_URL}${artwork.previewUrl}`
+        : (mediaUrl && isImageFile(mediaUrl, artwork.fileFormat) ? mediaUrl : null);
+
+    // Robust media type detection
+    const getMediaType = () => {
+        if (artwork.category === 'Video' || artwork.fileFormat?.startsWith('video')) return 'video';
+        if (artwork.category === 'Audio' || artwork.fileFormat?.startsWith('audio')) return 'audio';
+
+        // Fallback to extension check
+        if (mediaUrl) {
+            const ext = mediaUrl.split('.').pop().toLowerCase().split('?')[0];
+            if (['mp4', 'webm', 'ogg', 'mov'].includes(ext)) return 'video';
+            if (['mp3', 'wav', 'mpeg'].includes(ext)) return 'audio';
+        }
+        return 'image';
+    };
+
+    const mediaType = getMediaType();
 
     return (
         <div className="min-h-screen bg-background">
@@ -205,19 +311,152 @@ const ArtworkDetail = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-12">
-                        {/* Image */}
+                        {/* Image/Media Display */}
                         <motion.div
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="group relative rounded-3xl overflow-hidden bg-white/5 border border-text/5 cursor-zoom-in aspect-[4/3]"
-                            onClick={() => setShowPreview(true)}
+                            className={`group relative rounded-3xl overflow-hidden bg-white/5 border border-text/5 ${mediaType === 'audio' ? 'aspect-[2/1] flex items-center justify-center' : 'aspect-[4/3]'}`}
                         >
-                            <img
-                                src={imageUrl}
-                                alt={artwork.title}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                            {mediaType === 'video' ? (
+                                <video
+                                    src={mediaUrl}
+                                    poster={coverUrl}
+                                    controls
+                                    preload="metadata"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : mediaType === 'audio' ? (
+                                <div className="relative w-full min-h-[500px] flex flex-col justify-end overflow-hidden bg-gray-900 rounded-3xl group">
+                                    {/* Full Background Image */}
+                                    {coverUrl ? (
+                                        <div className="absolute inset-0 z-0">
+                                            <img
+                                                src={coverUrl}
+                                                alt=""
+                                                className="w-full h-full object-cover transition-transform duration-[20s] ease-in-out group-hover:scale-110"
+                                            />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10" />
+                                        </div>
+                                    ) : (
+                                        <div className="absolute inset-0 z-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-950">
+                                            <svg className="w-32 h-32 text-white/10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 19V6l12-3v13M9 10l12-3" />
+                                            </svg>
+                                        </div>
+                                    )}
+
+                                    {/* Main Content */}
+                                    <div className="relative z-10 flex flex-col items-center w-full px-8 py-12 gap-8">
+
+                                        <div className="text-center space-y-2">
+                                            <h3 className="text-3xl font-bold text-white tracking-tight drop-shadow-xl">{artwork.title}</h3>
+                                            <p className="text-lg text-white/80 font-medium drop-shadow-md">{artwork.artist?.name}</p>
+                                        </div>
+
+                                        {/* Custom Audio Player UI */}
+                                        <div className="w-full max-w-lg mt-4 space-y-6">
+                                            {/* Waveform Timeline */}
+                                            <div
+                                                className="flex items-center justify-center gap-[2px] h-12 cursor-pointer group/wave select-none"
+                                                onClick={handleSeek}
+                                            >
+                                                {waveform.map((height, i) => {
+                                                    const progress = (i / waveform.length) * 100;
+                                                    const currentPercent = (currentTime / duration) * 100;
+                                                    const isPlayed = currentPercent > progress;
+                                                    const isCurrent = Math.abs(currentPercent - progress) < (100 / waveform.length);
+
+                                                    return (
+                                                        <div
+                                                            key={i}
+                                                            className={`w-[3px] rounded-full transition-all duration-150 ${isCurrent ? 'bg-yellow-400 h-10 shadow-[0_0_10px_rgba(250,204,21,0.5)]' : isPlayed ? 'bg-white/90' : 'bg-white/30'}`}
+                                                            style={{
+                                                                height: isCurrent ? '100%' : `${Math.max(20, height)}%`
+                                                            }}
+                                                        />
+                                                    );
+                                                })}
+                                            </div>
+
+                                            {/* Time Display */}
+                                            <div className="text-center font-mono text-xl text-white tracking-widest drop-shadow-md">
+                                                {formatTime(currentTime)} <span className="text-white/40 mx-2">/</span> {formatTime(duration || 0)}
+                                            </div>
+
+                                            {/* Controls */}
+                                            <div className="flex items-center justify-between max-w-sm mx-auto px-4 pb-4">
+                                                {/* Share */}
+                                                <button className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full">
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+                                                </button>
+
+                                                {/* Rewind */}
+                                                <button
+                                                    onClick={() => { if (audioRef.current) audioRef.current.currentTime = Math.max(0, audioRef.current.currentTime - 10); }}
+                                                    className="text-white hover:text-yellow-400 transition-colors p-2 hover:bg-white/10 rounded-full"
+                                                >
+                                                    <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M11 18V6l-8.5 6 8.5 6zm.5-6l8.5 6V6l-8.5 6z" /></svg>
+                                                </button>
+
+                                                {/* Play/Pause */}
+                                                <button
+                                                    onClick={togglePlay}
+                                                    className="w-16 h-16 bg-white hover:bg-white/90 text-gray-900 rounded-full flex items-center justify-center transition-all transform hover:scale-110 shadow-xl"
+                                                >
+                                                    {isPlaying ? (
+                                                        <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /></svg>
+                                                    ) : (
+                                                        <svg className="w-8 h-8 fill-current ml-1" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                                    )}
+                                                </button>
+
+                                                {/* Fast Forward */}
+                                                <button
+                                                    onClick={() => { if (audioRef.current) audioRef.current.currentTime = Math.min(duration, audioRef.current.currentTime + 10); }}
+                                                    className="text-white hover:text-yellow-400 transition-colors p-2 hover:bg-white/10 rounded-full"
+                                                >
+                                                    <svg className="w-8 h-8 fill-current" viewBox="0 0 24 24"><path d="M4 18l8.5-6L4 6v12zm9-12v12l8.5-6L13 6z" /></svg>
+                                                </button>
+
+                                                {/* Loop */}
+                                                <button
+                                                    className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-full group/loop"
+                                                    onClick={(e) => {
+                                                        if (audioRef.current) {
+                                                            audioRef.current.loop = !audioRef.current.loop;
+                                                            e.currentTarget.classList.toggle('text-yellow-400');
+                                                        }
+                                                    }}
+                                                >
+                                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                                </button>
+                                            </div>
+
+                                            <audio
+                                                ref={audioRef}
+                                                src={mediaUrl}
+                                                onTimeUpdate={handleTimeUpdate}
+                                                onLoadedMetadata={handleLoadedMetadata}
+                                                onEnded={() => setIsPlaying(false)}
+                                                className="hidden"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                // Default Image
+                                <>
+                                    <img
+                                        src={coverUrl}
+                                        alt={artwork.title}
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 cursor-zoom-in"
+                                        onClick={() => setShowPreview(true)}
+                                    />
+                                    <div
+                                        className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"
+                                    />
+                                </>
+                            )}
                         </motion.div>
 
                         {/* Details Grid */}
@@ -354,8 +593,45 @@ const ArtworkDetail = () => {
                     className="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex items-center justify-center p-6"
                     onClick={() => setShowPreview(false)}
                 >
-                    <div className="relative max-w-7xl max-h-full">
-                        <img src={imageUrl} alt={artwork.title} className="rounded-2xl shadow-2xl max-h-[90vh] w-auto" />
+                    <div className="relative max-w-7xl max-h-full flex items-center justify-center">
+                        {(() => {
+                            const ext = imageUrl.split('.').pop().toLowerCase().split('?')[0];
+                            const isVideo = ['mp4', 'webm', 'ogg', 'mov'].includes(ext) || artwork.category === 'Video';
+                            const isAudio = ['mp3', 'wav', 'mpeg'].includes(ext) || artwork.category === 'Audio';
+
+                            if (isVideo) {
+                                return (
+                                    <video
+                                        controls
+                                        autoPlay
+                                        src={imageUrl}
+                                        className="rounded-2xl shadow-2xl max-h-[90vh] w-auto max-w-full"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                );
+                            } else if (isAudio) {
+                                return (
+                                    <div className="bg-neutral-900 p-8 rounded-2xl flex flex-col items-center gap-4 min-w-[300px]" onClick={(e) => e.stopPropagation()}>
+                                        <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
+                                            <svg className="w-10 h-10 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 10l12-3" />
+                                            </svg>
+                                        </div>
+                                        <audio controls src={imageUrl} className="w-full" />
+                                        <p className="text-white font-bold">{artwork.title}</p>
+                                    </div>
+                                );
+                            } else {
+                                return (
+                                    <img
+                                        src={imageUrl}
+                                        alt={artwork.title}
+                                        className="rounded-2xl shadow-2xl max-h-[90vh] w-auto"
+                                        onClick={(e) => e.stopPropagation()}
+                                    />
+                                );
+                            }
+                        })()}
                         <button className="absolute -top-12 right-0 text-white/60 hover:text-white transition-colors text-sm font-medium">
                             Press ESC to close
                         </button>

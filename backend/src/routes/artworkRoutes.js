@@ -40,7 +40,7 @@ router.get("/:id", identifyUser, getArtworkById);
    ========================================================================== */
 
 // Upload a new artwork (handles multiple file types via uploadArtwork middleware)
-router.post("/", protect, uploadArtwork.single("file"), createArtwork);
+router.post("/", protect, uploadArtwork.fields([{ name: 'file', maxCount: 1 }, { name: 'preview', maxCount: 1 }]), createArtwork);
 
 
 
