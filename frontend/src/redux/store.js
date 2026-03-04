@@ -5,6 +5,7 @@ import cartReducer from "./slices/cartSlice";
 import favoritesReducer from "./slices/favoritesSlice";
 import ordersReducer from "./slices/ordersSlice";
 import reportsReducer from "./slices/reportsSlice";
+import walletReducer from "./slices/walletSlice";
 
 export const store = configureStore({
     reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
         favorites: favoritesReducer,
         orders: ordersReducer,
         reports: reportsReducer,
+        wallet: walletReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

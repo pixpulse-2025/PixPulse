@@ -94,31 +94,31 @@ const AdminArtworks = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading artworks...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B5CF6] mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading artworks...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
+        <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h1 className="text-4xl font-bold text-white mb-2">
                             Artwork Management
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400">
+                        <p className="text-gray-400">
                             Manage artworks, visibility, and content
                         </p>
                     </div>
                     <Link
                         to="/admin"
-                        className="px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                        className="px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 transition-colors"
                     >
                         ← Back to Dashboard
                     </Link>
@@ -126,26 +126,26 @@ const AdminArtworks = () => {
 
                 {/* Statistics */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Artworks</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Total Artworks</p>
+                        <p className="text-2xl font-bold text-white">{stats.total}</p>
                     </div>
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Paid</p>
-                        <p className="text-2xl font-bold text-green-600">{stats.paid}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Paid</p>
+                        <p className="text-2xl font-bold text-green-500">{stats.paid}</p>
                     </div>
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Free</p>
-                        <p className="text-2xl font-bold text-blue-600">{stats.free}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Free</p>
+                        <p className="text-2xl font-bold text-blue-500">{stats.free}</p>
                     </div>
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Hidden</p>
-                        <p className="text-2xl font-bold text-red-600">{stats.hidden}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Hidden</p>
+                        <p className="text-2xl font-bold text-red-500">{stats.hidden}</p>
                     </div>
                 </div>
 
                 {/* Filters and Search */}
-                <div className="glass rounded-2xl p-6 mb-6">
+                <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 mb-6">
                     <div className="flex flex-col md:flex-row gap-4">
                         {/* Search */}
                         <div className="flex-1">
@@ -154,7 +154,7 @@ const AdminArtworks = () => {
                                 placeholder="Search by title, description, or artist..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                                className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#0B0D10] text-white focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent placeholder-gray-500"
                             />
                         </div>
 
@@ -165,8 +165,8 @@ const AdminArtworks = () => {
                                     key={f}
                                     onClick={() => setFilter(f)}
                                     className={`px-4 py-2 rounded-lg font-medium transition-all ${filter === f
-                                        ? "bg-primary-600 text-white"
-                                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
+                                        ? "bg-[#8B5CF6] text-white"
+                                        : "bg-white/5 text-gray-400 hover:bg-white/10"
                                         }`}
                                 >
                                     {f.charAt(0).toUpperCase() + f.slice(1)}
@@ -180,7 +180,7 @@ const AdminArtworks = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {filteredArtworks.length > 0 ? (
                         filteredArtworks.map((artwork) => (
-                            <div key={artwork._id} className="glass rounded-2xl overflow-hidden group">
+                            <div key={artwork._id} className="bg-[#141821] border border-white/5 rounded-2xl overflow-hidden group">
                                 {/* Image */}
                                 <div className="relative aspect-video bg-gray-900">
                                     <img
@@ -224,10 +224,10 @@ const AdminArtworks = () => {
 
                                 {/* Info */}
                                 <div className="p-4">
-                                    <h3 className="font-bold text-gray-900 dark:text-white mb-1 truncate">
+                                    <h3 className="font-bold text-white mb-1 truncate">
                                         {artwork.title}
                                     </h3>
-                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
+                                    <p className="text-sm text-gray-400 mb-3 line-clamp-2">
                                         {artwork.description}
                                     </p>
 
@@ -238,7 +238,7 @@ const AdminArtworks = () => {
                                             alt={artwork.artist?.name}
                                             className="w-6 h-6 rounded-full"
                                         />
-                                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                                        <span className="text-xs text-gray-400">
                                             {artwork.artist?.name || "Unknown"}
                                         </span>
                                     </div>
@@ -248,15 +248,15 @@ const AdminArtworks = () => {
                                         <button
                                             onClick={() => handleToggleVisibility(artwork._id, artwork.isPublic)}
                                             className={`flex-1 px-3 py-2 rounded-lg font-medium text-sm transition-colors ${artwork.isPublic
-                                                ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400"
-                                                : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400"
+                                                ? "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20"
+                                                : "bg-green-500/10 text-green-500 hover:bg-green-500/20"
                                                 }`}
                                         >
                                             {artwork.isPublic ? "Hide" : "Show"}
                                         </button>
                                         <button
                                             onClick={() => handleDeleteArtwork(artwork._id)}
-                                            className="flex-1 px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400 font-medium text-sm transition-colors"
+                                            className="flex-1 px-3 py-2 bg-red-500/10 text-red-500 rounded-lg hover:bg-red-500/20 font-medium text-sm transition-colors"
                                         >
                                             Delete
                                         </button>
@@ -265,8 +265,8 @@ const AdminArtworks = () => {
                             </div>
                         ))
                     ) : (
-                        <div className="col-span-full glass rounded-2xl p-12 text-center">
-                            <p className="text-gray-500 dark:text-gray-400">No artworks found</p>
+                        <div className="col-span-full bg-[#141821] border border-white/5 rounded-2xl p-12 text-center">
+                            <p className="text-gray-400">No artworks found</p>
                         </div>
                     )}
                 </div>
@@ -296,16 +296,16 @@ const AdminArtworks = () => {
                             </div>
 
                             {/* Info */}
-                            <div className="glass rounded-2xl p-6">
+                            <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
                                 <div className="flex items-start justify-between mb-4">
                                     <div className="flex-1">
-                                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                                        <h2 className="text-2xl font-bold text-white mb-2">
                                             {selectedArtwork.title}
                                         </h2>
-                                        <p className="text-gray-600 dark:text-gray-400 mb-4">
+                                        <p className="text-gray-400 mb-4">
                                             {selectedArtwork.description}
                                         </p>
-                                        <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400">
+                                        <div className="flex items-center gap-4 text-sm text-gray-400">
                                             <span>📁 {selectedArtwork.category}</span>
                                             <span>💰 {selectedArtwork.priceType === "Free" ? "Free" : `$${selectedArtwork.price}`}</span>
                                             <span>📜 {selectedArtwork.licenseType}</span>
@@ -316,7 +316,7 @@ const AdminArtworks = () => {
                                         <Link
                                             to={`/artwork/${selectedArtwork._id}`}
                                             target="_blank"
-                                            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                                            className="px-4 py-2 bg-[#8B5CF6] text-white rounded-lg hover:bg-[#7C3AED] transition-colors"
                                         >
                                             View on Site
                                         </Link>
@@ -324,17 +324,17 @@ const AdminArtworks = () => {
                                 </div>
 
                                 {/* Artist Info */}
-                                <div className="flex items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-800">
+                                <div className="flex items-center gap-3 pt-4 border-t border-white/5">
                                     <img
                                         src={selectedArtwork.artist?.avatar || `https://ui-avatars.com/api/?name=${selectedArtwork.artist?.name}&background=random`}
                                         alt={selectedArtwork.artist?.name}
                                         className="w-12 h-12 rounded-full"
                                     />
                                     <div>
-                                        <p className="font-medium text-gray-900 dark:text-white">
+                                        <p className="font-medium text-white">
                                             {selectedArtwork.artist?.name || "Unknown Artist"}
                                         </p>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        <p className="text-sm text-gray-400">
                                             {selectedArtwork.artist?.email}
                                         </p>
                                     </div>

@@ -57,6 +57,11 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        walletBalance: {
+            type: Number,
+            default: 500, // $500 test money for every new user
+            min: 0,
+        },
         googleId: {
             type: String,
             unique: true,

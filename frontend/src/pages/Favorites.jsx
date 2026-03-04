@@ -24,29 +24,29 @@ const Favorites = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
+        <div className="min-h-screen bg-[#0B0D10] pt-32 pb-20">
             <div className="container mx-auto max-w-[1400px] px-6">
                 <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                         My Favorites
                     </h1>
-                    <p className="text-base text-gray-600 dark:text-gray-400">
+                    <p className="text-base text-gray-400">
                         {favorites.length} {favorites.length === 1 ? 'item' : 'items'} saved in your collection
                     </p>
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg mb-6">
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-lg mb-6">
                         Error: {error}
                     </div>
                 )}
 
                 {favorites.length === 0 ? (
                     <div className="card-surface py-20 text-center">
-                        <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No favorites yet</h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">Explore our collection and save what you love</p>
-                        <Link to="/explore" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95">
+                        <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                        <h3 className="text-xl font-bold text-white mb-2">No favorites yet</h3>
+                        <p className="text-gray-400 mb-6">Explore our collection and save what you love</p>
+                        <Link to="/explore" className="btn-primary inline-flex items-center gap-2">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             Explore Artworks
                         </Link>

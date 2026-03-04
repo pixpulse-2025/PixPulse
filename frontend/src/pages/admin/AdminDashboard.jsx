@@ -8,7 +8,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const AdminDashboard = () => {
     const { user } = useAuth();
     const [stats, setStats] = useState({
-        users: { total: 0, artists: 0, newThisMonth: 0 },
+        users: { total: 0, newThisMonth: 0 },
         artworks: { total: 0, paid: 0, free: 0, pending: 0 },
         orders: { total: 0, revenue: 0, thisMonth: 0 },
         reports: { total: 0, pending: 0, resolved: 0 }
@@ -36,7 +36,7 @@ const AdminDashboard = () => {
             const users = usersRes.data.data || [];
             const userStats = {
                 total: users.length,
-                artists: users.filter(u => u.role === 'artist').length,
+                admins: users.filter(u => u.role === 'admin').length,
                 newThisMonth: users.filter(u => {
                     const created = new Date(u.createdAt);
                     const now = new Date();
@@ -127,20 +127,20 @@ const AdminDashboard = () => {
     };
 
     const StatCard = ({ title, value, subtitle, icon, color, link }) => (
-        <Link to={link} className="glass rounded-2xl p-6 hover:shadow-lg transition-all group">
+        <Link to={link} className="bg-[#141821] border border-white/5 rounded-2xl p-6 hover:shadow-lg transition-all group">
             <div className="flex items-start justify-between mb-4">
                 <div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">{title}</p>
-                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white">{value}</h3>
+                    <p className="text-sm text-gray-400 mb-1">{title}</p>
+                    <h3 className="text-3xl font-bold text-white">{value}</h3>
                     {subtitle && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtitle}</p>
+                        <p className="text-xs text-gray-400 mt-1">{subtitle}</p>
                     )}
                 </div>
                 <div className={`text-4xl ${color} group-hover:scale-110 transition-transform`}>
                     {icon}
                 </div>
             </div>
-            <div className="text-xs text-primary-600 dark:text-primary-400 font-medium">
+            <div className={`text-xs ${color} font-medium`}>
                 View Details →
             </div>
         </Link>
@@ -148,24 +148,24 @@ const AdminDashboard = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading dashboard...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B5CF6] mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading dashboard...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
+        <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h1 className="text-4xl font-bold text-white mb-2">
                         Admin Dashboard
                     </h1>
-                    <p className="text-gray-500 dark:text-gray-400">
+                    <p className="text-gray-400">
                         Welcome back, {user?.name}! Here's what's happening with PixPulse.
                     </p>
                 </div>
@@ -191,10 +191,10 @@ const AdminDashboard = () => {
                     <StatCard
                         title="Total Revenue"
                         value={`$${stats.orders.revenue.toFixed(2)}`}
-                        subtitle={`${stats.orders.thisMonth} orders this month`}
+                        subtitle={`Artists: $${(stats.orders.revenue * 0.9).toFixed(2)} | Admin: $${(stats.orders.revenue * 0.1).toFixed(2)}`}
                         icon="💰"
                         color="text-green-500"
-                        link="/admin/orders"
+                        link="/admin/transactions"
                     />
                     <StatCard
                         title="Reports"
@@ -208,76 +208,76 @@ const AdminDashboard = () => {
 
                 {/* Secondary Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="glass rounded-2xl p-6">
+                    <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-gray-900 dark:text-white">User Breakdown</h3>
+                            <h3 className="font-bold text-white">User Breakdown</h3>
                             <span className="text-2xl">👤</span>
                         </div>
                         <div className="space-y-3">
 
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Regular Users</span>
-                                <span className="font-bold text-gray-900 dark:text-white">
-                                    {stats.users.total - stats.users.artists}
+                                <span className="text-sm text-gray-400">Regular Users</span>
+                                <span className="font-bold text-white">
+                                    {stats.users.total - (stats.users.admins || 0)}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">New This Month</span>
-                                <span className="font-bold text-green-600">{stats.users.newThisMonth}</span>
+                                <span className="text-sm text-gray-400">New This Month</span>
+                                <span className="font-bold text-green-500">{stats.users.newThisMonth}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="glass rounded-2xl p-6">
+                    <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-gray-900 dark:text-white">Content Stats</h3>
+                            <h3 className="font-bold text-white">Content Stats</h3>
                             <span className="text-2xl">📊</span>
                         </div>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Paid Artworks</span>
-                                <span className="font-bold text-gray-900 dark:text-white">{stats.artworks.paid}</span>
+                                <span className="text-sm text-gray-400">Paid Artworks</span>
+                                <span className="font-bold text-white">{stats.artworks.paid}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Free Artworks</span>
-                                <span className="font-bold text-gray-900 dark:text-white">{stats.artworks.free}</span>
+                                <span className="text-sm text-gray-400">Free Artworks</span>
+                                <span className="font-bold text-white">{stats.artworks.free}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Pending Review</span>
-                                <span className="font-bold text-yellow-600">{stats.artworks.pending}</span>
+                                <span className="text-sm text-gray-400">Pending Review</span>
+                                <span className="font-bold text-yellow-500">{stats.artworks.pending}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="glass rounded-2xl p-6">
+                    <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="font-bold text-gray-900 dark:text-white">Report Status</h3>
+                            <h3 className="font-bold text-white">Report Status</h3>
                             <span className="text-2xl">🚨</span>
                         </div>
                         <div className="space-y-3">
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Total Reports</span>
-                                <span className="font-bold text-gray-900 dark:text-white">{stats.reports.total}</span>
+                                <span className="text-sm text-gray-400">Total Reports</span>
+                                <span className="font-bold text-white">{stats.reports.total}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Pending</span>
-                                <span className="font-bold text-yellow-600">{stats.reports.pending}</span>
+                                <span className="text-sm text-gray-400">Pending</span>
+                                <span className="font-bold text-yellow-500">{stats.reports.pending}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-sm text-gray-600 dark:text-gray-400">Resolved</span>
-                                <span className="font-bold text-green-600">{stats.reports.resolved}</span>
+                                <span className="text-sm text-gray-400">Resolved</span>
+                                <span className="font-bold text-green-500">{stats.reports.resolved}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Recent Activity */}
-                <div className="glass rounded-2xl p-6">
+                <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
                     <div className="flex items-center justify-between mb-6">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">Recent Activity</h3>
+                        <h3 className="text-xl font-bold text-white">Recent Activity</h3>
                         <button
                             onClick={fetchDashboardStats}
-                            className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                            className="text-sm text-[#8B5CF6] hover:text-[#7C3AED] font-medium"
                         >
                             🔄 Refresh
                         </button>
@@ -288,14 +288,14 @@ const AdminDashboard = () => {
                             {recentActivity.map((activity, index) => (
                                 <div
                                     key={index}
-                                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                    className="flex items-start gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors"
                                 >
                                     <span className="text-2xl">{activity.icon}</span>
                                     <div className="flex-1">
-                                        <p className="text-sm text-gray-900 dark:text-white font-medium">
+                                        <p className="text-sm text-white font-medium">
                                             {activity.message}
                                         </p>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                        <p className="text-xs text-gray-400 mt-1">
                                             {new Date(activity.time).toLocaleString()}
                                         </p>
                                     </div>
@@ -303,48 +303,55 @@ const AdminDashboard = () => {
                             ))}
                         </div>
                     ) : (
-                        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <div className="text-center py-8 text-gray-400">
                             No recent activity
                         </div>
                     )}
                 </div>
 
                 {/* Quick Actions */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mt-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mt-8">
                     <Link
                         to="/admin/users"
-                        className="p-4 border-2 border-gray-200 dark:border-gray-800 rounded-xl hover:border-primary-500 dark:hover:border-primary-500 transition-all text-center group"
+                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
                     >
                         <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">👥</div>
-                        <p className="font-medium text-gray-900 dark:text-white">Manage Users</p>
+                        <p className="font-medium text-white">Manage Users</p>
                     </Link>
                     <Link
                         to="/admin/artworks"
-                        className="p-4 border-2 border-gray-200 dark:border-gray-800 rounded-xl hover:border-primary-500 dark:hover:border-primary-500 transition-all text-center group"
+                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
                     >
                         <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🎨</div>
-                        <p className="font-medium text-gray-900 dark:text-white">Manage Artworks</p>
+                        <p className="font-medium text-white">Manage Artworks</p>
                     </Link>
                     <Link
                         to="/admin/analytics"
-                        className="p-4 border-2 border-gray-200 dark:border-gray-800 rounded-xl hover:border-primary-500 dark:hover:border-primary-500 transition-all text-center group"
+                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
                     >
                         <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">📊</div>
-                        <p className="font-medium text-gray-900 dark:text-white">View Analytics</p>
+                        <p className="font-medium text-white">View Analytics</p>
                     </Link>
                     <Link
                         to="/admin/reports"
-                        className="p-4 border-2 border-gray-200 dark:border-gray-800 rounded-xl hover:border-primary-500 dark:hover:border-primary-500 transition-all text-center group"
+                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
                     >
                         <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🚩</div>
-                        <p className="font-medium text-gray-900 dark:text-white">Review Reports</p>
+                        <p className="font-medium text-white">Review Reports</p>
                     </Link>
                     <Link
-                        to="/marketplace"
-                        className="p-4 border-2 border-gray-200 dark:border-gray-800 rounded-xl hover:border-primary-500 dark:hover:border-primary-500 transition-all text-center group"
+                        to="/explore"
+                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
                     >
                         <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🏪</div>
-                        <p className="font-medium text-gray-900 dark:text-white">View Marketplace</p>
+                        <p className="font-medium text-white">View Marketplace</p>
+                    </Link>
+                    <Link
+                        to="/admin/transactions"
+                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
+                    >
+                        <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">💳</div>
+                        <p className="font-medium text-white">Transactions</p>
                     </Link>
                 </div>
             </div>

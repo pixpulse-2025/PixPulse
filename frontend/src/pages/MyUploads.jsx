@@ -57,18 +57,18 @@ const MyUploads = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
+        <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">My Uploads</h1>
-                        <p className="text-gray-500 dark:text-gray-400">
+                        <h1 className="text-4xl font-bold text-white mb-2">My Uploads</h1>
+                        <p className="text-gray-400">
                             Manage your creative portfolio ({artworks.length} {artworks.length === 1 ? 'item' : 'items'})
                         </p>
                     </div>
                     <Link
                         to="/upload"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                        className="btn-primary inline-flex items-center gap-2 px-5 py-2.5"
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                         Upload New
@@ -82,13 +82,13 @@ const MyUploads = () => {
                 )}
 
                 {artworks.length === 0 ? (
-                    <div className="glass rounded-3xl p-16 text-center">
+                    <div className="card-surface rounded-3xl p-16 text-center">
                         <div className="text-6xl mb-4">🎨</div>
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">No uploads yet</h3>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6">Start sharing your creative work with the world!</p>
+                        <h3 className="text-2xl font-bold text-white mb-2">No uploads yet</h3>
+                        <p className="text-gray-400 mb-6">Start sharing your creative work with the world!</p>
                         <Link
                             to="/upload"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                            className="btn-primary inline-flex items-center gap-2 px-6 py-3"
                         >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                             Upload Your First Artwork
@@ -97,10 +97,10 @@ const MyUploads = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
                         {artworks.map((artwork) => (
-                            <div key={artwork._id} className="glass rounded-2xl overflow-hidden">
+                            <div key={artwork._id} className="card-surface rounded-2xl overflow-hidden">
                                 <div className="md:flex">
                                     {/* Preview Image */}
-                                    <div className="md:w-64 h-48 md:h-auto bg-gray-200 dark:bg-gray-800 flex-shrink-0">
+                                    <div className="md:w-64 h-48 md:h-auto bg-[#141821] border-r border-white/5 flex-shrink-0">
                                         <img
                                             src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`}
                                             alt={artwork.title}
@@ -119,13 +119,13 @@ const MyUploads = () => {
                                                     type="text"
                                                     value={editForm.title}
                                                     onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                                                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
                                                     placeholder="Title"
                                                 />
                                                 <textarea
                                                     value={editForm.description}
                                                     onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                                                    className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white"
+                                                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
                                                     rows="3"
                                                     placeholder="Description"
                                                 />
@@ -133,7 +133,7 @@ const MyUploads = () => {
                                                     <select
                                                         value={editForm.priceType}
                                                         onChange={(e) => setEditForm({ ...editForm, priceType: e.target.value })}
-                                                        className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                                                        className="px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
                                                     >
                                                         <option value="Free">Free</option>
                                                         <option value="Paid">Paid</option>
@@ -143,7 +143,7 @@ const MyUploads = () => {
                                                             type="number"
                                                             value={editForm.price}
                                                             onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
-                                                            className="px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+                                                            className="px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
                                                             placeholder="Price"
                                                         />
                                                     )}
@@ -151,14 +151,14 @@ const MyUploads = () => {
                                                 <div className="flex gap-2">
                                                     <button
                                                         onClick={() => handleSaveEdit(artwork._id)}
-                                                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98]"
+                                                        className="btn-primary inline-flex items-center gap-2 px-5 py-2.5"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                                         Save
                                                     </button>
                                                     <button
                                                         onClick={() => setEditingId(null)}
-                                                        className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg"
+                                                        className="px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10"
                                                     >
                                                         Cancel
                                                     </button>
@@ -168,13 +168,13 @@ const MyUploads = () => {
                                             <>
                                                 <div className="flex items-start justify-between mb-4">
                                                     <div className="flex-1">
-                                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
+                                                        <h3 className="text-xl font-bold text-white mb-1">
                                                             {artwork.title}
                                                         </h3>
-                                                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                                                        <p className="text-sm text-gray-400 mb-2">
                                                             {artwork.category} • {artwork.subCategory}
                                                         </p>
-                                                        <p className="text-gray-700 dark:text-gray-300 mb-3">
+                                                        <p className="text-gray-300 mb-3">
                                                             {artwork.description}
                                                         </p>
                                                         {artwork.tags && artwork.tags.length > 0 && (
@@ -203,7 +203,7 @@ const MyUploads = () => {
                                                 </div>
 
                                                 <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+                                                    <div className="flex items-center gap-6 text-sm text-gray-400">
                                                         <span className="flex items-center gap-1">
                                                             👁️ {artwork.views || 0} views
                                                         </span>
@@ -222,19 +222,19 @@ const MyUploads = () => {
                                                     <div className="flex gap-2">
                                                         <button
                                                             onClick={() => handleEdit(artwork)}
-                                                            className="px-4 py-2 text-sm font-medium text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/10 rounded-lg transition-colors"
+                                                            className="px-4 py-2 text-sm font-medium text-[#8B5CF6] hover:bg-[#8B5CF6]/10 rounded-lg transition-colors"
                                                         >
                                                             ✏️ Edit
                                                         </button>
                                                         <button
                                                             onClick={() => handleToggleVisibility(artwork._id)}
-                                                            className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                                                            className="px-4 py-2 text-sm font-medium text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
                                                         >
                                                             {artwork.isPublic ? "👁️ Hide" : "👁️‍🗨️ Unhide"}
                                                         </button>
                                                         <button
                                                             onClick={() => handleDelete(artwork._id)}
-                                                            className="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors"
+                                                            className="px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
                                                         >
                                                             🗑️ Delete
                                                         </button>

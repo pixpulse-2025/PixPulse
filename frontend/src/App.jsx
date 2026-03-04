@@ -22,6 +22,7 @@ import MyUploads from "./pages/MyUploads";
 import ArtworkDetail from "./pages/ArtworkDetail";
 import Favorites from "./pages/Favorites";
 import Cart from "./pages/Cart";
+import Wallet from "./pages/Wallet";
 import MyPurchases from "./pages/MyPurchases";
 import MyReports from "./pages/MyReports";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -29,6 +30,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminArtworks from "./pages/admin/Artworks";
 import AdminReports from "./pages/admin/Reports";
 import AdminAnalytics from "./pages/admin/Analytics";
+import AdminTransactions from "./pages/admin/Transactions";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
@@ -85,7 +87,14 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         <Route path="/community" element={<Community />} />
-        <Route path="/artwork/:id" element={<ArtworkDetail />} />
+        <Route
+          path="/artwork/:id"
+          element={
+            <ProtectedRoute>
+              <ArtworkDetail />
+            </ProtectedRoute>
+          }
+        />
 
         {/* ==========================================================================
            PROTECTED ROUTES (Require Authentication)
@@ -143,6 +152,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Cart />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/wallet"
+          element={
+            <ProtectedRoute>
+              <Wallet />
             </ProtectedRoute>
           }
         />
@@ -211,6 +228,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminReports />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/transactions"
+          element={
+            <AdminRoute>
+              <AdminTransactions />
             </AdminRoute>
           }
         />

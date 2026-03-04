@@ -14,6 +14,9 @@ import checkoutRoutes from "./routes/checkoutRoutes.js";
 import downloadRoutes from "./routes/downloadRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import sketchRoutes from "./routes/sketchRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -97,8 +100,17 @@ app.use("/api/download", downloadRoutes);
 // Reporting problematic or copyright-infringing content
 app.use("/api/reports", reportRoutes);
 
-// Admin Dashboard routes (User Management, Statistics)
+// User management and public profiles
+app.use("/api/users", userRoutes);
+
+// Admin Dashboard routes (Statistics)
 app.use("/api", adminRoutes);
+
+// Sketch recognition (Draw to Search)
+app.use("/api/sketch", sketchRoutes);
+
+// Wallet system (Balance, Deposits, Purchases)
+app.use("/api/wallet", walletRoutes);
 
 /* ==========================================================================
    ERROR HANDLING MIDDLEWARE

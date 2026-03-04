@@ -11,7 +11,7 @@ const HumSearchModal = ({ isOpen, onClose, onSearch }) => {
                 setStatus("Analyzing...");
                 const timer2 = setTimeout(() => {
                     // Match seeded audio data
-                    const mockMatches = ["Lo-Fi", "Beats", "Nature", "Rain"];
+                    const mockMatches = ["Lo-Fi", "Beats", "Nature", "Rain", "Chill", "Sound", "Relax", "Forest", "Piano", "Drums", "Synth"];
                     const match = mockMatches[Math.floor(Math.random() * mockMatches.length)];
                     onSearch(match);
                     onClose();

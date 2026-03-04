@@ -7,10 +7,14 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 const AdminUsers = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [filter, setFilter] = useState("all"); // all, users, artists, blocked
+    const [filter, setFilter] = useState("all"); // all, users, blocked
     const [searchTerm, setSearchTerm] = useState("");
+    const [roleFilter, setRoleFilter] = useState("all");
+
+    // Modal states
     const [selectedUser, setSelectedUser] = useState(null);
-    const [showModal, setShowModal] = useState(false);
+    const [showRoleModal, setShowRoleModal] = useState(false);
+    const [newRole, setNewRole] = useState("");
 
     useEffect(() => {
         fetchUsers();
@@ -61,6 +65,9 @@ const AdminUsers = () => {
         }
     };
 
+    // Alias for the JSX call
+    const handleToggleBlock = handleBlockUser;
+
     const handleDeleteUser = async (userId) => {
         if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
             return;
@@ -80,11 +87,11 @@ const AdminUsers = () => {
         }
     };
 
-    const handleChangeRole = async (userId, newRole) => {
+    const handleChangeRole = async (userId, role) => {
         try {
             const token = localStorage.getItem("token");
             await axios.patch(`${API_URL}/users/${userId}`, {
-                role: newRole
+                role: role
             }, {
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -92,13 +99,35 @@ const AdminUsers = () => {
             });
 
             setUsers(users.map(u =>
-                u._id === userId ? { ...u, role: newRole } : u
+                u._id === userId ? { ...u, role: role } : u
             ));
 
             alert('User role updated successfully');
-            setShowModal(false);
+            setShowRoleModal(false);
         } catch (error) {
             alert(error.response?.data?.message || 'Failed to update role');
+        }
+    };
+
+    const handleRoleClick = (user) => {
+        setSelectedUser(user);
+        setNewRole(user.role);
+        setShowRoleModal(true);
+    };
+
+    const handleSaveRole = () => {
+        if (selectedUser && newRole) {
+            handleChangeRole(selectedUser._id, newRole);
+        }
+    };
+
+    const getRoleBadgeColor = (role) => {
+        switch (role) {
+            case "admin":
+                return "bg-red-500/10 text-red-500";
+
+            default:
+                return "bg-blue-500/10 text-blue-500";
         }
     };
 
@@ -110,190 +139,183 @@ const AdminUsers = () => {
 
         if (!matchesSearch) return false;
 
-        // Role/status filter
-        if (filter === "users") return user.role === "user";
-        if (filter === "blocked") return user.isBlocked;
-        return true; // all
+        // Role filter
+        if (roleFilter !== "all" && user.role !== roleFilter) return false;
+
+        // Status filter (legacy filter state, if needed, or remove)
+        // if (filter === "users") return user.role === "user"; // This seems redundant with roleFilter
+        // if (filter === "blocked") return user.isBlocked;
+
+        return true;
     });
 
     // Statistics
     const stats = {
         total: users.length,
-        users: users.filter(u => u.role === "user").length,
-        blocked: users.filter(u => u.isBlocked).length
+        newThisMonth: users.filter(u => {
+            const now = new Date();
+            const joined = new Date(u.createdAt);
+            return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
+        }).length,
+
+        admins: users.filter(u => u.role === "admin").length
     };
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading users...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B5CF6] mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading users...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
+        <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h1 className="text-4xl font-bold text-white mb-2">
                             User Management
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            Manage users, roles, and permissions
+                        <p className="text-gray-400">
+                            Manage user accounts, roles, and permissions
                         </p>
                     </div>
                     <Link
                         to="/admin"
-                        className="px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                        className="px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 transition-colors"
                     >
                         ← Back to Dashboard
                     </Link>
                 </div>
 
-                {/* Statistics */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Total Users</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Total Users</p>
+                        <p className="text-2xl font-bold text-white">{stats.total}</p>
                     </div>
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Regular Users</p>
-                        <p className="text-2xl font-bold text-blue-600">{stats.users}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">New (Month)</p>
+                        <p className="text-2xl font-bold text-green-500">{stats.newThisMonth}</p>
                     </div>
-                    <div className="glass rounded-xl p-4">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Blocked</p>
-                        <p className="text-2xl font-bold text-red-600">{stats.blocked}</p>
+
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Admins</p>
+                        <p className="text-2xl font-bold text-blue-500">{stats.admins}</p>
                     </div>
                 </div>
 
                 {/* Filters and Search */}
-                <div className="glass rounded-2xl p-6 mb-6">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        {/* Search */}
-                        <div className="flex-1">
-                            <input
-                                type="text"
-                                placeholder="Search by name or email..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                            />
-                        </div>
-
-                        {/* Filter Tabs */}
-                        <div className="flex gap-2">
-                            {["all", "users", "blocked"].map((f) => (
+                <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 mb-6">
+                    <div className="flex flex-col md:flex-row gap-4 justify-between">
+                        {/* Role Filter */}
+                        <div className="flex gap-2 text-sm md:text-base overflow-x-auto pb-2 md:pb-0">
+                            {["all", "user", "admin"].map((r) => (
                                 <button
-                                    key={f}
-                                    onClick={() => setFilter(f)}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-all ${filter === f
-                                        ? "bg-primary-600 text-white"
-                                        : "bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700"
+                                    key={r}
+                                    onClick={() => setRoleFilter(r)}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${roleFilter === r
+                                        ? "bg-[#8B5CF6] text-white"
+                                        : "bg-white/5 text-gray-400 hover:bg-white/10"
                                         }`}
                                 >
-                                    {f.charAt(0).toUpperCase() + f.slice(1)}
+                                    {r.charAt(0).toUpperCase() + r.slice(1)}s
                                 </button>
                             ))}
+                        </div>
+
+                        {/* Search */}
+                        <div className="w-full md:w-1/3">
+                            <input
+                                type="text"
+                                placeholder="Search users..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#0B0D10] text-white focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent placeholder-gray-500"
+                            />
                         </div>
                     </div>
                 </div>
 
                 {/* Users Table */}
-                <div className="glass rounded-2xl overflow-hidden">
+                <div className="bg-[#141821] border border-white/5 rounded-2xl overflow-hidden">
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-100 dark:bg-gray-800">
-                                <tr>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        User
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Email
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Role
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Status
-                                    </th>
-                                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Joined
-                                    </th>
-                                    <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                                        Actions
-                                    </th>
+                            <thead>
+                                <tr className="border-b border-white/5 bg-white/5">
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">User</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Role</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Joined</th>
+                                    <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                            <tbody className="divide-y divide-white/5">
                                 {filteredUsers.length > 0 ? (
                                     filteredUsers.map((user) => (
-                                        <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="flex items-center">
+                                        <tr key={user._id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
                                                     <img
                                                         src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=random`}
                                                         alt={user.name}
-                                                        className="w-10 h-10 rounded-full mr-3"
+                                                        className="w-10 h-10 rounded-full"
                                                     />
                                                     <div>
-                                                        <p className="font-medium text-gray-900 dark:text-white">{user.name}</p>
+                                                        <p className="font-medium text-white">{user.name}</p>
+                                                        <p className="text-sm text-gray-400">{user.email}</p>
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <p className="text-sm text-gray-600 dark:text-gray-400">{user.email}</p>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedUser(user);
-                                                        setShowModal(true);
-                                                    }}
-                                                    className={`px-3 py-1 rounded-full text-xs font-medium ${user.role === "admin"
-                                                        ? "bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400"
-                                                        : user.role === "artist"
-                                                            ? "bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400"
-                                                            : "bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
-                                                        }`}
-                                                >
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getRoleBadgeColor(user.role)}`}>
                                                     {user.role}
-                                                </button>
+                                                </span>
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
+                                            <td className="px-6 py-4">
                                                 {user.isBlocked ? (
-                                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400">
-                                                        🚫 Blocked
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
+                                                        Blocked
                                                     </span>
                                                 ) : (
-                                                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400">
-                                                        ✓ Active
+                                                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500">
+                                                        Active
                                                     </span>
                                                 )}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                                            <td className="px-6 py-4 text-sm text-gray-400">
                                                 {new Date(user.createdAt).toLocaleDateString()}
                                             </td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                <div className="flex items-center justify-end gap-2">
+                                            <td className="px-6 py-4 text-right">
+                                                <div className="flex justify-end gap-2">
                                                     <button
-                                                        onClick={() => handleBlockUser(user._id, user.isBlocked)}
-                                                        className={`px-3 py-1 rounded-lg font-medium transition-colors ${user.isBlocked
-                                                            ? "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/20 dark:text-green-400"
-                                                            : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400"
-                                                            }`}
+                                                        onClick={() => handleRoleClick(user)}
+                                                        className="p-2 text-[#8B5CF6] hover:bg-[#8B5CF6]/10 rounded-lg transition-colors"
+                                                        title="Change Role"
                                                     >
-                                                        {user.isBlocked ? "Unblock" : "Block"}
+                                                        👑
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleToggleBlock(user._id, user.isBlocked)}
+                                                        className={`p-2 rounded-lg transition-colors ${user.isBlocked
+                                                            ? "text-green-500 hover:bg-green-500/10"
+                                                            : "text-red-500 hover:bg-red-500/10"
+                                                            }`}
+                                                        title={user.isBlocked ? "Unblock User" : "Block User"}
+                                                    >
+                                                        {user.isBlocked ? "🔓" : "🚫"}
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteUser(user._id)}
-                                                        className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 dark:bg-red-900/20 dark:text-red-400 font-medium transition-colors"
+                                                        className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                        title="Delete User"
                                                     >
-                                                        Delete
+                                                        🗑️
                                                     </button>
                                                 </div>
                                             </td>
@@ -301,7 +323,7 @@ const AdminUsers = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                                        <td colSpan="5" className="px-6 py-12 text-center text-gray-400">
                                             No users found
                                         </td>
                                     </tr>
@@ -312,36 +334,46 @@ const AdminUsers = () => {
                 </div>
 
                 {/* Role Change Modal */}
-                {showModal && selectedUser && (
-                    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowModal(false)}>
-                        <div className="glass rounded-2xl p-6 max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
-                                Change User Role
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
-                                Change role for <span className="font-medium">{selectedUser.name}</span>
+                {showRoleModal && selectedUser && (
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                        <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 w-full max-w-sm">
+                            <h2 className="text-xl font-bold text-white mb-4">
+                                Change Role
+                            </h2>
+                            <p className="text-gray-400 mb-6">
+                                Select a new role for <span className="font-bold text-white">{selectedUser.name}</span>
                             </p>
-                            <div className="space-y-3">
+
+                            <div className="space-y-3 mb-6">
                                 {["user", "admin"].map((role) => (
                                     <button
                                         key={role}
-                                        onClick={() => handleChangeRole(selectedUser._id, role)}
-                                        className={`w-full px-4 py-3 rounded-lg font-medium transition-all ${selectedUser.role === role
-                                            ? "bg-primary-600 text-white"
-                                            : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
+                                        onClick={() => setNewRole(role)}
+                                        className={`w-full p-4 rounded-xl border flex items-center justify-between transition-all ${newRole === role
+                                            ? "border-[#8B5CF6] bg-[#8B5CF6]/10 text-white"
+                                            : "border-white/10 bg-[#0B0D10] text-gray-400 hover:border-white/20"
                                             }`}
                                     >
-                                        {role.charAt(0).toUpperCase() + role.slice(1)}
-                                        {selectedUser.role === role && " (Current)"}
+                                        <span className="capitalize">{role}</span>
+                                        {newRole === role && <span>✓</span>}
                                     </button>
                                 ))}
                             </div>
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="w-full mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
-                            >
-                                Cancel
-                            </button>
+
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowRoleModal(false)}
+                                    className="flex-1 px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveRole}
+                                    className="flex-1 px-4 py-2 bg-[#8B5CF6] text-white rounded-lg hover:bg-[#7C3AED] transition-colors"
+                                >
+                                    Save
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

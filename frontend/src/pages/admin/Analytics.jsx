@@ -115,38 +115,38 @@ const AdminAnalytics = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading analytics...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B5CF6] mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading analytics...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
+        <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h1 className="text-4xl font-bold text-white mb-2">
                             Analytics Dashboard
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400">
+                        <p className="text-gray-400">
                             Platform insights and performance metrics
                         </p>
                     </div>
                     <div className="flex gap-3">
                         <button
                             onClick={fetchAnalytics}
-                            className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                            className="btn-primary px-4 py-2 text-white rounded-lg transition-colors"
                         >
                             🔄 Refresh
                         </button>
                         <Link
                             to="/admin"
-                            className="px-4 py-2 bg-gray-200 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors"
+                            className="px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 transition-colors"
                         >
                             ← Back
                         </Link>
@@ -155,32 +155,32 @@ const AdminAnalytics = () => {
 
                 {/* Overview Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="glass rounded-xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Revenue</p>
-                        <p className="text-3xl font-bold text-green-600">${analytics.totalRevenue?.toFixed(2) || 0}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
+                        <p className="text-sm text-gray-400 mb-1">Total Revenue</p>
+                        <p className="text-3xl font-bold text-green-500">${analytics.totalRevenue?.toFixed(2) || 0}</p>
                     </div>
-                    <div className="glass rounded-xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Orders</p>
-                        <p className="text-3xl font-bold text-blue-600">{analytics.totalOrders || 0}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
+                        <p className="text-sm text-gray-400 mb-1">Total Orders</p>
+                        <p className="text-3xl font-bold text-blue-500">{analytics.totalOrders || 0}</p>
                     </div>
-                    <div className="glass rounded-xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Artworks</p>
-                        <p className="text-3xl font-bold text-purple-600">{analytics.totalArtworks || 0}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
+                        <p className="text-sm text-gray-400 mb-1">Total Artworks</p>
+                        <p className="text-3xl font-bold text-purple-500">{analytics.totalArtworks || 0}</p>
                     </div>
-                    <div className="glass rounded-xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Users</p>
-                        <p className="text-3xl font-bold text-orange-600">{analytics.totalUsers || 0}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
+                        <p className="text-sm text-gray-400 mb-1">Total Users</p>
+                        <p className="text-3xl font-bold text-orange-500">{analytics.totalUsers || 0}</p>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Top Creators */}
-                    <div className="glass rounded-2xl p-6">
+                    <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <h2 className="text-2xl font-bold text-white">
                                 🎨 Top Creators
                             </h2>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="text-sm text-gray-400">
                                 By artwork count
                             </span>
                         </div>
@@ -190,9 +190,9 @@ const AdminAnalytics = () => {
                                 {analytics.topCreators.map((creator, index) => (
                                     <div
                                         key={creator.artist?._id || index}
-                                        className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                        className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors"
                                     >
-                                        <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-primary-100 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 rounded-full font-bold">
+                                        <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-[#8B5CF6]/10 text-[#8B5CF6] rounded-full font-bold">
                                             #{index + 1}
                                         </div>
                                         <img
@@ -201,36 +201,36 @@ const AdminAnalytics = () => {
                                             className="w-12 h-12 rounded-full"
                                         />
                                         <div className="flex-1">
-                                            <p className="font-bold text-gray-900 dark:text-white">
+                                            <p className="font-bold text-white">
                                                 {creator.artist?.name || "Unknown"}
                                             </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            <p className="text-sm text-gray-400">
                                                 {creator.artworkCount} artworks • {creator.totalViews} views
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-white">
+                                            <p className="text-sm font-medium text-white">
                                                 {creator.totalDownloads}
                                             </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">downloads</p>
+                                            <p className="text-xs text-gray-400">downloads</p>
                                         </div>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                            <div className="text-center py-12 text-gray-400">
                                 No creator data available
                             </div>
                         )}
                     </div>
 
                     {/* Top Sales */}
-                    <div className="glass rounded-2xl p-6">
+                    <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+                            <h2 className="text-2xl font-bold text-white">
                                 💰 Top Sales
                             </h2>
-                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                            <span className="text-sm text-gray-400">
                                 By revenue
                             </span>
                         </div>
@@ -240,9 +240,9 @@ const AdminAnalytics = () => {
                                 {analytics.topSales.map((sale, index) => (
                                     <div
                                         key={sale.artwork?._id || index}
-                                        className="flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                                        className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors"
                                     >
-                                        <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-green-100 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-full font-bold">
+                                        <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center bg-green-500/10 text-green-500 rounded-full font-bold">
                                             #{index + 1}
                                         </div>
                                         <img
@@ -254,15 +254,15 @@ const AdminAnalytics = () => {
                                             }}
                                         />
                                         <div className="flex-1">
-                                            <p className="font-bold text-gray-900 dark:text-white truncate">
+                                            <p className="font-bold text-white truncate">
                                                 {sale.artwork?.title || "Unknown"}
                                             </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                                            <p className="text-sm text-gray-400">
                                                 {sale.salesCount} sales
                                             </p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-lg font-bold text-green-600">
+                                            <p className="text-lg font-bold text-green-500">
                                                 ${sale.totalRevenue.toFixed(2)}
                                             </p>
                                         </div>
@@ -270,7 +270,7 @@ const AdminAnalytics = () => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                            <div className="text-center py-12 text-gray-400">
                                 No sales data available
                             </div>
                         )}
@@ -278,8 +278,8 @@ const AdminAnalytics = () => {
                 </div>
 
                 {/* Revenue by Category */}
-                <div className="glass rounded-2xl p-6">
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                <div className="bg-[#141821] border border-white/5 rounded-2xl p-6">
+                    <h2 className="text-2xl font-bold text-white mb-6">
                         📊 Revenue by Category
                     </h2>
 
@@ -293,22 +293,22 @@ const AdminAnalytics = () => {
                                 return (
                                     <div
                                         key={index}
-                                        className="p-4 rounded-xl border-2 border-gray-200 dark:border-gray-800 hover:border-primary-500 dark:hover:border-primary-500 transition-all"
+                                        className="p-4 rounded-xl border border-white/10 hover:border-[#8B5CF6] transition-all"
                                     >
                                         <div className="flex items-center justify-between mb-2">
-                                            <p className="font-bold text-gray-900 dark:text-white">
+                                            <p className="font-bold text-white">
                                                 {item.category}
                                             </p>
-                                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                                            <span className="text-sm text-gray-400">
                                                 {percentage}%
                                             </span>
                                         </div>
-                                        <p className="text-2xl font-bold text-primary-600">
+                                        <p className="text-2xl font-bold text-[#8B5CF6]">
                                             ${item.revenue.toFixed(2)}
                                         </p>
-                                        <div className="mt-2 h-2 bg-gray-200 dark:bg-gray-800 rounded-full overflow-hidden">
+                                        <div className="mt-2 h-2 bg-gray-800 rounded-full overflow-hidden">
                                             <div
-                                                className="h-full bg-primary-600 rounded-full transition-all"
+                                                className="h-full bg-[#8B5CF6] rounded-full transition-all"
                                                 style={{ width: `${percentage}%` }}
                                             ></div>
                                         </div>
@@ -317,7 +317,7 @@ const AdminAnalytics = () => {
                             })}
                         </div>
                     ) : (
-                        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+                        <div className="text-center py-12 text-gray-400">
                             No revenue data available
                         </div>
                     )}

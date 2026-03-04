@@ -24,3 +24,4 @@ app.listen(PORT, async () => {
   // Verify that the email service (Nodemailer) is correctly configured for sending emails
   await verifyEmailConfig();
 });
+

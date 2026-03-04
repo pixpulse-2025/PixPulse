@@ -155,7 +155,10 @@ export const completeOrder = async (req, res, next) => {
 export const getMyOrders = async (req, res, next) => {
     try {
         const orders = await Order.find({ user: req.user._id })
-            .populate("items.artwork")
+            .populate({
+                path: "items.artwork",
+                populate: { path: "artist", select: "name avatar" }
+            })
             .sort("-createdAt");
 
         res.status(200).json({
@@ -177,7 +180,10 @@ export const getOrderById = async (req, res, next) => {
     try {
         const { orderId } = req.params;
 
-        const order = await Order.findById(orderId).populate("items.artwork");
+        const order = await Order.findById(orderId).populate({
+            path: "items.artwork",
+            populate: { path: "artist", select: "name avatar" }
+        });
 
         if (!order) {
             return res.status(404).json({

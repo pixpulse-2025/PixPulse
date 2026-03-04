@@ -1,19 +1,53 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchCart, removeFromCart, clearCart } from "../redux/slices/cartSlice";
 import { useAuth } from "../hooks/useAuth";
+import {
+    purchaseWithWallet,
+    fetchWalletBalance,
+    selectWalletBalance,
+    selectPurchaseLoading,
+    selectPurchaseSuccess,
+    selectLastOrder,
+    clearPurchaseSuccess,
+} from "../redux/slices/walletSlice";
 
 const Cart = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { user } = useAuth();
     const { items, total, loading, error } = useSelector((state) => state.cart);
+    const walletBalance = useSelector(selectWalletBalance);
+    const purchaseLoading = useSelector(selectPurchaseLoading);
+    const purchaseSuccess = useSelector(selectPurchaseSuccess);
+    const lastOrder = useSelector(selectLastOrder);
 
     useEffect(() => {
         if (user) {
             dispatch(fetchCart());
+            dispatch(fetchWalletBalance());
         }
     }, [dispatch, user]);
+
+    // Redirect on successful purchase
+    useEffect(() => {
+        if (purchaseSuccess && lastOrder) {
+            dispatch(clearPurchaseSuccess());
+            dispatch(fetchCart()); // Refresh cart (will be empty)
+            navigate("/my-purchases");
+        }
+    }, [purchaseSuccess, lastOrder, dispatch, navigate]);
+
+    const handleWalletPurchase = () => {
+        if (walletBalance < total) {
+            alert(`Insufficient balance. You need $${total.toFixed(2)} but have $${walletBalance.toFixed(2)}. Please add funds to your wallet.`);
+            return;
+        }
+        if (window.confirm(`Pay $${total.toFixed(2)} from your wallet?`)) {
+            dispatch(purchaseWithWallet());
+        }
+    };
 
     const handleRemove = (itemId) => {
         if (window.confirm("Remove this item from your cart?")) {
@@ -39,14 +73,14 @@ const Cart = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
+        <div className="min-h-screen bg-[#0B0D10] pt-32 pb-20">
             <div className="container mx-auto max-w-[1400px] px-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                             Shopping Cart
                         </h1>
-                        <p className="text-base text-gray-600 dark:text-gray-400">
+                        <p className="text-base text-gray-400">
                             {items.length} {items.length === 1 ? 'item' : 'items'} in your cart
                         </p>
                     </div>
@@ -61,16 +95,16 @@ const Cart = () => {
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg mb-6">
+                    <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-lg mb-6">
                         Error: {error}
                     </div>
                 )}
 
                 {items.length === 0 ? (
                     <div className="card-surface py-20 text-center">
-                        <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Your cart is empty</h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">Looks like you haven't added anything yet</p>
+                        <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        <h3 className="text-xl font-bold text-white mb-2">Your cart is empty</h3>
+                        <p className="text-gray-400 mb-6">Looks like you haven't added anything yet</p>
                         <Link to="/explore" className="btn-primary inline-block">
                             Browse Artworks
                         </Link>
@@ -88,25 +122,43 @@ const Cart = () => {
                                         <div className="flex gap-6">
                                             <Link
                                                 to={`/artwork/${artwork._id}`}
-                                                className="w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0"
+                                                className="w-24 h-24 bg-[#141821] rounded-lg overflow-hidden flex-shrink-0"
                                             >
-                                                <img
-                                                    src={artwork.imageUrl ? (artwork.imageUrl.startsWith('http') ? artwork.imageUrl : `http://localhost:5000${artwork.imageUrl}`) : `https://picsum.photos/400/400?random=${artwork._id}`}
-                                                    alt={artwork.title}
-                                                    className="w-full h-full object-cover hover:scale-110 transition-transform"
-                                                />
+                                                {(() => {
+                                                    const BASE_URL = "http://localhost:5000";
+                                                    const hasValidPreview = artwork.previewUrl && !artwork.previewUrl.includes('default-preview');
+                                                    const isImageFile = (url) => {
+                                                        if (!url) return false;
+                                                        const ext = url.split('.').pop().toLowerCase().split('?')[0];
+                                                        return ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext);
+                                                    };
+
+                                                    const mediaUrl = artwork.fileUrl ? `${BASE_URL}${artwork.fileUrl}` : null;
+
+                                                    const coverUrl = hasValidPreview
+                                                        ? `${BASE_URL}${artwork.previewUrl}`
+                                                        : (mediaUrl && isImageFile(mediaUrl) ? mediaUrl : null);
+
+                                                    return (
+                                                        <img
+                                                            src={coverUrl || `https://picsum.photos/400/400?random=${artwork._id}`}
+                                                            alt={artwork.title}
+                                                            className="w-full h-full object-cover hover:scale-110 transition-transform"
+                                                        />
+                                                    );
+                                                })()}
                                             </Link>
 
                                             <div className="flex-1 min-w-0">
                                                 <Link to={`/artwork/${artwork._id}`} className="block mb-2">
-                                                    <h3 className="font-semibold text-gray-900 dark:text-white hover:text-primary dark:hover:text-accent transition-colors truncate">
+                                                    <h3 className="font-semibold text-white hover:text-[#8B5CF6] transition-colors truncate">
                                                         {artwork.title}
                                                     </h3>
                                                 </Link>
-                                                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                                <p className="text-sm text-gray-400 mb-2">
                                                     by {artwork.artist?.name || 'Unknown Artist'}
                                                 </p>
-                                                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                                                <p className="text-lg font-bold text-white">
                                                     ${artwork.price?.toFixed(2) || '0.00'}
                                                 </p>
                                             </div>
@@ -126,28 +178,63 @@ const Cart = () => {
                         {/* Order Summary */}
                         <div className="lg:col-span-1">
                             <div className="card-surface p-6 sticky top-32">
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Order Summary</h2>
+                                <h2 className="text-lg font-bold text-white mb-6">Order Summary</h2>
 
                                 <div className="space-y-4 mb-6">
-                                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                                    <div className="flex justify-between text-gray-400">
                                         <span>Subtotal</span>
                                         <span className="font-semibold">${total.toFixed(2)}</span>
                                     </div>
-                                    <div className="flex justify-between text-gray-600 dark:text-gray-400">
+                                    <div className="flex justify-between text-gray-400">
                                         <span>Processing Fee</span>
                                         <span className="font-semibold">$0.00</span>
                                     </div>
-                                    <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                        <div className="flex justify-between text-lg font-bold text-gray-900 dark:text-white">
+                                    <div className="border-t border-white/5 pt-4">
+                                        <div className="flex justify-between text-lg font-bold text-white">
                                             <span>Total</span>
                                             <span>${total.toFixed(2)}</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <Link to="/checkout" className="btn-primary w-full text-center block mb-3">
-                                    Proceed to Checkout
-                                </Link>
+                                {/* Wallet Payment */}
+                                <div className="mb-4 flex items-center justify-between bg-white/5 rounded-xl px-4 py-3 border border-white/5">
+                                    <div className="flex items-center gap-2">
+                                        <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                        <span className="text-sm text-gray-400">Wallet Balance</span>
+                                    </div>
+                                    <span className={`text-sm font-bold tabular-nums ${walletBalance >= total ? 'text-emerald-400' : 'text-red-400'}`}>
+                                        ${walletBalance.toFixed(2)}
+                                    </span>
+                                </div>
+
+                                {walletBalance < total && (
+                                    <Link
+                                        to="/wallet"
+                                        className="block mb-3 text-center text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors"
+                                    >
+                                        + Add funds to your wallet
+                                    </Link>
+                                )}
+
+                                <button
+                                    onClick={handleWalletPurchase}
+                                    disabled={purchaseLoading || walletBalance < total}
+                                    className="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold text-sm transition-all duration-200 active:scale-[0.98] disabled:cursor-not-allowed flex items-center justify-center gap-2 mb-3"
+                                >
+                                    {purchaseLoading ? (
+                                        <>
+                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            Processing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                            Pay ${total.toFixed(2)} with Wallet
+                                        </>
+                                    )}
+                                </button>
+
                                 <Link to="/explore" className="btn-secondary w-full text-center block">
                                     Continue Shopping
                                 </Link>

@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import Artwork from "../models/Artwork.js";
 import Order from "../models/Order.js";
+import Transaction from "../models/Transaction.js";
 
 /**
  * Get all users (Admin only)
@@ -196,6 +197,142 @@ export const getDashboardStats = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch dashboard statistics"
+        });
+    }
+};
+
+/**
+ * Get all transactions across the platform (Admin only)
+ * GET /api/admin/transactions
+ * Supports pagination and type filtering
+ */
+export const getAllTransactions = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+        const typeFilter = req.query.type; // Optional: deposit, purchase, earning, admin_commission
+
+        const query = {};
+        if (typeFilter && typeFilter !== "all") {
+            query.type = typeFilter;
+        }
+
+        const total = await Transaction.countDocuments(query);
+        const transactions = await Transaction.find(query)
+            .sort("-createdAt")
+            .skip(skip)
+            .limit(limit)
+            .populate("user", "name email avatar role")
+            .populate("artwork", "title previewUrl price")
+            .populate("order", "orderNumber totalAmount")
+            .populate("relatedUser", "name email avatar");
+
+        // Calculate revenue summary
+        const revenueSummary = await Transaction.aggregate([
+            { $match: { status: "completed" } },
+            {
+                $group: {
+                    _id: "$type",
+                    totalAmount: { $sum: "$amount" },
+                    count: { $sum: 1 },
+                }
+            }
+        ]);
+
+        // Parse the summary into a readable object
+        const summary = {
+            totalSales: 0,
+            totalArtistEarnings: 0,
+            totalAdminCommission: 0,
+            totalDeposits: 0,
+            transactionCount: total,
+        };
+
+        revenueSummary.forEach((item) => {
+            switch (item._id) {
+                case "purchase":
+                    summary.totalSales = Math.abs(item.totalAmount);
+                    break;
+                case "earning":
+                    summary.totalArtistEarnings = item.totalAmount;
+                    break;
+                case "admin_commission":
+                    summary.totalAdminCommission = item.totalAmount;
+                    break;
+                case "deposit":
+                    summary.totalDeposits = item.totalAmount;
+                    break;
+            }
+        });
+
+        res.status(200).json({
+            success: true,
+            data: transactions,
+            summary,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching transactions:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch transactions"
+        });
+    }
+};
+
+/**
+ * Get all orders across the platform (Admin only)
+ * GET /api/admin/orders
+ */
+export const getAllOrders = async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
+        const total = await Order.countDocuments();
+        const orders = await Order.find()
+            .sort("-createdAt")
+            .skip(skip)
+            .limit(limit)
+            .populate("user", "name email avatar")
+            .populate({
+                path: "items.artwork",
+                populate: { path: "artist", select: "name email avatar" },
+            });
+
+        // Calculate revenue breakdown from completed orders
+        const completedOrders = await Order.find({ paymentStatus: "completed" });
+        const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+        const artistRevenue = Math.round(totalRevenue * 0.90 * 100) / 100;
+        const adminRevenue = Math.round(totalRevenue * 0.10 * 100) / 100;
+
+        res.status(200).json({
+            success: true,
+            data: orders,
+            revenueBreakdown: {
+                totalRevenue,
+                artistRevenue,
+                adminRevenue,
+            },
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+            },
+        });
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch orders"
         });
     }
 };

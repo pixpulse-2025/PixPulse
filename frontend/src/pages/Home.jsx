@@ -1,10 +1,161 @@
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useAuth } from "../hooks/useAuth";
 import { fetchArtworks, selectArtworks, selectArtworkLoading } from "../redux/slices/artworkSlice";
 import { motion, useScroll, useTransform } from "framer-motion";
 import ArtworkCard from "../components/artwork/ArtworkCard";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+
+// ─── AudioWaveCard ─────────────────────────────────────────────────────────────
+// A premium audio card with animated waveform bars, play/pause, and progress.
+const AudioWaveCard = ({ artwork, apiUrl }) => {
+    const audioRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [waveform] = useState(() => [...Array(160)].map(() => Math.random() * 60 + 25));
+
+    const BASE = apiUrl.replace("/api", "");
+    const fileUrl = artwork.fileUrl
+        ? (artwork.fileUrl.startsWith("http") ? artwork.fileUrl : `${BASE}${artwork.fileUrl}`)
+        : null;
+    const coverUrl = artwork.previewUrl
+        ? (artwork.previewUrl.startsWith("http") ? artwork.previewUrl : `${BASE}${artwork.previewUrl}`)
+        : artwork.coverUrl
+            ? (artwork.coverUrl.startsWith("http") ? artwork.coverUrl : `${BASE}${artwork.coverUrl}`)
+            : null;
+
+    const formatTime = (t) => {
+        if (!t || isNaN(t)) return "0:00";
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60);
+        return `${m}:${s < 10 ? '0' + s : s}`;
+    };
+
+    const togglePlay = useCallback((e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!audioRef.current || !fileUrl) return;
+        if (isPlaying) {
+            audioRef.current.pause();
+            setIsPlaying(false);
+        } else {
+            audioRef.current.play().catch(() => { });
+            setIsPlaying(true);
+        }
+    }, [isPlaying, fileUrl]);
+
+    const handleSeek = (e) => {
+        if (!duration || !audioRef.current) return;
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, x / rect.width));
+        audioRef.current.currentTime = pct * duration;
+        setCurrentTime(pct * duration);
+    };
+
+    const progressPct = duration ? (currentTime / duration) * 100 : 0;
+
+    return (
+        <div className="group relative flex items-center gap-4 px-4 py-3 rounded-2xl bg-[#141821] border border-white/5 hover:border-violet-500/30 transition-all duration-300 hover:bg-[#1a1f2e]">
+            {/* Cover Art + Play Button */}
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-violet-600/20 to-indigo-600/20 flex-shrink-0">
+                {coverUrl ? (
+                    <img src={coverUrl} alt={artwork.title} className="w-full h-full object-cover" />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                        <svg className="w-5 h-5 text-violet-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 10l12-3" />
+                        </svg>
+                    </div>
+                )}
+                <button
+                    onClick={togglePlay}
+                    className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                >
+                    {isPlaying ? (
+                        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" /></svg>
+                    ) : (
+                        <svg className="w-5 h-5 text-white ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                    )}
+                </button>
+            </div>
+
+            {/* Title & Artist */}
+            <div className="min-w-0 w-36 md:w-44 flex-shrink-0">
+                <h3 className="text-sm font-bold text-white truncate group-hover:text-violet-400 transition-colors leading-tight">
+                    {artwork.title}
+                </h3>
+                <p className="text-xs text-gray-500 truncate leading-tight mt-0.5">
+                    {artwork.artist?.name || "Unknown Artist"}
+                </p>
+            </div>
+
+            {/* Waveform + Time */}
+            <div className="flex-1 min-w-0 flex items-center gap-2">
+                {/* Waveform */}
+                <div
+                    className="flex-1 flex items-end gap-[1px] h-10 cursor-pointer select-none"
+                    onClick={handleSeek}
+                >
+                    {waveform.map((h, i) => {
+                        const barPct = (i / waveform.length) * 100;
+                        const isPlayed = progressPct > barPct;
+                        const isCurrent = Math.abs(progressPct - barPct) < (100 / waveform.length);
+                        return (
+                            <div
+                                key={i}
+                                className={`flex-1 rounded-full transition-all duration-100 ${isCurrent
+                                    ? 'bg-violet-400 shadow-[0_0_6px_rgba(139,92,246,0.5)]'
+                                    : isPlayed
+                                        ? 'bg-violet-500/80'
+                                        : 'bg-white/12 group-hover:bg-white/20'
+                                    }`}
+                                style={{
+                                    height: isCurrent ? '100%' : `${Math.max(18, h)}%`,
+                                    maxWidth: '3px',
+                                    minWidth: '1.5px',
+                                }}
+                            />
+                        );
+                    })}
+                </div>
+                {/* Time */}
+                <span className="text-[10px] font-mono text-gray-500 flex-shrink-0 w-16 text-right tabular-nums">
+                    {formatTime(currentTime)}/{formatTime(duration)}
+                </span>
+            </div>
+
+            {/* Price & Action */}
+            <div className="flex items-center gap-4 flex-shrink-0">
+                <span className={`text-sm font-bold ${artwork.price > 0 ? 'text-emerald-400' : 'text-blue-400'}`}>
+                    {artwork.price > 0 ? `$${artwork.price}` : 'Free'}
+                </span>
+                <Link
+                    to={`/artwork/${artwork._id}`}
+                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-violet-500 text-white transition-all text-xs font-semibold border border-white/5 hover:border-violet-500"
+                >
+                    View
+                </Link>
+            </div>
+
+            {/* Hidden audio element */}
+            {fileUrl && (
+                <audio
+                    ref={audioRef}
+                    src={fileUrl}
+                    preload="metadata"
+                    onTimeUpdate={() => audioRef.current && setCurrentTime(audioRef.current.currentTime)}
+                    onLoadedMetadata={() => audioRef.current && setDuration(audioRef.current.duration)}
+                    onEnded={() => setIsPlaying(false)}
+                />
+            )}
+        </div>
+    );
+};
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -13,18 +164,37 @@ const Home = () => {
     const loading = useSelector(selectArtworkLoading);
     const { scrollYProgress } = useScroll();
 
-    // Parallax background effect
-    const y1 = useTransform(scrollYProgress, [0, 1], [0, -200]);
+    // Parallax background effect (subtle vertical shift)
+    const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
+
+    const [featuredArtists, setFeaturedArtists] = useState([]);
 
     useEffect(() => {
         dispatch(fetchArtworks({ limit: 20, sortBy: "popular" }));
+        fetchTopCreators();
     }, [dispatch]);
+
+    const fetchTopCreators = async () => {
+        try {
+            const { data } = await axios.get(`${API_URL}/users/top-creators`);
+            if (data.success) {
+                setFeaturedArtists(data.data.map(artist => ({
+                    name: artist.name,
+                    role: "Top Creator", // or use artist.role which is usually 'user' or 'artist'
+                    img: artist.avatar || `https://ui-avatars.com/api/?name=${artist.name}&background=random`,
+                    id: artist._id
+                })));
+            }
+        } catch (error) {
+            console.error("Failed to fetch top creators", error);
+        }
+    };
 
     // Separate artworks by category
     const visualWorks = artworks.filter(art => art.category !== 'Audio');
     const audioWorks = artworks.filter(art => art.category === 'Audio');
 
-    const marqueeImages = [
+    const placeholderImages = [
         "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2570&auto=format&fit=crop",
         "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2570&auto=format&fit=crop",
@@ -33,90 +203,106 @@ const Home = () => {
         "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=2570&auto=format&fit=crop",
     ];
 
+    const marqueeImages = visualWorks.length > 0
+        ? visualWorks.slice(0, 8).map(art => {
+            const url = art.previewUrl || art.fileUrl;
+            return url.startsWith("http") ? url : `${API_URL.replace("/api", "")}${url}`;
+        })
+        : placeholderImages;
+
+
+
+    // const featuredArtists = [ ... ]; // Replacing with state
+
+
     return (
-        <div className="flex-grow bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white selection:bg-primary selection:text-white overflow-x-hidden">
+        <div className="flex-grow min-h-screen bg-[#0B0D10] text-[#E5E7EB] selection:bg-[#8B5CF6] selection:text-white font-sans overflow-x-hidden">
             {/* Hero Section */}
-            <section className="relative min-h-[85vh] flex items-center pt-20 px-6 bg-white dark:bg-gray-900">
-                <div className="container mx-auto max-w-[1400px] z-20">
+            <section className="relative min-h-[90vh] flex items-center pt-20 px-6 overflow-hidden">
+                {/* Cinematic Glows */}
+                <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-violet-900/10 to-transparent pointer-events-none" />
+                <motion.div
+                    style={{ y: y1 }}
+                    className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen"
+                />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+
+                <div className="container mx-auto max-w-[1400px] z-20 relative">
                     <motion.div
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="max-w-3xl space-y-10"
+                        transition={{ duration: 0.8, ease: "easeOut" }}
+                        className="max-w-4xl space-y-10"
                     >
-                        <div className="space-y-4">
-                            <h1 className="text-5xl md:text-8xl font-black leading-[0.9] uppercase tracking-tighter text-gray-900 dark:text-white">
-                                Design and <br />
-                                Share Art.
+                        <div className="space-y-6">
+                            <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[0.95] text-white">
+                                The Marketplace for <br />
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">
+                                    Digital Creators.
+                                </span>
                             </h1>
-                            <p className="text-xl md:text-2xl text-gray-600 dark:text-gray-400 max-w-2xl font-medium">
-                                High-quality images, music, and videos for your next project. Join the world's most vibrant creative community.
+                            <p className="text-xl md:text-2xl text-gray-400 max-w-xl font-light leading-relaxed">
+                                Buy and sell high-quality assets. Audio, Visuals, and Presets for the modern era.
                             </p>
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-6">
                             <Link
                                 to="/explore"
-                                className="btn-primary text-center text-lg px-8 py-4 rounded-lg"
+                                className="btn-primary text-center text-lg px-10 py-4"
                             >
-                                Explore Works
+                                Explore Collection
                             </Link>
                             {!isAuthenticated && (
                                 <Link
                                     to="/register"
-                                    className="btn-secondary text-center text-lg px-8 py-4 rounded-lg"
+                                    className="btn-secondary text-center text-lg px-10 py-4"
                                 >
-                                    Join Now
+                                    Join Community
                                 </Link>
                             )}
                         </div>
                     </motion.div>
                 </div>
-
-                {/* Palette Glow Elements */}
-                <motion.div
-                    style={{ y: y1 }}
-                    className="absolute right-[5%] top-[10%] w-[500px] h-[500px] bg-[#7091E6]/20 rounded-full blur-[120px] pointer-events-none"
-                />
-                <div className="absolute left-[10%] bottom-[10%] w-[400px] h-[400px] bg-[#ADBBDA]/30 rounded-full blur-[100px] pointer-events-none" />
             </section>
 
             {/* Horizontal Scroll Gallery */}
-            <div className="py-12 bg-background overflow-hidden whitespace-nowrap border-y border-[#3D52A0]/5">
+            <div className="py-16 bg-[#0B0D10] overflow-hidden whitespace-nowrap border-y border-white/5">
                 <motion.div
                     animate={{ x: ["0%", "-100%"] }}
-                    transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+                    transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
                     className="flex gap-8 items-center w-max"
                 >
                     {[...marqueeImages, ...marqueeImages].map((img, i) => (
-                        <div key={i} className="w-[300px] md:w-[450px] aspect-[16/10] rounded-3xl overflow-hidden bg-white/5 border border-[#3D52A0]/10 group">
-                            <img src={img} className="w-full h-full object-cover grayscale-0 group-hover:scale-110 transition-transform duration-1000" alt="Art preview" />
+                        <div key={i} className="w-[300px] md:w-[450px] aspect-[16/10] rounded-2xl overflow-hidden grayscale hover:grayscale-0 transition-all duration-700 ease-out border border-white/5 hover:border-violet-500/50 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)]">
+                            <img src={img} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" alt="Art preview" />
                         </div>
                     ))}
                 </motion.div>
             </div>
 
+
+
             {/* Visual Arts Section */}
-            <section className="py-40 px-6">
-                <div className="container mx-auto max-w-[1400px]">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
-                        <div className="space-y-4">
-                            <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-text">
-                                New Editions
+            <section className="py-24 px-6 relative">
+                <div className="absolute inset-0 bg-[#0B0D10]" />
+
+                <div className="container mx-auto max-w-[1400px] relative z-10">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-white/5 pb-6">
+                        <div className="space-y-2">
+                            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                                Trending Visual Art
                             </h2>
-                            <p className="text-sm font-bold text-text/40 uppercase tracking-widest">
-                                Discover our latest curated visual artworks
-                            </p>
                         </div>
-                        <Link to="/explore?category=Visual Art" className="text-lg font-bold uppercase tracking-widest border-b-4 border-[#7091E6] pb-2 hover:text-[#3D52A0] transition-all">
-                            See More
+                        <Link to="/explore?category=Visual Art" className="text-lg font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                            View All Visuals &rarr;
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
                         {loading ? (
                             [...Array(4)].map((_, i) => (
-                                <div key={i} className="aspect-[3/4] rounded-2xl bg-gray-200 dark:bg-gray-800 animate-pulse" />
+                                <div key={i} className="aspect-[3/4] rounded-2xl bg-white/5 animate-pulse" />
                             ))
                         ) : visualWorks.length > 0 ? (
                             visualWorks.slice(0, 8).map((artwork) => (
@@ -129,31 +315,46 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Music/Audio Section */}
-            <section className="py-20 px-6 bg-gray-50 dark:bg-gray-800">
+            {/* Featured Artists Section */}
+            <section className="py-24 px-6 bg-[#141821] border-y border-white/5">
                 <div className="container mx-auto max-w-[1400px]">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-8">
-                        <div className="space-y-4">
-                            <h2 className="text-5xl md:text-7xl font-bold text-gray-900 dark:text-white leading-tight">
-                                Music Samples
+                    <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-white tracking-tight">Featured Artists</h2>
+                    <div className="flex flex-wrap justify-center gap-12 md:gap-20">
+                        {featuredArtists.map((artist, i) => (
+                            <div key={i} className="flex flex-col items-center group cursor-pointer">
+                                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-violet-500 transition-all duration-300 mb-6 p-1">
+                                    <img src={artist.img} alt={artist.name} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-white mb-1">{artist.name}</h3>
+                                <p className="text-gray-400 text-sm tracking-widest uppercase">{artist.role}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* Audio Section */}
+            <section className="py-24 px-6 bg-[#0B0D10]">
+                <div className="container mx-auto max-w-[1400px]">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-white/5 pb-6">
+                        <div className="space-y-2">
+                            <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
+                                Trending Music Art
                             </h2>
-                            <p className="text-base text-gray-600">
-                                Premium audio productions for creators
-                            </p>
                         </div>
-                        <Link to="/explore?category=Audio" className="text-lg font-bold uppercase tracking-widest border-b-4 border-[#7091E6] pb-2 hover:text-[#3D52A0] transition-all">
-                            Browse Audio
+                        <Link to="/explore?category=Audio" className="text-lg font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                            Browse Library &rarr;
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="flex flex-col gap-4">
                         {loading ? (
                             [...Array(4)].map((_, i) => (
-                                <div key={i} className="aspect-[3/4] rounded-2xl bg-gray-200 dark:bg-gray-800 animate-pulse" />
+                                <div key={i} className="h-28 w-full rounded-2xl bg-white/5 animate-pulse" />
                             ))
                         ) : audioWorks.length > 0 ? (
                             audioWorks.slice(0, 8).map((artwork) => (
-                                <ArtworkCard key={artwork._id} artwork={artwork} />
+                                <AudioWaveCard key={artwork._id} artwork={artwork} apiUrl={API_URL} />
                             ))
                         ) : (
                             <p className="col-span-full text-center text-gray-500">No audio tracks found.</p>
@@ -163,23 +364,21 @@ const Home = () => {
             </section>
 
             {/* Newsletter Section */}
-            <section className="py-20 px-6 bg-white dark:bg-gray-900">
-                <div className="container mx-auto max-w-4xl">
-                    <div className="card-surface p-12 text-center">
-                        <div className="space-y-4 mb-8">
-                            <h3 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">Stay Updated</h3>
-                            <p className="text-base text-gray-600 dark:text-gray-400">Join our community to get the latest artworks and updates delivered to your inbox</p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-                            <input
-                                type="email"
-                                placeholder="Enter your email"
-                                className="input-field flex-1"
-                            />
-                            <button className="btn-primary whitespace-nowrap">
-                                Subscribe
-                            </button>
-                        </div>
+            <section className="py-24 px-6 bg-[#0B0D10]">
+                <div className="container mx-auto max-w-2xl text-center">
+                    <div className="space-y-6 mb-10">
+                        <h3 className="text-4xl font-bold text-white tracking-tight">Stay Inspired</h3>
+                        <p className="text-gray-400 text-lg font-light">Join 50,000+ creators getting weekly design resources and inspiration.</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <input
+                            type="email"
+                            placeholder="Email address"
+                            className="flex-1 px-6 py-4 rounded-xl bg-[#141821] border border-white/10 text-white focus:outline-none focus:border-violet-500 transition-all"
+                        />
+                        <button className="btn-primary whitespace-nowrap px-8">
+                            Subscribe
+                        </button>
                     </div>
                 </div>
             </section>

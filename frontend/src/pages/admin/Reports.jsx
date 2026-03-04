@@ -20,10 +20,15 @@ const AdminReports = () => {
     const success = useSelector(selectReportsSuccess);
 
     const [filter, setFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
     const [selectedReport, setSelectedReport] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [adminNotes, setAdminNotes] = useState("");
-    const [newStatus, setNewStatus] = useState("");
+
+    // State for modal actions
+    const [adminAction, setAdminAction] = useState({
+        status: "",
+        notes: ""
+    });
 
     useEffect(() => {
         dispatch(getAllReports());
@@ -33,28 +38,35 @@ const AdminReports = () => {
         if (success) {
             setShowModal(false);
             setSelectedReport(null);
-            setAdminNotes("");
-            setNewStatus("");
+            setAdminAction({ status: "", notes: "" });
             dispatch(clearSuccess());
         }
     }, [success, dispatch]);
 
-    const handleUpdateStatus = (report) => {
+    const handleOpenModal = (report) => {
         setSelectedReport(report);
-        setAdminNotes(report.adminNotes || "");
-        setNewStatus(report.status);
+        setAdminAction({
+            status: report.status,
+            notes: report.adminNotes || ""
+        });
         setShowModal(true);
     };
 
-    const handleSubmitUpdate = () => {
+    const handleCloseModal = () => {
+        setShowModal(false);
+        setSelectedReport(null);
+        setAdminAction({ status: "", notes: "" });
+    };
+
+    const handleUpdateStatus = () => {
         if (!selectedReport) return;
 
         dispatch(
             updateReportStatus({
                 reportId: selectedReport._id,
                 updateData: {
-                    status: newStatus,
-                    adminNotes: adminNotes,
+                    status: adminAction.status,
+                    adminNotes: adminAction.notes,
                 },
             })
         );
@@ -66,110 +78,116 @@ const AdminReports = () => {
         }
     };
 
-    const getStatusBadge = (status) => {
-        const badges = {
-            pending: "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400",
-            reviewing: "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400",
-            resolved: "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400",
-            dismissed: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400",
+    const getStatusBadgeColor = (status) => {
+        const colors = {
+            pending: "bg-yellow-500/10 text-yellow-500",
+            reviewed: "bg-blue-500/10 text-blue-500",
+            resolved: "bg-green-500/10 text-green-500",
+            dismissed: "bg-gray-500/10 text-gray-400",
         };
-        return badges[status] || badges.pending;
-    };
-
-    const getStatusIcon = (status) => {
-        const icons = {
-            pending: "⏳",
-            reviewing: "🔍",
-            resolved: "✅",
-            dismissed: "❌",
-        };
-        return icons[status] || icons.pending;
+        return colors[status] || colors.pending;
     };
 
     const filteredReports = reports.filter((report) => {
-        if (filter === "all") return true;
-        return report.status === filter;
-    });
+        // Filter by status
+        if (filter !== "all" && report.status !== filter) return false;
 
-    const stats = {
-        total: reports.length,
-        pending: reports.filter((r) => r.status === "pending").length,
-        reviewing: reports.filter((r) => r.status === "reviewing").length,
-        resolved: reports.filter((r) => r.status === "resolved").length,
-        dismissed: reports.filter((r) => r.status === "dismissed").length,
-    };
+        // Filter by search term
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const reporterName = report.reporter?.name?.toLowerCase() || "";
+            const reason = report.reason?.toLowerCase() || "";
+            const targetTitle = (report.targetId?.title || report.targetId?.name || "").toLowerCase();
+
+            return reporterName.includes(term) || reason.includes(term) || targetTitle.includes(term);
+        }
+
+        return true;
+    });
 
     if (loading && reports.length === 0) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading reports...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#8B5CF6] mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading reports...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
+        <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
                 {/* Header */}
-                <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                        📊 Reports Management
-                    </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
-                        Review and manage user-submitted artwork reports
-                    </p>
+                <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h1 className="text-4xl font-bold text-white mb-2">
+                            Report Management
+                        </h1>
+                        <p className="text-gray-400">
+                            Handle user reports and content moderation
+                        </p>
+                    </div>
+                    <Link
+                        to="/admin"
+                        className="px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                        ← Back to Dashboard
+                    </Link>
                 </div>
 
-                {/* Stats Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-                    <div className="glass rounded-2xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Total Reports</p>
-                        <p className="text-3xl font-bold text-gray-900 dark:text-white">{stats.total}</p>
+                {/* Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Total Reports</p>
+                        <p className="text-2xl font-bold text-white">{filteredReports.length}</p>
                     </div>
-                    <div className="glass rounded-2xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Pending</p>
-                        <p className="text-3xl font-bold text-yellow-600">{stats.pending}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Pending Action</p>
+                        <p className="text-2xl font-bold text-yellow-500">
+                            {reports.filter(r => r.status === 'pending').length}
+                        </p>
                     </div>
-                    <div className="glass rounded-2xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Reviewing</p>
-                        <p className="text-3xl font-bold text-blue-600">{stats.reviewing}</p>
-                    </div>
-                    <div className="glass rounded-2xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Resolved</p>
-                        <p className="text-3xl font-bold text-green-600">{stats.resolved}</p>
-                    </div>
-                    <div className="glass rounded-2xl p-6">
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">Dismissed</p>
-                        <p className="text-3xl font-bold text-gray-600">{stats.dismissed}</p>
+                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
+                        <p className="text-sm text-gray-400">Resolved</p>
+                        <p className="text-2xl font-bold text-green-500">
+                            {reports.filter(r => r.status === 'resolved').length}
+                        </p>
                     </div>
                 </div>
 
-                {/* Filter Tabs */}
-                <div className="glass rounded-2xl p-2 mb-6 inline-flex gap-2 flex-wrap">
-                    {["all", "pending", "reviewing", "resolved", "dismissed"].map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setFilter(status)}
-                            className={`px-6 py-3 rounded-xl font-medium transition-all capitalize ${filter === status
-                                    ? "bg-primary-600 text-white shadow-lg"
-                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                }`}
-                        >
-                            {status}
-                            {status !== "all" && (
-                                <span className="ml-2 text-xs opacity-75">({stats[status]})</span>
-                            )}
-                        </button>
-                    ))}
+                {/* Filters */}
+                <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 mb-6">
+                    <div className="flex flex-col md:flex-row gap-4 mb-4">
+                        <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
+                            {['all', 'pending', 'reviewed', 'resolved', 'dismissed'].map((status) => (
+                                <button
+                                    key={status}
+                                    onClick={() => setFilter(status)}
+                                    className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${filter === status
+                                        ? "bg-[#8B5CF6] text-white"
+                                        : "bg-white/5 text-gray-400 hover:bg-white/10"
+                                        }`}
+                                >
+                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Search reports by reporter, reason, or content..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#0B0D10] text-white focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent placeholder-gray-500"
+                    />
                 </div>
 
                 {/* Error Message */}
                 {error && (
-                    <div className="glass rounded-2xl p-6 mb-6 border-2 border-red-200 dark:border-red-800">
-                        <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-6">
+                        <div className="flex items-center gap-3 text-red-500">
                             <span className="text-2xl">⚠️</span>
                             <p>{error}</p>
                         </div>
@@ -177,235 +195,232 @@ const AdminReports = () => {
                 )}
 
                 {/* Reports List */}
-                {filteredReports.length === 0 ? (
-                    <div className="glass rounded-3xl p-12 text-center">
-                        <div className="text-6xl mb-4">📋</div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                            {filter === "all" ? "No Reports" : `No ${filter} Reports`}
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400">
-                            {filter === "all"
-                                ? "There are no reports to review."
-                                : `There are no ${filter} reports.`}
-                        </p>
-                    </div>
-                ) : (
-                    <div className="space-y-4">
-                        {filteredReports.map((report) => (
-                            <div
-                                key={report._id}
-                                className="glass rounded-2xl p-6 hover:shadow-lg transition-all"
-                            >
-                                <div className="flex flex-col lg:flex-row gap-6">
-                                    {/* Artwork Preview */}
-                                    <Link
-                                        to={`/artwork/${report.artwork?._id}`}
-                                        className="flex-shrink-0"
-                                        target="_blank"
-                                    >
-                                        <img
-                                            src={`http://localhost:5000${report.artwork?.previewUrl}`}
-                                            alt={report.artwork?.title}
-                                            className="w-full lg:w-48 h-32 object-cover rounded-xl"
-                                            onError={(e) => {
-                                                e.target.src =
-                                                    "http://localhost:5000/uploads/placeholders/default-preview.png";
-                                            }}
-                                        />
-                                    </Link>
-
-                                    {/* Report Details */}
-                                    <div className="flex-1 space-y-3">
-                                        {/* Title & Status */}
-                                        <div className="flex flex-wrap items-start justify-between gap-3">
-                                            <div>
-                                                <Link
-                                                    to={`/artwork/${report.artwork?._id}`}
-                                                    target="_blank"
-                                                    className="text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                <div className="bg-[#141821] border border-white/5 rounded-2xl overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-white/5 bg-white/5">
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reported Item</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Type</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reason</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reporter</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Date</th>
+                                    <th className="px-6 py-4 text-right text-sm font-semibold text-gray-300">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-white/5">
+                                {filteredReports.length > 0 ? (
+                                    filteredReports.map((report) => (
+                                        <tr key={report._id} className="hover:bg-white/5 transition-colors">
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-3">
+                                                    {report.targetModel === 'Artwork' && report.targetId && (
+                                                        <img
+                                                            src={`http://localhost:5000${report.targetId.previewUrl || report.targetId.fileUrl}`}
+                                                            alt="Preview"
+                                                            className="w-10 h-10 rounded-lg object-cover"
+                                                            onError={(e) => {
+                                                                e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <div>
+                                                        <p className="font-medium text-white">
+                                                            {report.targetModel === 'User'
+                                                                ? report.targetId?.name
+                                                                : report.targetId?.title || 'Unknown Item'}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">ID: {report.targetId?._id}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/10 text-gray-300">
+                                                    {report.targetModel}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className="text-sm text-gray-300">{report.reason}</span>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm text-white">
+                                                        {report.reporter?.name || "Anonymous"}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(report.status)}`}>
+                                                    {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 text-sm text-gray-400">
+                                                {new Date(report.createdAt).toLocaleDateString()}
+                                            </td>
+                                            <td className="px-6 py-4 text-right flex gap-2 justify-end">
+                                                <button
+                                                    onClick={() => handleOpenModal(report)}
+                                                    className="text-[#8B5CF6] hover:text-white font-medium text-sm"
                                                 >
-                                                    {report.artwork?.title || "Deleted Artwork"}
-                                                </Link>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                                    By {report.artwork?.artist?.name || "Unknown Artist"}
-                                                </p>
-                                            </div>
-                                            <span
-                                                className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${getStatusBadge(
-                                                    report.status
-                                                )}`}
-                                            >
-                                                {getStatusIcon(report.status)} {report.status}
-                                            </span>
-                                        </div>
+                                                    Review
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(report._id)}
+                                                    className="text-red-500 hover:text-red-400 font-medium text-sm"
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7" className="px-6 py-12 text-center text-gray-400">
+                                            No reports found
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                                        {/* Reporter Info */}
-                                        <div className="flex items-center gap-4 text-sm">
-                                            <div>
-                                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                                    Reported by:
-                                                </span>
-                                                <span className="ml-2 text-gray-600 dark:text-gray-400">
-                                                    {report.reporter?.name} ({report.reporter?.email})
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <span className="font-bold text-gray-700 dark:text-gray-300">
-                                                    Date:
-                                                </span>
-                                                <span className="ml-2 text-gray-600 dark:text-gray-400">
-                                                    {new Date(report.createdAt).toLocaleDateString()}
-                                                </span>
-                                            </div>
-                                        </div>
+                {/* Review Modal */}
+                {showModal && selectedReport && (
+                    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+                        <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                            <div className="flex justify-between items-center mb-6">
+                                <h2 className="text-2xl font-bold text-white">Review Report</h2>
+                                <button
+                                    onClick={handleCloseModal}
+                                    className="p-2 hover:bg-white/10 rounded-full transition-colors text-white"
+                                >
+                                    ✕
+                                </button>
+                            </div>
 
-                                        {/* Reason */}
-                                        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800 rounded-xl p-3">
-                                            <span className="text-sm font-bold text-red-700 dark:text-red-400">
-                                                Reason:
-                                            </span>
-                                            <span className="ml-2 text-sm text-red-600 dark:text-red-300">
-                                                {report.reason}
-                                            </span>
-                                        </div>
-
-                                        {/* Description */}
+                            <div className="space-y-6">
+                                {/* Report Details */}
+                                <div className="bg-[#0B0D10] rounded-xl p-4 border border-white/5">
+                                    <h3 className="font-bold text-white mb-2">Report Details</h3>
+                                    <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div>
-                                            <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-                                                Description:
-                                            </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                                                {report.description}
-                                            </p>
+                                            <p className="text-gray-400">Reporter</p>
+                                            <p className="font-medium text-white">{selectedReport.reporter?.name || "Anonymous"}</p>
                                         </div>
-
-                                        {/* Admin Notes */}
-                                        {report.adminNotes && (
-                                            <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                                                <p className="text-sm font-bold text-blue-900 dark:text-blue-400 mb-1">
-                                                    Admin Notes:
-                                                </p>
-                                                <p className="text-sm text-blue-800 dark:text-blue-300">
-                                                    {report.adminNotes}
-                                                </p>
-                                                {report.resolvedBy && (
-                                                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
-                                                        Resolved by {report.resolvedBy.name} on{" "}
-                                                        {new Date(report.resolvedAt).toLocaleDateString()}
-                                                    </p>
-                                                )}
+                                        <div>
+                                            <p className="text-gray-400">Date</p>
+                                            <p className="font-medium text-white">{new Date(selectedReport.createdAt).toLocaleString()}</p>
+                                        </div>
+                                        <div className="col-span-2">
+                                            <p className="text-gray-400">Reason</p>
+                                            <p className="font-medium text-white">{selectedReport.reason}</p>
+                                        </div>
+                                        {selectedReport.details && (
+                                            <div className="col-span-2">
+                                                <p className="text-gray-400">Additional Details</p>
+                                                <p className="font-medium text-white">{selectedReport.details}</p>
                                             </div>
                                         )}
+                                    </div>
+                                </div>
 
-                                        {/* Action Buttons */}
-                                        <div className="flex gap-3 pt-3">
-                                            <button
-                                                onClick={() => handleUpdateStatus(report)}
-                                                className="px-4 py-2 bg-primary-600 text-white font-medium rounded-xl hover:bg-primary-700 transition-all"
-                                            >
+                                {/* Target Content Preview */}
+                                <div className="bg-[#0B0D10] rounded-xl p-4 border border-white/5">
+                                    <h3 className="font-bold text-white mb-4">Reported Content</h3>
+                                    {selectedReport.targetModel === 'Artwork' ? (
+                                        <div className="flex gap-4">
+                                            <div className="w-1/3">
+                                                {selectedReport.targetId && (
+                                                    <img
+                                                        src={`http://localhost:5000${selectedReport.targetId.previewUrl || selectedReport.targetId.fileUrl}`}
+                                                        alt="Content"
+                                                        className="w-full rounded-lg"
+                                                        onError={(e) => {
+                                                            e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
+                                                        }}
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex-1">
+                                                <h4 className="font-bold text-white text-lg">{selectedReport.targetId?.title}</h4>
+                                                <p className="text-gray-400 text-sm mt-1">{selectedReport.targetId?.description}</p>
+                                                <div className="flex gap-2 mt-4">
+                                                    <span className="px-2 py-1 bg-white/10 text-gray-300 rounded text-xs">
+                                                        {selectedReport.targetId?.category}
+                                                    </span>
+                                                    <span className="px-2 py-1 bg-white/10 text-gray-300 rounded text-xs">
+                                                        {selectedReport.targetId?.priceType}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-xl font-bold text-white">
+                                                {selectedReport.targetId?.name?.[0]}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-white">{selectedReport.targetId?.name}</h4>
+                                                <p className="text-gray-400">{selectedReport.targetId?.email}</p>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Action Form */}
+                                <div>
+                                    <h3 className="font-bold text-white mb-4">Take Action</h3>
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-400 mb-1">
                                                 Update Status
-                                            </button>
-                                            <Link
-                                                to={`/artwork/${report.artwork?._id}`}
-                                                target="_blank"
-                                                className="px-4 py-2 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+                                            </label>
+                                            <select
+                                                value={adminAction.status}
+                                                onChange={(e) => setAdminAction({ ...adminAction, status: e.target.value })}
+                                                className="w-full px-4 py-2 rounded-lg bg-[#0B0D10] border border-white/10 text-white focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
                                             >
-                                                View Artwork
-                                            </Link>
-                                            <button
-                                                onClick={() => handleDelete(report._id)}
-                                                className="px-4 py-2 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-medium rounded-xl hover:bg-red-200 dark:hover:bg-red-900/30 transition-all"
-                                            >
-                                                Delete
-                                            </button>
+                                                <option value="pending">Pending Review</option>
+                                                <option value="reviewed">Reviewed</option>
+                                                <option value="resolved">Resolved</option>
+                                                <option value="dismissed">Dismissed</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-400 mb-1">
+                                                Admin Notes
+                                            </label>
+                                            <textarea
+                                                value={adminAction.notes}
+                                                onChange={(e) => setAdminAction({ ...adminAction, notes: e.target.value })}
+                                                className="w-full px-4 py-2 rounded-lg bg-[#0B0D10] border border-white/10 text-white focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent h-24"
+                                                placeholder="Add notes about the action taken..."
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
 
-            {/* Update Status Modal */}
-            {showModal && selectedReport && (
-                <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-                    onClick={() => setShowModal(false)}
-                >
-                    <div
-                        className="glass rounded-3xl max-w-2xl w-full p-8"
-                        onClick={(e) => e.stopPropagation()}
-                    >
-                        <div className="flex justify-between items-start mb-6">
-                            <div>
-                                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                                    Update Report Status
-                                </h2>
-                                <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    {selectedReport.artwork?.title}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl"
-                            >
-                                ✕
-                            </button>
-                        </div>
-
-                        <div className="space-y-4">
-                            {/* Status Selector */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                    Status
-                                </label>
-                                <select
-                                    value={newStatus}
-                                    onChange={(e) => setNewStatus(e.target.value)}
-                                    className="w-full px-4 py-3 rounded-xl glass border-2 border-gray-200 dark:border-gray-700 focus:border-primary-500 outline-none transition-colors text-gray-900 dark:text-white"
-                                >
-                                    <option value="pending">Pending</option>
-                                    <option value="reviewing">Reviewing</option>
-                                    <option value="resolved">Resolved</option>
-                                    <option value="dismissed">Dismissed</option>
-                                </select>
-                            </div>
-
-                            {/* Admin Notes */}
-                            <div>
-                                <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
-                                    Admin Notes
-                                </label>
-                                <textarea
-                                    value={adminNotes}
-                                    onChange={(e) => setAdminNotes(e.target.value)}
-                                    placeholder="Add notes about this report..."
-                                    rows="4"
-                                    className="w-full px-4 py-3 rounded-xl glass border-2 border-gray-200 dark:border-gray-700 focus:border-primary-500 outline-none transition-colors text-gray-900 dark:text-white resize-none"
-                                />
-                            </div>
-
-                            {/* Buttons */}
-                            <div className="flex gap-3 pt-4">
+                            <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-white/5">
                                 <button
-                                    onClick={() => setShowModal(false)}
-                                    className="flex-1 px-6 py-3 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                                    onClick={handleCloseModal}
+                                    className="px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10 font-medium transition-colors"
                                 >
                                     Cancel
                                 </button>
                                 <button
-                                    onClick={handleSubmitUpdate}
-                                    disabled={loading}
-                                    className="flex-1 px-6 py-3 bg-gradient-to-r from-primary-600 to-indigo-600 text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    onClick={handleUpdateStatus}
+                                    className="btn-primary px-6 py-2 text-white rounded-lg font-medium transition-colors"
                                 >
-                                    {loading ? "Updating..." : "Update Report"}
+                                    Save Changes
                                 </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };

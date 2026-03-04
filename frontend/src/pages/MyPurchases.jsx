@@ -96,14 +96,14 @@ const MyPurchases = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
+        <div className="min-h-screen bg-[#0B0D10] pt-32 pb-20">
             <div className="container mx-auto max-w-[1400px] px-6">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8">
                     <div>
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
                             My Purchases
                         </h1>
-                        <p className="text-base text-gray-600 dark:text-gray-400">
+                        <p className="text-base text-gray-400">
                             {orders.length} {orders.length === 1 ? 'order' : 'orders'} in your purchase history
                         </p>
                     </div>
@@ -120,8 +120,8 @@ const MyPurchases = () => {
                             key={f.id}
                             onClick={() => setFilter(f.id)}
                             className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${filter === f.id
-                                ? "bg-primary dark:bg-accent text-white shadow-md"
-                                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
+                                ? "bg-[#8B5CF6] text-white shadow-md"
+                                : "bg-[#141821] text-gray-400 hover:bg-white/5 hover:text-white border border-white/5"
                                 }`}
                         >
                             {f.label}
@@ -138,9 +138,9 @@ const MyPurchases = () => {
                 {filteredOrders.length === 0 ? (
                     <div className="card-surface py-20 text-center">
                         <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No purchases yet</h3>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">Start building your collection today</p>
-                        <Link to="/explore" className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95">
+                        <h3 className="text-xl font-bold text-white mb-2">No purchases yet</h3>
+                        <p className="text-gray-400 mb-6">Start building your collection today</p>
+                        <Link to="/explore" className="btn-primary inline-flex items-center gap-2">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                             Explore Artworks
                         </Link>
@@ -150,17 +150,17 @@ const MyPurchases = () => {
                         {filteredOrders.map((order) => (
                             <div key={order._id} className="card-surface p-6">
                                 {/* Order Header */}
-                                <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-gray-200 dark:border-gray-700 mb-6">
+                                <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/5 mb-6">
                                     <div className="space-y-1">
                                         <div className="flex items-center gap-3">
-                                            <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                            <h3 className="text-lg font-bold text-white">
                                                 Order #{order.orderNumber}
                                             </h3>
                                             <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyles(order.paymentStatus)}`}>
                                                 {order.paymentStatus}
                                             </span>
                                         </div>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                        <p className="text-sm text-gray-400">
                                             {new Date(order.createdAt).toLocaleDateString("en-US", {
                                                 year: "numeric",
                                                 month: "long",
@@ -169,8 +169,8 @@ const MyPurchases = () => {
                                         </p>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total</p>
-                                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                                        <p className="text-sm text-gray-400 mb-1">Total</p>
+                                        <p className="text-2xl font-bold text-white">
                                             ${order.totalAmount.toFixed(2)}
                                         </p>
                                     </div>
@@ -192,7 +192,7 @@ const MyPurchases = () => {
                                         const isAudio = ['mp3', 'wav', 'mpeg'].includes(ext) || artwork?.category === 'Audio';
 
                                         return (
-                                            <div key={idx} className="flex gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                                            <div key={idx} className="flex gap-4 p-4 bg-[#0B0D10] rounded-xl hover:bg-black/50 transition-all border border-white/5">
                                                 {/* Thumbnail */}
                                                 <Link
                                                     to={artwork ? `/artwork/${artwork._id}` : "#"}
@@ -232,30 +232,35 @@ const MyPurchases = () => {
                                                 {/* Details */}
                                                 <div className="flex-1 flex flex-col justify-between">
                                                     <div>
-                                                        <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                                                        <h4 className="font-semibold text-white mb-1">
                                                             {item.title}
                                                         </h4>
-                                                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                                                        <p className="text-sm text-gray-400">
                                                             {item.licenseType} License
                                                         </p>
+                                                        <div className="flex items-center gap-3 mt-1">
+                                                            <span className="text-xs text-amber-400/70">Artist: ${(item.price * 0.9).toFixed(2)}</span>
+                                                            <span className="text-xs text-gray-600">|</span>
+                                                            <span className="text-xs text-cyan-400/70">Platform: ${(item.price * 0.1).toFixed(2)}</span>
+                                                        </div>
                                                     </div>
 
                                                     <div className="flex items-center justify-between mt-2">
                                                         <div className="flex items-center gap-2">
-                                                            <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700">
+                                                            <div className="w-6 h-6 rounded-full overflow-hidden border border-white/10">
                                                                 <img
                                                                     src={artwork?.artist?.avatar || `https://ui-avatars.com/api/?name=${artwork?.artist?.name}&background=random`}
                                                                     alt={artwork?.artist?.name}
                                                                     className="w-full h-full object-cover"
                                                                 />
                                                             </div>
-                                                            <span className="text-sm text-gray-600 dark:text-gray-400">{artwork?.artist?.name || "Anonymous"}</span>
+                                                            <span className="text-sm text-gray-400">{artwork?.artist?.name || "Anonymous"}</span>
                                                         </div>
                                                         {order.paymentStatus === "completed" && (
                                                             <button
                                                                 onClick={() => handleDownload(artwork?._id || item.artwork, item.title)}
                                                                 disabled={downloading === (artwork?._id || item.artwork)}
-                                                                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                                                             >
                                                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
                                                                 {downloading === (artwork?._id || item.artwork) ? 'Downloading...' : 'Download'}

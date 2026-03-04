@@ -40,7 +40,19 @@ const Dashboard = () => {
 
                 // Calculate Stats
                 const totalViews = artworks.reduce((sum, art) => sum + (art.views || 0), 0);
-                const totalRevenue = 0; // Placeholder until seller orders are implemented
+
+                // Calculate revenue: sum of completed orders where user's artwork was bought
+                // For each artwork belonging to this user sold in any order, artist earns 90%
+                let totalRevenue = 0;
+                try {
+                    const walletRes = await axios.get(`${API_URL}/wallet/balance`);
+                    const transactions = walletRes.data?.data?.transactions || [];
+                    totalRevenue = transactions
+                        .filter(t => t.type === 'earning')
+                        .reduce((sum, t) => sum + (t.amount || 0), 0);
+                } catch (e) {
+                    // If wallet fetch fails, just use 0
+                }
 
                 setOverviewStats({
                     artworks: artworks.length,
@@ -101,7 +113,7 @@ const Dashboard = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
+        <div className="min-h-screen bg-[#0B0D10] pt-32 pb-20">
             <div className="container mx-auto max-w-[1400px] px-6">
                 <div className="flex flex-col lg:flex-row gap-8">
 
@@ -112,14 +124,14 @@ const Dashboard = () => {
                                 <img
                                     src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}&background=0369a1&color=fff`}
                                     alt={user?.name}
-                                    className="w-full h-full rounded-full border-4 border-gray-200 object-cover"
+                                    className="w-full h-full rounded-full border-4 border-[#141821] object-cover"
                                 />
                                 <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-[#075985] transition-colors">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
                                 </button>
                             </div>
-                            <h2 className="text-xl font-bold text-gray-900 dark:text-white truncate mb-1">{user?.name}</h2>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{user?.role || "Member"}</p>
+                            <h2 className="text-xl font-bold text-white truncate mb-1">{user?.name}</h2>
+                            <p className="text-sm text-gray-400 mb-4">{user?.role || "Member"}</p>
                             <Link
                                 to="/settings"
                                 className="btn-secondary w-full text-sm"
@@ -132,8 +144,8 @@ const Dashboard = () => {
                             <button
                                 onClick={() => setActiveTab("overview")}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all ${activeTab === 'overview'
-                                    ? 'bg-primary text-white'
-                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    ? 'bg-[#8B5CF6] text-white'
+                                    : 'text-gray-400 hover:bg-white/5 hover:text-white'
                                     }`}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
@@ -141,21 +153,28 @@ const Dashboard = () => {
                             </button>
                             <Link
                                 to="/my-uploads"
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-all"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-gray-400 hover:bg-white/5 hover:text-white transition-all"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                 My Artworks
                             </Link>
                             <Link
                                 to="/my-purchases"
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-all"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-gray-400 hover:bg-white/5 hover:text-white transition-all"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
                                 My Purchases
                             </Link>
                             <Link
+                                to="/wallet"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-gray-400 hover:bg-white/5 hover:text-white transition-all"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" /></svg>
+                                Wallet
+                            </Link>
+                            <Link
                                 to="/favorites"
-                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-all"
+                                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold text-gray-400 hover:bg-white/5 hover:text-white transition-all"
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                 Favorites
@@ -166,10 +185,10 @@ const Dashboard = () => {
                     {/* Main Content */}
                     <main className="flex-1 space-y-8">
                         <div className="space-y-2">
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                            <h1 className="text-3xl md:text-4xl font-bold text-white">
                                 Dashboard
                             </h1>
-                            <p className="text-base text-gray-600 dark:text-gray-400">Welcome back, {user?.name}! Here's your account overview.</p>
+                            <p className="text-base text-gray-400">Welcome back, {user?.name}! Here's your account overview.</p>
                         </div>
 
                         {/* Stats Grid */}
@@ -177,10 +196,10 @@ const Dashboard = () => {
                             {stats.map((stat) => (
                                 <div key={stat.label} className="card-surface p-6">
                                     <div className="flex items-center justify-between mb-4">
-                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.label}</p>
+                                        <p className="text-sm font-medium text-gray-400">{stat.label}</p>
                                         <span className="text-2xl">{stat.icon}</span>
                                     </div>
-                                    <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</h3>
+                                    <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
                                     <p className="text-sm text-green-600 font-medium">{stat.trend}</p>
                                 </div>
                             ))}
@@ -189,7 +208,7 @@ const Dashboard = () => {
                         <div className="grid lg:grid-cols-3 gap-6">
                             {/* Performance Overview (Top Viewed Artworks) */}
                             <div className="lg:col-span-2 card-surface p-8">
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Performance Overview</h3>
+                                <h3 className="text-lg font-bold text-white mb-6">Performance Overview</h3>
                                 {performance.length > 0 ? (
                                     <div className="space-y-4">
                                         <div className="grid grid-cols-12 text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
@@ -198,31 +217,31 @@ const Dashboard = () => {
                                             <div className="col-span-3 text-right">Downloads</div>
                                         </div>
                                         {performance.map((artwork) => (
-                                            <div key={artwork._id} className="grid grid-cols-12 items-center gap-4 py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
+                                            <div key={artwork._id} className="grid grid-cols-12 items-center gap-4 py-3 border-b border-white/5 last:border-0">
                                                 <div className="col-span-6 flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded bg-gray-100 dark:bg-gray-800 overflow-hidden flex-shrink-0">
+                                                    <div className="w-10 h-10 rounded bg-[#141821] overflow-hidden flex-shrink-0 border border-white/5">
                                                         <img src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`} alt={artwork.title} className="w-full h-full object-cover" />
                                                     </div>
                                                     <div className="min-w-0">
-                                                        <p className="font-medium text-gray-900 dark:text-white truncate">{artwork.title}</p>
-                                                        <p className="text-xs text-gray-500 dark:text-gray-400">{artwork.category}</p>
+                                                        <p className="font-medium text-white truncate">{artwork.title}</p>
+                                                        <p className="text-xs text-gray-400">{artwork.category}</p>
                                                     </div>
                                                 </div>
-                                                <div className="col-span-3 text-right font-medium text-gray-900 dark:text-white">
+                                                <div className="col-span-3 text-right font-medium text-white">
                                                     {artwork.views}
                                                 </div>
-                                                <div className="col-span-3 text-right font-medium text-gray-900 dark:text-white">
+                                                <div className="col-span-3 text-right font-medium text-white">
                                                     {artwork.downloads}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-900 rounded-lg">
+                                    <div className="h-64 flex items-center justify-center bg-[#0B0D10]/50 rounded-lg border border-white/5">
                                         <div className="text-center">
-                                            <svg className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
-                                            <p className="text-gray-500 dark:text-gray-400 font-medium">No performance data available</p>
-                                            <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Upload artworks to see stats</p>
+                                            <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                                            <p className="text-gray-400 font-medium">No performance data available</p>
+                                            <p className="text-sm text-gray-500 mt-1">Upload artworks to see stats</p>
                                         </div>
                                     </div>
                                 )}
@@ -230,17 +249,17 @@ const Dashboard = () => {
 
                             {/* Recent Activity */}
                             <div className="card-surface p-6">
-                                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
+                                <h3 className="text-lg font-bold text-white mb-4">Recent Activity</h3>
                                 <div className="space-y-4">
                                     {recentActivity.length > 0 ? (
                                         recentActivity.map((activity, index) => (
-                                            <div key={index} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
-                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.type === 'uploaded' ? 'bg-blue-500' : 'bg-green-500'}`} />
+                                            <div key={index} className="flex gap-3 pb-4 border-b border-white/5 last:border-0 last:pb-0">
+                                                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.type === 'uploaded' ? 'bg-[#8B5CF6]' : 'bg-green-500'}`} />
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                                                        <span className="font-semibold text-gray-500 dark:text-gray-400 capitalize">{activity.type}</span> <span className="font-semibold">{activity.target}</span>
+                                                    <p className="text-sm font-medium text-white">
+                                                        <span className="font-semibold text-gray-400 capitalize">{activity.type}</span> <span className="font-semibold">{activity.target}</span>
                                                     </p>
-                                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                    <p className="text-xs text-gray-500 mt-0.5">
                                                         {new Date(activity.time).toLocaleDateString()}
                                                     </p>
                                                 </div>
@@ -258,7 +277,7 @@ const Dashboard = () => {
 
                         {/* Quick Actions */}
                         <div className="card-surface p-6">
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+                            <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <Link to="/upload" className="btn-primary text-center">
                                     Upload New Artwork
@@ -268,6 +287,9 @@ const Dashboard = () => {
                                 </Link>
                                 <Link to="/settings" className="btn-secondary text-center">
                                     Account Settings
+                                </Link>
+                                <Link to="/wallet" className="btn-secondary text-center">
+                                    Wallet
                                 </Link>
                             </div>
                         </div>

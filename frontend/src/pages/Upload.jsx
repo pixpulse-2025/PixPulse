@@ -126,16 +126,16 @@ const Upload = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-32 pb-20">
+        <div className="min-h-screen bg-[#0B0D10] pt-32 pb-20">
             <div className="container mx-auto px-6 max-w-4xl">
                 <div className="card-surface p-8 md:p-12">
                     <div className="mb-8">
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">Upload Artwork</h1>
-                        <p className="text-base text-gray-600 dark:text-gray-400">Share your creative work with the community</p>
+                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Upload Artwork</h1>
+                        <p className="text-base text-gray-400">Share your creative work with the community</p>
                     </div>
 
                     {(error || validationError) && (
-                        <div className="bg-red-50 border border-red-200 text-red-600 px-6 py-4 rounded-lg mb-6 flex items-center gap-3">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-6 py-4 rounded-lg mb-6 flex items-center gap-3">
                             <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
                             <span>{error || validationError}</span>
                         </div>
@@ -145,7 +145,7 @@ const Upload = () => {
                         {/* Title & Description */}
                         <div className="grid grid-cols-1 gap-6">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
+                                <label className="block text-sm font-semibold text-gray-300 mb-2">Title</label>
                                 <input
                                     name="title"
                                     type="text"
@@ -157,7 +157,7 @@ const Upload = () => {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                                <label className="block text-sm font-semibold text-gray-300 mb-2">Description</label>
                                 <textarea
                                     name="description"
                                     required
@@ -173,7 +173,7 @@ const Upload = () => {
                         {/* Category & SubCategory */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Category</label>
+                                <label className="block text-sm font-semibold text-gray-300 mb-2">Category</label>
                                 <select
                                     name="category"
                                     value={formData.category}
@@ -186,7 +186,7 @@ const Upload = () => {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Sub-Category</label>
+                                <label className="block text-sm font-semibold text-gray-300 mb-2">Sub-Category</label>
                                 <select
                                     name="subCategory"
                                     value={formData.subCategory}
@@ -203,19 +203,19 @@ const Upload = () => {
                         {/* Pricing & License */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">Price Type</label>
-                                <div className="flex gap-2 p-1 bg-gray-100 rounded-lg">
+                                <label className="block text-sm font-semibold text-gray-300 mb-2">Price Type</label>
+                                <div className="flex gap-2 p-1 bg-[#0B0D10] border border-white/10 rounded-xl">
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, priceType: "Free" })}
-                                        className={`flex-1 py-2 rounded-md text-sm font-semibold transition-all ${formData.priceType === 'Free' ? 'bg-white shadow-sm text-primary' : 'text-gray-600'}`}
+                                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${formData.priceType === 'Free' ? 'bg-[#8B5CF6] text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
                                     >
                                         Free
                                     </button>
                                     <button
                                         type="button"
                                         onClick={() => setFormData({ ...formData, priceType: "Paid" })}
-                                        className={`flex-1 py-2 rounded-md text-sm font-semibold transition-all ${formData.priceType === 'Paid' ? 'bg-white shadow-sm text-primary' : 'text-gray-600'}`}
+                                        className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${formData.priceType === 'Paid' ? 'bg-[#8B5CF6] text-white shadow-lg' : 'text-gray-400 hover:text-white'}`}
                                     >
                                         Paid
                                     </button>
@@ -223,7 +223,7 @@ const Upload = () => {
                             </div>
                             {formData.priceType === 'Paid' && (
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-2">Price ($)</label>
+                                    <label className="block text-sm font-semibold text-gray-300 mb-2">Price ($)</label>
                                     <input
                                         name="price"
                                         type="number"
@@ -237,7 +237,7 @@ const Upload = () => {
                                 </div>
                             )}
                             <div className={formData.priceType === 'Free' ? 'md:col-span-2' : ''}>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">License Type</label>
+                                <label className="block text-sm font-semibold text-gray-300 mb-2">License Type</label>
                                 <select
                                     name="licenseType"
                                     value={formData.licenseType}
@@ -255,10 +255,10 @@ const Upload = () => {
                         <div className="grid grid-cols-1 gap-6">
                             {/* Main Asset */}
                             <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                                <label className="block text-sm font-semibold text-gray-300 mb-3">
                                     Main Asset {formData.category !== 'Visual Art' ? `(${constraints[formData.category].label})` : ''}
                                 </label>
-                                <label className={`w-full h-48 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${file ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary hover:bg-gray-50'}`}>
+                                <label className={`w-full h-48 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${file ? 'border-[#8B5CF6] bg-[#8B5CF6]/10' : 'border-white/10 hover:border-[#8B5CF6] hover:bg-white/5'}`}>
                                     <input
                                         type="file"
                                         className="hidden"
@@ -266,17 +266,17 @@ const Upload = () => {
                                     />
                                     {file ? (
                                         <>
-                                            <svg className="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            <svg className="w-12 h-12 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                             <div className="text-center px-4">
-                                                <p className="text-sm font-semibold text-gray-900 truncate max-w-[300px]">{file.name}</p>
-                                                <p className="text-xs text-gray-500 mt-1">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+                                                <p className="text-sm font-semibold text-white truncate max-w-[300px]">{file.name}</p>
+                                                <p className="text-xs text-gray-400 mt-1">{(file.size / (1024 * 1024)).toFixed(2)} MB</p>
                                             </div>
                                         </>
                                     ) : (
                                         <>
-                                            <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
+                                            <svg className="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
                                             <div className="text-center">
-                                                <p className="text-sm font-semibold text-gray-700">Click to upload Main File</p>
+                                                <p className="text-sm font-semibold text-gray-300">Click to upload Main File</p>
                                                 <p className="text-xs text-gray-500 mt-1">{constraints[formData.category].label}</p>
                                             </div>
                                         </>
@@ -287,8 +287,8 @@ const Upload = () => {
                             {/* Optional Cover Image for non-visual art */}
                             {formData.category !== 'Visual Art' && (
                                 <div>
-                                    <label className="block text-sm font-semibold text-gray-700 mb-3">Cover Image (Optional)</label>
-                                    <label className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${previewFile ? 'border-primary bg-primary/5' : 'border-gray-300 hover:border-primary hover:bg-gray-50'}`}>
+                                    <label className="block text-sm font-semibold text-gray-300 mb-3">Cover Image (Optional)</label>
+                                    <label className={`w-full h-32 border-2 border-dashed rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer transition-all ${previewFile ? 'border-[#8B5CF6] bg-[#8B5CF6]/10' : 'border-white/10 hover:border-[#8B5CF6] hover:bg-white/5'}`}>
                                         <input
                                             type="file"
                                             accept="image/*"
@@ -297,16 +297,16 @@ const Upload = () => {
                                         />
                                         {previewFile ? (
                                             <>
-                                                <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                <svg className="w-8 h-8 text-[#8B5CF6]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                                 <div className="text-center px-4">
-                                                    <p className="text-sm font-semibold text-gray-900 truncate max-w-[300px]">{previewFile.name}</p>
+                                                    <p className="text-sm font-semibold text-white truncate max-w-[300px]">{previewFile.name}</p>
                                                 </div>
                                             </>
                                         ) : (
                                             <>
-                                                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                <svg className="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                                 <div className="text-center">
-                                                    <p className="text-sm font-semibold text-gray-700">Upload Thumbnail</p>
+                                                    <p className="text-sm font-semibold text-gray-300">Upload Thumbnail</p>
                                                     <p className="text-xs text-gray-500 mt-1">JPG, PNG</p>
                                                 </div>
                                             </>
@@ -318,7 +318,7 @@ const Upload = () => {
 
                         {/* Tags */}
                         <div>
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">Tags (comma separated)</label>
+                            <label className="block text-sm font-semibold text-gray-300 mb-2">Tags (comma separated)</label>
                             <input
                                 name="tags"
                                 type="text"
@@ -332,7 +332,7 @@ const Upload = () => {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-[#0369A1] hover:bg-[#075985] dark:bg-[#0EA5E9] dark:hover:bg-[#0284C7] text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-md disabled:active:scale-100"
+                            className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white font-semibold rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
                         >
                             {loading ? (
                                 <>
