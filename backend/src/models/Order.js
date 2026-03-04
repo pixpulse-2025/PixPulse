@@ -115,13 +115,12 @@ const orderSchema = new mongoose.Schema(
  * Pre-save middleware to automatically generate a unique order number.
  * Uses a combination of timestamp and random characters.
  */
-orderSchema.pre("save", function (next) {
+orderSchema.pre("save", function () {
     if (!this.orderNumber) {
         const timestamp = Date.now().toString(36).toUpperCase();
         const random = Math.random().toString(36).substring(2, 7).toUpperCase();
         this.orderNumber = `ORD-${timestamp}-${random}`;
     }
-    next();
 });
 
 /**
