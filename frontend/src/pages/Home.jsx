@@ -168,6 +168,8 @@ const Home = () => {
     const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
 
     const [featuredArtists, setFeaturedArtists] = useState([]);
+    const [subscribeEmail, setSubscribeEmail] = useState("");
+    const [subscribeStatus, setSubscribeStatus] = useState(""); // "", "success", "error"
 
     useEffect(() => {
         dispatch(fetchArtworks({ limit: 20, sortBy: "popular" }));
@@ -180,7 +182,7 @@ const Home = () => {
             if (data.success) {
                 setFeaturedArtists(data.data.map(artist => ({
                     name: artist.name,
-                    role: "Top Creator", // or use artist.role which is usually 'user' or 'artist'
+                    totalViews: artist.totalViews || 0,
                     img: artist.avatar || `https://ui-avatars.com/api/?name=${artist.name}&background=random`,
                     id: artist._id
                 })));
@@ -203,12 +205,31 @@ const Home = () => {
         "https://images.unsplash.com/photo-1563089145-599997674d42?q=80&w=2570&auto=format&fit=crop",
     ];
 
-    const marqueeImages = visualWorks.length > 0
-        ? visualWorks.slice(0, 8).map(art => {
-            const url = art.previewUrl || art.fileUrl;
-            return url.startsWith("http") ? url : `${API_URL.replace("/api", "")}${url}`;
-        })
-        : placeholderImages;
+    // Sort visual works by most views for the showcase
+    const mostViewedWorks = useMemo(() => {
+        return [...visualWorks]
+            .sort((a, b) => (b.views || 0) - (a.views || 0))
+            .slice(0, 10);
+    }, [visualWorks]);
+
+    const marqueeItems = mostViewedWorks.length > 0
+        ? mostViewedWorks.map(art => ({
+            img: (art.previewUrl || art.fileUrl)?.startsWith("http")
+                ? (art.previewUrl || art.fileUrl)
+                : `${API_URL.replace("/api", "")}${art.previewUrl || art.fileUrl}`,
+            title: art.title,
+            artist: art.artist?.name || "Unknown",
+            views: art.views || 0,
+            id: art._id,
+        }))
+        : placeholderImages.map((img, i) => ({
+            img,
+            title: `Artwork ${i + 1}`,
+            artist: "Featured",
+            views: 0,
+            id: null,
+        }));
+
 
 
 
@@ -266,17 +287,32 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Horizontal Scroll Gallery */}
-            <div className="py-16 bg-[#0B0D10] overflow-hidden whitespace-nowrap border-y border-white/5">
+            {/* Most Viewed Showcase */}
+            <div className="relative py-16 bg-[#0B0D10] overflow-hidden border-y border-white/5">
                 <motion.div
-                    animate={{ x: ["0%", "-100%"] }}
-                    transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                    className="flex gap-8 items-center w-max"
+                    animate={{ x: ["0%", "-50%"] }}
+                    transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+                    className="flex gap-6 items-center w-max"
                 >
-                    {[...marqueeImages, ...marqueeImages].map((img, i) => (
-                        <div key={i} className="w-[300px] md:w-[450px] aspect-[16/10] rounded-2xl overflow-hidden grayscale hover:grayscale-0 transition-all duration-700 ease-out border border-white/5 hover:border-violet-500/50 hover:shadow-[0_0_30px_rgba(139,92,246,0.2)]">
-                            <img src={img} className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" alt="Art preview" />
-                        </div>
+                    {[...marqueeItems, ...marqueeItems].map((item, i) => (
+                        <Link
+                            key={i}
+                            to={item.id ? `/artwork/${item.id}` : "/explore"}
+                            className="group relative w-[300px] md:w-[420px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 hover:border-violet-500/40 transition-all duration-500 flex-shrink-0 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)]"
+                        >
+                            <img
+                                src={item.img}
+                                className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700"
+                                alt={item.title}
+                            />
+                            {/* Dark gradient from below */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+
+                            {/* Metadata overlay */}
+                            <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                <h3 className="text-white font-bold text-base truncate">{item.title}</h3>
+                            </div>
+                        </Link>
                     ))}
                 </motion.div>
             </div>
@@ -299,10 +335,10 @@ const Home = () => {
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {loading ? (
-                            [...Array(4)].map((_, i) => (
-                                <div key={i} className="aspect-[3/4] rounded-2xl bg-white/5 animate-pulse" />
+                            [...Array(6)].map((_, i) => (
+                                <div key={i} className="aspect-[4/3] rounded-2xl bg-white/5 animate-pulse" />
                             ))
                         ) : visualWorks.length > 0 ? (
                             visualWorks.slice(0, 8).map((artwork) => (
@@ -319,17 +355,24 @@ const Home = () => {
             <section className="py-24 px-6 bg-[#141821] border-y border-white/5">
                 <div className="container mx-auto max-w-[1400px]">
                     <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-white tracking-tight">Featured Artists</h2>
-                    <div className="flex flex-wrap justify-center gap-12 md:gap-20">
-                        {featuredArtists.map((artist, i) => (
-                            <div key={i} className="flex flex-col items-center group cursor-pointer">
-                                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-violet-500 transition-all duration-300 mb-6 p-1">
-                                    <img src={artist.img} alt={artist.name} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                    {featuredArtists.length > 0 ? (
+                        <div className="flex flex-wrap justify-center gap-12 md:gap-20">
+                            {featuredArtists.map((artist, i) => (
+                                <div key={i} className="flex flex-col items-center group cursor-default">
+                                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-violet-500 transition-all duration-300 mb-6 p-1">
+                                        <img src={artist.img} alt={artist.name} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-violet-400 transition-colors">{artist.name}</h3>
+                                    <p className="text-gray-400 text-sm flex items-center gap-1.5">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                        {artist.totalViews.toLocaleString()} views
+                                    </p>
                                 </div>
-                                <h3 className="text-2xl font-bold text-white mb-1">{artist.name}</h3>
-                                <p className="text-gray-400 text-sm tracking-widest uppercase">{artist.role}</p>
-                            </div>
-                        ))}
-                    </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-center text-gray-500">No featured artists yet.</p>
+                    )}
                 </div>
             </section>
 
@@ -363,23 +406,57 @@ const Home = () => {
                 </div>
             </section>
 
-            {/* Newsletter Section */}
+            {/* Stay Inspired Section */}
             <section className="py-24 px-6 bg-[#0B0D10]">
                 <div className="container mx-auto max-w-2xl text-center">
                     <div className="space-y-6 mb-10">
                         <h3 className="text-4xl font-bold text-white tracking-tight">Stay Inspired</h3>
                         <p className="text-gray-400 text-lg font-light">Join 50,000+ creators getting weekly design resources and inspiration.</p>
                     </div>
-                    <div className="flex flex-col sm:flex-row gap-4">
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            if (!subscribeEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(subscribeEmail)) {
+                                setSubscribeStatus("error");
+                                return;
+                            }
+                            setSubscribeStatus("success");
+                            setSubscribeEmail("");
+                            setTimeout(() => setSubscribeStatus(""), 4000);
+                        }}
+                        className="flex flex-col sm:flex-row gap-4"
+                    >
                         <input
                             type="email"
                             placeholder="Email address"
-                            className="flex-1 px-6 py-4 rounded-xl bg-[#141821] border border-white/10 text-white focus:outline-none focus:border-violet-500 transition-all"
+                            value={subscribeEmail}
+                            onChange={(e) => { setSubscribeEmail(e.target.value); setSubscribeStatus(""); }}
+                            className={`flex-1 px-6 py-4 rounded-xl bg-[#141821] border text-white focus:outline-none focus:border-violet-500 transition-all ${subscribeStatus === "error" ? "border-red-500/50" : "border-white/10"
+                                }`}
                         />
-                        <button className="btn-primary whitespace-nowrap px-8">
+                        <button type="submit" className="btn-primary whitespace-nowrap px-8">
                             Subscribe
                         </button>
-                    </div>
+                    </form>
+                    {subscribeStatus === "success" && (
+                        <motion.p
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-4 text-green-400 text-sm flex items-center justify-center gap-2"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            You're subscribed! Check your inbox for inspiration.
+                        </motion.p>
+                    )}
+                    {subscribeStatus === "error" && (
+                        <motion.p
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-4 text-red-400 text-sm"
+                        >
+                            Please enter a valid email address.
+                        </motion.p>
+                    )}
                 </div>
             </section>
         </div>

@@ -87,7 +87,7 @@ const ArtworkCard = ({ artwork }) => {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
         >
-            <div onClick={() => navigate(`/artwork/${artwork._id}`)} className="block relative aspect-[3/4] bg-[#0B0D10] overflow-hidden cursor-pointer">
+            <div onClick={() => navigate(`/artwork/${artwork._id}`)} className="block relative aspect-[4/3] bg-[#0B0D10] overflow-hidden cursor-pointer">
                 {(() => {
                     const ext = (mediaUrl || coverUrl || '').split('.').pop().toLowerCase().split('?')[0];
                     const isVideo = ['mp4', 'webm', 'ogg', 'mov'].includes(ext) || artwork.category === 'Video';
@@ -178,32 +178,19 @@ const ArtworkCard = ({ artwork }) => {
                     }
                 })()}
 
-                {/* Sliding Info Panel */}
-                <div className="absolute bottom-0 inset-x-0 p-5 bg-[#0B0D10]/95 backdrop-blur-xl border-t border-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-30 flex flex-col gap-3">
-                    <div className="flex justify-between items-start">
-                        <h3 className="text-lg font-bold leading-none text-white line-clamp-1 pr-4 tracking-tight">{artwork.title}</h3>
-                        <span className="font-bold text-[#A78BFA]">${artwork.price || '0.00'}</span>
+                {/* Compact Info Panel on Hover */}
+                <div className="absolute bottom-0 inset-x-0 px-3 py-2.5 bg-[#0B0D10]/95 backdrop-blur-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out z-30">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-sm font-semibold text-white line-clamp-1 pr-2">{artwork.title}</h3>
+                        <span className="text-sm font-bold text-[#A78BFA] whitespace-nowrap">${artwork.price || '0.00'}</span>
                     </div>
-
-                    <div className="flex justify-between items-center pt-1">
-                        <Link
-                            to={`/profile/${artwork.artist?._id}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-                        >
-                            <img
-                                src={artwork.artist?.avatar || `https://ui-avatars.com/api/?name=${artwork.artist?.name || 'Artist'}&background=random`}
-                                alt={artwork.artist?.name}
-                                className="w-6 h-6 rounded-full object-cover ring-1 ring-white/20"
-                            />
-                            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 line-clamp-1 hover:text-white transition-colors">{artwork.artist?.name || 'Anonymous'}</span>
-                        </Link>
-
+                    <div className="flex justify-between items-center mt-1">
+                        <span className="text-xs text-gray-400 line-clamp-1">{artwork.artist?.name || 'Anonymous'}</span>
                         <button
                             onClick={handleFavorite}
-                            className={`transition-all duration-300 ${isFavorite ? "text-violet-500 drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]" : "text-gray-500 hover:text-white"}`}
+                            className={`transition-all duration-300 ${isFavorite ? "text-red-500" : "text-gray-500 hover:text-red-400"}`}
                         >
-                            <svg className="w-5 h-5" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-4 h-4" fill={isFavorite ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
                         </button>

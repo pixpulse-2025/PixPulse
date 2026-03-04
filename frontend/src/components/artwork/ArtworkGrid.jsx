@@ -8,9 +8,9 @@ import ArtworkCard from "./ArtworkCard";
 const ArtworkGrid = ({ artworks, loading }) => {
     if (loading) {
         return (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {[...Array(8)].map((_, i) => (
-                    <div key={i} className="bg-text/5 rounded-3xl aspect-[4/3] animate-pulse" />
+                    <div key={i} className="bg-text/5 rounded-2xl aspect-[4/3] animate-pulse" />
                 ))}
             </div>
         );
@@ -31,7 +31,7 @@ const ArtworkGrid = ({ artworks, loading }) => {
     }
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {artworks.map((artwork) => (
                 <ArtworkCard key={artwork._id} artwork={artwork} />
             ))}

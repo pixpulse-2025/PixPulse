@@ -81,7 +81,7 @@ const AdminReports = () => {
     const getStatusBadgeColor = (status) => {
         const colors = {
             pending: "bg-yellow-500/10 text-yellow-500",
-            reviewed: "bg-blue-500/10 text-blue-500",
+            reviewing: "bg-blue-500/10 text-blue-500",
             resolved: "bg-green-500/10 text-green-500",
             dismissed: "bg-gray-500/10 text-gray-400",
         };
@@ -97,9 +97,9 @@ const AdminReports = () => {
             const term = searchTerm.toLowerCase();
             const reporterName = report.reporter?.name?.toLowerCase() || "";
             const reason = report.reason?.toLowerCase() || "";
-            const targetTitle = (report.targetId?.title || report.targetId?.name || "").toLowerCase();
+            const artworkTitle = (report.artwork?.title || "").toLowerCase();
 
-            return reporterName.includes(term) || reason.includes(term) || targetTitle.includes(term);
+            return reporterName.includes(term) || reason.includes(term) || artworkTitle.includes(term);
         }
 
         return true;
@@ -138,22 +138,46 @@ const AdminReports = () => {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
-                        <p className="text-sm text-gray-400">Total Reports</p>
-                        <p className="text-2xl font-bold text-white">{filteredReports.length}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/20 via-[#141821] to-violet-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">📋</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Total Reports</p>
+                            </div>
+                            <p className="text-3xl font-bold text-violet-400 tabular-nums">{reports.length}</p>
+                        </div>
                     </div>
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
-                        <p className="text-sm text-gray-400">Pending Action</p>
-                        <p className="text-2xl font-bold text-yellow-500">
-                            {reports.filter(r => r.status === 'pending').length}
-                        </p>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600/20 via-[#141821] to-amber-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">⏳</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Pending Action</p>
+                            </div>
+                            <p className="text-3xl font-bold text-amber-400 tabular-nums">
+                                {reports.filter(r => r.status === 'pending').length}
+                            </p>
+                        </div>
                     </div>
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
-                        <p className="text-sm text-gray-400">Resolved</p>
-                        <p className="text-2xl font-bold text-green-500">
-                            {reports.filter(r => r.status === 'resolved').length}
-                        </p>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600/20 via-[#141821] to-emerald-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">✅</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Resolved</p>
+                            </div>
+                            <p className="text-3xl font-bold text-emerald-400 tabular-nums">
+                                {reports.filter(r => r.status === 'resolved').length}
+                            </p>
+                        </div>
                     </div>
                 </div>
 
@@ -161,7 +185,7 @@ const AdminReports = () => {
                 <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 mb-6">
                     <div className="flex flex-col md:flex-row gap-4 mb-4">
                         <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0">
-                            {['all', 'pending', 'reviewed', 'resolved', 'dismissed'].map((status) => (
+                            {['all', 'pending', 'reviewing', 'resolved', 'dismissed'].map((status) => (
                                 <button
                                     key={status}
                                     onClick={() => setFilter(status)}
@@ -177,7 +201,7 @@ const AdminReports = () => {
                     </div>
                     <input
                         type="text"
-                        placeholder="Search reports by reporter, reason, or content..."
+                        placeholder="Search reports by reporter, reason, or artwork title..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#0B0D10] text-white focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent placeholder-gray-500"
@@ -200,8 +224,7 @@ const AdminReports = () => {
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-white/5 bg-white/5">
-                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reported Item</th>
-                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Type</th>
+                                    <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reported Artwork</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reason</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Reporter</th>
                                     <th className="px-6 py-4 text-left text-sm font-semibold text-gray-300">Status</th>
@@ -215,9 +238,9 @@ const AdminReports = () => {
                                         <tr key={report._id} className="hover:bg-white/5 transition-colors">
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    {report.targetModel === 'Artwork' && report.targetId && (
+                                                    {report.artwork && (
                                                         <img
-                                                            src={`http://localhost:5000${report.targetId.previewUrl || report.targetId.fileUrl}`}
+                                                            src={`http://localhost:5000${report.artwork.previewUrl || report.artwork.fileUrl}`}
                                                             alt="Preview"
                                                             className="w-10 h-10 rounded-lg object-cover"
                                                             onError={(e) => {
@@ -227,18 +250,11 @@ const AdminReports = () => {
                                                     )}
                                                     <div>
                                                         <p className="font-medium text-white">
-                                                            {report.targetModel === 'User'
-                                                                ? report.targetId?.name
-                                                                : report.targetId?.title || 'Unknown Item'}
+                                                            {report.artwork?.title || 'Unknown Artwork'}
                                                         </p>
-                                                        <p className="text-xs text-gray-400">ID: {report.targetId?._id}</p>
+                                                        <p className="text-xs text-gray-400">ID: {report.artwork?._id}</p>
                                                     </div>
                                                 </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="px-2 py-1 rounded-full text-xs font-medium bg-white/10 text-gray-300">
-                                                    {report.targetModel}
-                                                </span>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="text-sm text-gray-300">{report.reason}</span>
@@ -276,7 +292,7 @@ const AdminReports = () => {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" className="px-6 py-12 text-center text-gray-400">
+                                        <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
                                             No reports found
                                         </td>
                                     </tr>
@@ -310,64 +326,94 @@ const AdminReports = () => {
                                             <p className="font-medium text-white">{selectedReport.reporter?.name || "Anonymous"}</p>
                                         </div>
                                         <div>
+                                            <p className="text-gray-400">Reporter Email</p>
+                                            <p className="font-medium text-white">{selectedReport.reporter?.email || "N/A"}</p>
+                                        </div>
+                                        <div>
                                             <p className="text-gray-400">Date</p>
                                             <p className="font-medium text-white">{new Date(selectedReport.createdAt).toLocaleString()}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-gray-400">Current Status</p>
+                                            <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${getStatusBadgeColor(selectedReport.status)}`}>
+                                                {selectedReport.status.charAt(0).toUpperCase() + selectedReport.status.slice(1)}
+                                            </span>
                                         </div>
                                         <div className="col-span-2">
                                             <p className="text-gray-400">Reason</p>
                                             <p className="font-medium text-white">{selectedReport.reason}</p>
                                         </div>
-                                        {selectedReport.details && (
+                                        {selectedReport.description && (
                                             <div className="col-span-2">
-                                                <p className="text-gray-400">Additional Details</p>
-                                                <p className="font-medium text-white">{selectedReport.details}</p>
+                                                <p className="text-gray-400">Description</p>
+                                                <p className="font-medium text-white whitespace-pre-wrap">{selectedReport.description}</p>
                                             </div>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* Target Content Preview */}
+                                {/* Reported Artwork Preview */}
                                 <div className="bg-[#0B0D10] rounded-xl p-4 border border-white/5">
-                                    <h3 className="font-bold text-white mb-4">Reported Content</h3>
-                                    {selectedReport.targetModel === 'Artwork' ? (
-                                        <div className="flex gap-4">
-                                            <div className="w-1/3">
-                                                {selectedReport.targetId && (
-                                                    <img
-                                                        src={`http://localhost:5000${selectedReport.targetId.previewUrl || selectedReport.targetId.fileUrl}`}
-                                                        alt="Content"
-                                                        className="w-full rounded-lg"
-                                                        onError={(e) => {
-                                                            e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
-                                                        }}
-                                                    />
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <h4 className="font-bold text-white text-lg">{selectedReport.targetId?.title}</h4>
-                                                <p className="text-gray-400 text-sm mt-1">{selectedReport.targetId?.description}</p>
-                                                <div className="flex gap-2 mt-4">
-                                                    <span className="px-2 py-1 bg-white/10 text-gray-300 rounded text-xs">
-                                                        {selectedReport.targetId?.category}
-                                                    </span>
-                                                    <span className="px-2 py-1 bg-white/10 text-gray-300 rounded text-xs">
-                                                        {selectedReport.targetId?.priceType}
-                                                    </span>
-                                                </div>
-                                            </div>
+                                    <h3 className="font-bold text-white mb-4">Reported Artwork</h3>
+                                    <div className="flex gap-4">
+                                        <div className="w-1/3">
+                                            {selectedReport.artwork && (
+                                                <img
+                                                    src={`http://localhost:5000${selectedReport.artwork.previewUrl || selectedReport.artwork.fileUrl}`}
+                                                    alt="Content"
+                                                    className="w-full rounded-lg"
+                                                    onError={(e) => {
+                                                        e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
+                                                    }}
+                                                />
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center text-xl font-bold text-white">
-                                                {selectedReport.targetId?.name?.[0]}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-white">{selectedReport.targetId?.name}</h4>
-                                                <p className="text-gray-400">{selectedReport.targetId?.email}</p>
-                                            </div>
+                                        <div className="flex-1">
+                                            <h4 className="font-bold text-white text-lg">{selectedReport.artwork?.title || "Deleted Artwork"}</h4>
+                                            {selectedReport.artwork?.artist && (
+                                                <p className="text-gray-400 text-sm mt-1">
+                                                    Artist: {typeof selectedReport.artwork.artist === 'object'
+                                                        ? selectedReport.artwork.artist.name
+                                                        : selectedReport.artwork.artist}
+                                                </p>
+                                            )}
+                                            {selectedReport.artwork?._id && (
+                                                <Link
+                                                    to={`/artwork/${selectedReport.artwork._id}`}
+                                                    className="inline-block mt-3 text-sm text-[#8B5CF6] hover:text-violet-400 transition-colors"
+                                                    target="_blank"
+                                                >
+                                                    View Artwork →
+                                                </Link>
+                                            )}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
+
+                                {/* Resolved Info (if already resolved) */}
+                                {selectedReport.resolvedBy && (
+                                    <div className="bg-[#0B0D10] rounded-xl p-4 border border-white/5">
+                                        <h3 className="font-bold text-white mb-2">Resolution Info</h3>
+                                        <div className="grid grid-cols-2 gap-4 text-sm">
+                                            <div>
+                                                <p className="text-gray-400">Resolved By</p>
+                                                <p className="font-medium text-white">{selectedReport.resolvedBy?.name || "Admin"}</p>
+                                            </div>
+                                            {selectedReport.resolvedAt && (
+                                                <div>
+                                                    <p className="text-gray-400">Resolved At</p>
+                                                    <p className="font-medium text-white">{new Date(selectedReport.resolvedAt).toLocaleString()}</p>
+                                                </div>
+                                            )}
+                                            {selectedReport.adminNotes && (
+                                                <div className="col-span-2">
+                                                    <p className="text-gray-400">Previous Admin Notes</p>
+                                                    <p className="font-medium text-white whitespace-pre-wrap">{selectedReport.adminNotes}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {/* Action Form */}
                                 <div>
@@ -382,8 +428,8 @@ const AdminReports = () => {
                                                 onChange={(e) => setAdminAction({ ...adminAction, status: e.target.value })}
                                                 className="w-full px-4 py-2 rounded-lg bg-[#0B0D10] border border-white/10 text-white focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
                                             >
-                                                <option value="pending">Pending Review</option>
-                                                <option value="reviewed">Reviewed</option>
+                                                <option value="pending">Pending</option>
+                                                <option value="reviewing">Reviewing</option>
                                                 <option value="resolved">Resolved</option>
                                                 <option value="dismissed">Dismissed</option>
                                             </select>

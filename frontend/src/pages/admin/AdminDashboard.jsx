@@ -28,7 +28,7 @@ const AdminDashboard = () => {
             const [usersRes, artworksRes, ordersRes, reportsRes] = await Promise.all([
                 axios.get(`${API_URL}/users`).catch(() => ({ data: { data: [] } })),
                 axios.get(`${API_URL}/artworks`).catch(() => ({ data: { data: [] } })),
-                axios.get(`${API_URL}/orders`).catch(() => ({ data: { data: [] } })),
+                axios.get(`${API_URL}/admin/orders`).catch(() => ({ data: { data: [] } })),
                 axios.get(`${API_URL}/reports`).catch(() => ({ data: { data: [] } }))
             ]);
 
@@ -58,7 +58,7 @@ const AdminDashboard = () => {
             const orders = ordersRes.data.data || [];
             const orderStats = {
                 total: orders.length,
-                revenue: orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
+                revenue: ordersRes.data.revenueBreakdown ? ordersRes.data.revenueBreakdown.totalRevenue : orders.filter(o => o.paymentStatus === 'completed').reduce((sum, o) => sum + (o.totalAmount || 0), 0),
                 thisMonth: orders.filter(o => {
                     const created = new Date(o.createdAt);
                     const now = new Date();
@@ -126,22 +126,24 @@ const AdminDashboard = () => {
         }
     };
 
-    const StatCard = ({ title, value, subtitle, icon, color, link }) => (
-        <Link to={link} className="bg-[#141821] border border-white/5 rounded-2xl p-6 hover:shadow-lg transition-all group">
-            <div className="flex items-start justify-between mb-4">
-                <div>
-                    <p className="text-sm text-gray-400 mb-1">{title}</p>
-                    <h3 className="text-3xl font-bold text-white">{value}</h3>
-                    {subtitle && (
-                        <p className="text-xs text-gray-400 mt-1">{subtitle}</p>
-                    )}
+    const StatCard = ({ title, value, subtitle, icon, color, gradientFrom, gradientTo, blobColor, iconBg, link }) => (
+        <Link to={link} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientFrom} via-[#141821] ${gradientTo} border border-white/5 p-6 hover:shadow-xl hover:border-white/10 transition-all group block`}>
+            {/* Glow blob */}
+            <div className={`absolute top-0 right-0 w-28 h-28 ${blobColor} rounded-full blur-3xl -translate-y-1/2 translate-x-1/2`}></div>
+            <div className="relative">
+                <div className="flex items-center gap-2 mb-3">
+                    <div className={`w-8 h-8 rounded-lg ${iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                        <span className="text-lg">{icon}</span>
+                    </div>
+                    <p className="text-sm font-medium text-gray-400">{title}</p>
                 </div>
-                <div className={`text-4xl ${color} group-hover:scale-110 transition-transform`}>
-                    {icon}
+                <p className={`text-3xl font-bold tabular-nums ${color}`}>{value}</p>
+                {subtitle && (
+                    <p className="text-xs text-gray-500 mt-1">{subtitle}</p>
+                )}
+                <div className={`text-xs ${color} font-medium mt-3 opacity-70 group-hover:opacity-100 transition-opacity`}>
+                    View Details →
                 </div>
-            </div>
-            <div className={`text-xs ${color} font-medium`}>
-                View Details →
             </div>
         </Link>
     );
@@ -177,7 +179,11 @@ const AdminDashboard = () => {
                         value={stats.users.total}
                         subtitle={`${stats.users.newThisMonth} new this month`}
                         icon="👥"
-                        color="text-blue-500"
+                        color="text-blue-400"
+                        gradientFrom="from-blue-600/20"
+                        gradientTo="to-blue-600/5"
+                        blobColor="bg-blue-500/10"
+                        iconBg="bg-blue-500/15"
                         link="/admin/users"
                     />
                     <StatCard
@@ -185,7 +191,11 @@ const AdminDashboard = () => {
                         value={stats.artworks.total}
                         subtitle={`${stats.artworks.paid} paid, ${stats.artworks.free} free`}
                         icon="🎨"
-                        color="text-purple-500"
+                        color="text-violet-400"
+                        gradientFrom="from-violet-600/20"
+                        gradientTo="to-violet-600/5"
+                        blobColor="bg-violet-500/10"
+                        iconBg="bg-violet-500/15"
                         link="/admin/artworks"
                     />
                     <StatCard
@@ -193,7 +203,11 @@ const AdminDashboard = () => {
                         value={`$${stats.orders.revenue.toFixed(2)}`}
                         subtitle={`Artists: $${(stats.orders.revenue * 0.9).toFixed(2)} | Admin: $${(stats.orders.revenue * 0.1).toFixed(2)}`}
                         icon="💰"
-                        color="text-green-500"
+                        color="text-emerald-400"
+                        gradientFrom="from-emerald-600/20"
+                        gradientTo="to-emerald-600/5"
+                        blobColor="bg-emerald-500/10"
+                        iconBg="bg-emerald-500/15"
                         link="/admin/transactions"
                     />
                     <StatCard
@@ -201,7 +215,11 @@ const AdminDashboard = () => {
                         value={stats.reports.total}
                         subtitle={`${stats.reports.pending} pending review`}
                         icon="🚩"
-                        color="text-red-500"
+                        color="text-red-400"
+                        gradientFrom="from-red-600/20"
+                        gradientTo="to-red-600/5"
+                        blobColor="bg-red-500/10"
+                        iconBg="bg-red-500/15"
                         link="/admin/reports"
                     />
                 </div>

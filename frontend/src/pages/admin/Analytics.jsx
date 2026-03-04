@@ -154,22 +154,54 @@ const AdminAnalytics = () => {
                 </div>
 
                 {/* Overview Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
-                        <p className="text-sm text-gray-400 mb-1">Total Revenue</p>
-                        <p className="text-3xl font-bold text-green-500">${analytics.totalRevenue?.toFixed(2) || 0}</p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600/20 via-[#141821] to-emerald-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">💰</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Total Revenue</p>
+                            </div>
+                            <p className="text-3xl font-bold text-emerald-400 tabular-nums">${analytics.totalRevenue?.toFixed(2) || 0}</p>
+                        </div>
                     </div>
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
-                        <p className="text-sm text-gray-400 mb-1">Total Orders</p>
-                        <p className="text-3xl font-bold text-blue-500">{analytics.totalOrders || 0}</p>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 via-[#141821] to-blue-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">📦</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Total Orders</p>
+                            </div>
+                            <p className="text-3xl font-bold text-blue-400 tabular-nums">{analytics.totalOrders || 0}</p>
+                        </div>
                     </div>
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
-                        <p className="text-sm text-gray-400 mb-1">Total Artworks</p>
-                        <p className="text-3xl font-bold text-purple-500">{analytics.totalArtworks || 0}</p>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/20 via-[#141821] to-violet-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">🎨</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Total Artworks</p>
+                            </div>
+                            <p className="text-3xl font-bold text-violet-400 tabular-nums">{analytics.totalArtworks || 0}</p>
+                        </div>
                     </div>
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
-                        <p className="text-sm text-gray-400 mb-1">Total Users</p>
-                        <p className="text-3xl font-bold text-orange-500">{analytics.totalUsers || 0}</p>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-600/20 via-[#141821] to-amber-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-amber-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">👥</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Total Users</p>
+                            </div>
+                            <p className="text-3xl font-bold text-amber-400 tabular-nums">{analytics.totalUsers || 0}</p>
+                        </div>
                     </div>
                 </div>
 

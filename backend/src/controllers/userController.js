@@ -17,7 +17,7 @@ export const getTopCreators = async (req, res) => {
                 }
             },
             { $sort: { totalViews: -1 } },
-            { $limit: 6 },
+            { $limit: 5 },
             {
                 $lookup: {
                     from: "users",

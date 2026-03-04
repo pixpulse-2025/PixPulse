@@ -94,7 +94,7 @@ export const getAllReports = async (req, res, next) => {
         }
 
         const reports = await Report.find(filter)
-            .populate("artwork", "title artist previewUrl")
+            .populate("artwork", "title artist previewUrl fileUrl")
             .populate("reporter", "name email")
             .populate("resolvedBy", "name")
             .sort("-createdAt");

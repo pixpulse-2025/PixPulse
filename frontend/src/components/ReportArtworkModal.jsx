@@ -81,21 +81,21 @@ const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-            <div className="glass rounded-3xl max-w-2xl w-full p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-[#141821] border border-white/5 rounded-2xl max-w-2xl w-full p-8" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="flex justify-between items-start mb-6">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        <h2 className="text-2xl font-bold text-white mb-1">
                             Report Artwork
                         </h2>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-sm text-gray-400">
                             {artworkTitle}
                         </p>
                     </div>
                     <button
                         onClick={onClose}
-                        className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 text-2xl"
+                        className="p-2 hover:bg-white/10 rounded-full transition-colors text-gray-400 hover:text-white"
                     >
                         ✕
                     </button>
@@ -105,14 +105,14 @@ const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Reason */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-bold text-gray-300 mb-2">
                             Reason for Report <span className="text-red-500">*</span>
                         </label>
                         <select
                             name="reason"
                             value={formData.reason}
                             onChange={handleChange}
-                            className="w-full px-4 py-3 rounded-xl glass border-2 border-gray-200 dark:border-gray-700 focus:border-primary-500 outline-none transition-colors text-gray-900 dark:text-white"
+                            className="w-full px-4 py-3 rounded-xl bg-[#0B0D10] border border-white/10 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/20 outline-none transition-colors text-white"
                             required
                         >
                             <option value="">Select a reason...</option>
@@ -126,7 +126,7 @@ const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">
+                        <label className="block text-sm font-bold text-gray-300 mb-2">
                             Additional Details <span className="text-red-500">*</span>
                         </label>
                         <textarea
@@ -136,14 +136,14 @@ const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
                             placeholder="Please provide specific details about why you're reporting this artwork..."
                             rows="6"
                             maxLength="1000"
-                            className="w-full px-4 py-3 rounded-xl glass border-2 border-gray-200 dark:border-gray-700 focus:border-primary-500 outline-none transition-colors text-gray-900 dark:text-white resize-none"
+                            className="w-full px-4 py-3 rounded-xl bg-[#0B0D10] border border-white/10 focus:border-[#8B5CF6] focus:ring-2 focus:ring-[#8B5CF6]/20 outline-none transition-colors text-white placeholder-gray-500 resize-none"
                             required
                         />
                         <div className="flex justify-between items-center mt-2">
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-gray-500">
                                 Minimum 10 characters required
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                            <p className="text-xs text-gray-500">
                                 {formData.description.length}/1000
                             </p>
                         </div>
@@ -151,14 +151,14 @@ const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
 
                     {/* Error Message */}
                     {(validationError || error) && (
-                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+                        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
                             {validationError || error}
                         </div>
                     )}
 
                     {/* Info Box */}
-                    <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                        <p className="text-sm text-blue-800 dark:text-blue-400">
+                    <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4">
+                        <p className="text-sm text-violet-400">
                             <strong>Note:</strong> False reports may result in account suspension.
                             We take all reports seriously and will review them within 24-48 hours.
                         </p>
@@ -169,14 +169,14 @@ const ReportArtworkModal = ({ artworkId, artworkTitle, isOpen, onClose }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-6 py-3 border-2 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+                            className="flex-1 px-6 py-3 bg-white/5 text-gray-300 font-bold rounded-xl hover:bg-white/10 transition-all"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-red-500/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {loading ? "Submitting..." : "Submit Report"}
                         </button>

@@ -104,10 +104,10 @@ const Dashboard = () => {
 
     // Real data for the dashboard
     const stats = [
-        { label: "Total Artworks", value: overviewStats.artworks, trend: "Lifetime count", icon: "📊" },
-        { label: "Total Views", value: overviewStats.views, trend: "Across all uploads", icon: "👁️" },
-        { label: "Downloads", value: overviewStats.downloads, trend: "Total downloads", icon: "⬇️" },
-        { label: "Revenue", value: `$${overviewStats.revenue}`, trend: "Total earned", icon: "💰" },
+        { label: "Total Artworks", value: overviewStats.artworks, trend: "Lifetime count", icon: "📊", color: "text-violet-400", gradientFrom: "from-violet-600/20", gradientTo: "to-violet-600/5", blobColor: "bg-violet-500/10", iconBg: "bg-violet-500/15" },
+        { label: "Total Views", value: overviewStats.views, trend: "Across all uploads", icon: "👁️", color: "text-blue-400", gradientFrom: "from-blue-600/20", gradientTo: "to-blue-600/5", blobColor: "bg-blue-500/10", iconBg: "bg-blue-500/15" },
+        { label: "Downloads", value: overviewStats.downloads, trend: "Total downloads", icon: "⬇️", color: "text-cyan-400", gradientFrom: "from-cyan-600/20", gradientTo: "to-cyan-600/5", blobColor: "bg-cyan-500/10", iconBg: "bg-cyan-500/15" },
+        { label: "Revenue", value: `$${overviewStats.revenue}`, trend: "Total earned", icon: "💰", color: "text-emerald-400", gradientFrom: "from-emerald-600/20", gradientTo: "to-emerald-600/5", blobColor: "bg-emerald-500/10", iconBg: "bg-emerald-500/15" },
     ];
 
 
@@ -194,13 +194,18 @@ const Dashboard = () => {
                         {/* Stats Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                             {stats.map((stat) => (
-                                <div key={stat.label} className="card-surface p-6">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <p className="text-sm font-medium text-gray-400">{stat.label}</p>
-                                        <span className="text-2xl">{stat.icon}</span>
+                                <div key={stat.label} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${stat.gradientFrom} via-[#141821] ${stat.gradientTo} border border-white/5 p-6 hover:shadow-xl hover:border-white/10 transition-all group`}>
+                                    <div className={`absolute top-0 right-0 w-28 h-28 ${stat.blobColor} rounded-full blur-3xl -translate-y-1/2 translate-x-1/2`}></div>
+                                    <div className="relative">
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <div className={`w-8 h-8 rounded-lg ${stat.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                                                <span className="text-lg">{stat.icon}</span>
+                                            </div>
+                                            <p className="text-sm font-medium text-gray-400">{stat.label}</p>
+                                        </div>
+                                        <p className={`text-3xl font-bold tabular-nums ${stat.color}`}>{stat.value}</p>
+                                        <p className="text-xs text-gray-500 mt-1">{stat.trend}</p>
                                     </div>
-                                    <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
-                                    <p className="text-sm text-green-600 font-medium">{stat.trend}</p>
                                 </div>
                             ))}
                         </div>

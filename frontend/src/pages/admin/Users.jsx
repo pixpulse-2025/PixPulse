@@ -194,19 +194,42 @@ const AdminUsers = () => {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
-                        <p className="text-sm text-gray-400">Total Users</p>
-                        <p className="text-2xl font-bold text-white">{stats.total}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600/20 via-[#141821] to-blue-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">👥</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Total Users</p>
+                            </div>
+                            <p className="text-3xl font-bold text-blue-400 tabular-nums">{stats.total}</p>
+                        </div>
                     </div>
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
-                        <p className="text-sm text-gray-400">New (Month)</p>
-                        <p className="text-2xl font-bold text-green-500">{stats.newThisMonth}</p>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600/20 via-[#141821] to-emerald-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">✨</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">New (Month)</p>
+                            </div>
+                            <p className="text-3xl font-bold text-emerald-400 tabular-nums">{stats.newThisMonth}</p>
+                        </div>
                     </div>
-
-                    <div className="bg-[#141821] border border-white/5 rounded-xl p-4">
-                        <p className="text-sm text-gray-400">Admins</p>
-                        <p className="text-2xl font-bold text-blue-500">{stats.admins}</p>
+                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/20 via-[#141821] to-violet-600/5 border border-white/5 p-6 group">
+                        <div className="absolute top-0 right-0 w-28 h-28 bg-violet-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+                        <div className="relative">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
+                                    <span className="text-lg">👑</span>
+                                </div>
+                                <p className="text-sm font-medium text-gray-400">Admins</p>
+                            </div>
+                            <p className="text-3xl font-bold text-violet-400 tabular-nums">{stats.admins}</p>
+                        </div>
                     </div>
                 </div>
 

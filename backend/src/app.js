@@ -17,6 +17,7 @@ import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import sketchRoutes from "./routes/sketchRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -111,6 +112,9 @@ app.use("/api/sketch", sketchRoutes);
 
 // Wallet system (Balance, Deposits, Purchases)
 app.use("/api/wallet", walletRoutes);
+
+// Community comments
+app.use("/api/comments", commentRoutes);
 
 /* ==========================================================================
    ERROR HANDLING MIDDLEWARE

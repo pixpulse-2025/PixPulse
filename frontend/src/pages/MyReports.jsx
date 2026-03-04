@@ -21,10 +21,10 @@ const MyReports = () => {
 
     const getStatusBadge = (status) => {
         const badges = {
-            pending: "bg-yellow-100 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400",
-            reviewing: "bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400",
-            resolved: "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400",
-            dismissed: "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400",
+            pending: "bg-yellow-500/10 text-yellow-400",
+            reviewing: "bg-blue-500/10 text-blue-400",
+            resolved: "bg-green-500/10 text-green-400",
+            dismissed: "bg-gray-500/10 text-gray-400",
         };
         return badges[status] || badges.pending;
     };
@@ -46,37 +46,37 @@ const MyReports = () => {
 
     if (loading && reports.length === 0) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
+            <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600 dark:text-gray-400">Loading your reports...</p>
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-[#8B5CF6] mx-auto mb-4"></div>
+                    <p className="text-gray-400">Loading your reports...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12">
+        <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
                 {/* Header */}
                 <div className="mb-8">
-                    <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                    <h1 className="text-4xl font-bold text-white mb-2">
                         My Reports
                     </h1>
-                    <p className="text-gray-600 dark:text-gray-400">
+                    <p className="text-gray-400">
                         Track the status of your submitted artwork reports
                     </p>
                 </div>
 
                 {/* Filter Tabs */}
-                <div className="glass rounded-2xl p-2 mb-6 inline-flex gap-2">
+                <div className="bg-[#141821] border border-white/5 rounded-2xl p-2 mb-6 inline-flex gap-2">
                     {["all", "pending", "reviewing", "resolved", "dismissed"].map((status) => (
                         <button
                             key={status}
                             onClick={() => setFilter(status)}
                             className={`px-6 py-3 rounded-xl font-medium transition-all capitalize ${filter === status
-                                    ? "bg-primary-600 text-white shadow-lg"
-                                    : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+                                ? "bg-[#8B5CF6] text-white shadow-lg"
+                                : "text-gray-400 hover:bg-white/10"
                                 }`}
                         >
                             {status}
@@ -91,8 +91,8 @@ const MyReports = () => {
 
                 {/* Error Message */}
                 {error && (
-                    <div className="glass rounded-2xl p-6 mb-6 border-2 border-red-200 dark:border-red-800">
-                        <div className="flex items-center gap-3 text-red-600 dark:text-red-400">
+                    <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-6 mb-6">
+                        <div className="flex items-center gap-3 text-red-500">
                             <span className="text-2xl">⚠️</span>
                             <p>{error}</p>
                         </div>
@@ -101,21 +101,21 @@ const MyReports = () => {
 
                 {/* Reports List */}
                 {filteredReports.length === 0 ? (
-                    <div className="glass rounded-3xl p-12 text-center">
+                    <div className="bg-[#141821] border border-white/5 rounded-3xl p-12 text-center">
                         <div className="text-6xl mb-4">📋</div>
-                        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                        <h2 className="text-2xl font-bold text-white mb-2">
                             {filter === "all" ? "No Reports Yet" : `No ${filter} Reports`}
                         </h2>
-                        <p className="text-gray-500 dark:text-gray-400 mb-6">
+                        <p className="text-gray-400 mb-6">
                             {filter === "all"
                                 ? "You haven't submitted any reports yet."
                                 : `You don't have any ${filter} reports.`}
                         </p>
                         <Link
-                            to="/marketplace"
-                            className="inline-block px-6 py-3 bg-primary-600 text-white font-bold rounded-xl hover:bg-primary-700 transition-all"
+                            to="/explore"
+                            className="inline-block px-6 py-3 bg-[#8B5CF6] text-white font-bold rounded-xl hover:bg-[#7C3AED] transition-all"
                         >
-                            Browse Marketplace
+                            Browse Artworks
                         </Link>
                     </div>
                 ) : (
@@ -123,7 +123,7 @@ const MyReports = () => {
                         {filteredReports.map((report) => (
                             <div
                                 key={report._id}
-                                className="glass rounded-2xl p-6 hover:shadow-lg transition-all"
+                                className="bg-[#141821] border border-white/5 rounded-2xl p-6 hover:border-white/10 transition-all"
                             >
                                 <div className="flex flex-col lg:flex-row gap-6">
                                     {/* Artwork Preview */}
@@ -148,11 +148,11 @@ const MyReports = () => {
                                             <div>
                                                 <Link
                                                     to={`/artwork/${report.artwork?._id}`}
-                                                    className="text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+                                                    className="text-xl font-bold text-white hover:text-[#8B5CF6] transition-colors"
                                                 >
                                                     {report.artwork?.title || "Deleted Artwork"}
                                                 </Link>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                                <p className="text-sm text-gray-400 mt-1">
                                                     Reported on {new Date(report.createdAt).toLocaleDateString()}
                                                 </p>
                                             </div>
@@ -167,35 +167,35 @@ const MyReports = () => {
 
                                         {/* Reason */}
                                         <div>
-                                            <span className="text-sm font-bold text-gray-700 dark:text-gray-300">
+                                            <span className="text-sm font-bold text-gray-300">
                                                 Reason:
                                             </span>
-                                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">
+                                            <span className="ml-2 text-sm text-gray-400">
                                                 {report.reason}
                                             </span>
                                         </div>
 
                                         {/* Description */}
                                         <div>
-                                            <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
+                                            <p className="text-sm font-bold text-gray-300 mb-1">
                                                 Description:
                                             </p>
-                                            <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                                            <p className="text-sm text-gray-400 line-clamp-2">
                                                 {report.description}
                                             </p>
                                         </div>
 
                                         {/* Admin Notes (if resolved/dismissed) */}
                                         {report.adminNotes && (
-                                            <div className="bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                                                <p className="text-sm font-bold text-blue-900 dark:text-blue-400 mb-1">
+                                            <div className="bg-violet-500/10 border border-violet-500/20 rounded-xl p-4">
+                                                <p className="text-sm font-bold text-violet-400 mb-1">
                                                     Admin Response:
                                                 </p>
-                                                <p className="text-sm text-blue-800 dark:text-blue-300">
+                                                <p className="text-sm text-violet-300">
                                                     {report.adminNotes}
                                                 </p>
                                                 {report.resolvedAt && (
-                                                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                                                    <p className="text-xs text-violet-400/70 mt-2">
                                                         Resolved on {new Date(report.resolvedAt).toLocaleDateString()}
                                                     </p>
                                                 )}
@@ -209,14 +209,14 @@ const MyReports = () => {
                 )}
 
                 {/* Info Box */}
-                <div className="glass rounded-2xl p-6 mt-8">
+                <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 mt-8">
                     <div className="flex items-start gap-4">
                         <span className="text-3xl">ℹ️</span>
                         <div>
-                            <h3 className="font-bold text-gray-900 dark:text-white mb-2">
+                            <h3 className="font-bold text-white mb-2">
                                 About Reports
                             </h3>
-                            <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+                            <ul className="text-sm text-gray-400 space-y-1">
                                 <li>• Reports are typically reviewed within 24-48 hours</li>
                                 <li>• You'll be notified when your report status changes</li>
                                 <li>• False reports may result in account restrictions</li>

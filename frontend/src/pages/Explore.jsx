@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
     fetchArtworks,
@@ -12,6 +12,7 @@ import {
 import ArtworkGrid from "../components/artwork/ArtworkGrid";
 import DrawSearchModal from "../components/search/DrawSearchModal";
 import HumSearchModal from "../components/search/HumSearchModal";
+
 
 const AudioListRow = ({ artwork }) => {
     const BASE_URL = "http://localhost:5000";
@@ -171,11 +172,28 @@ const Explore = () => {
     const loading = useSelector(selectArtworkLoading);
     const pagination = useSelector(selectArtworkPagination);
     const filters = useSelector(selectArtworkFilters);
+    const [searchParams] = useSearchParams();
 
     const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState(filters.search || "");
     const [showDrawSearch, setShowDrawSearch] = useState(false);
     const [showHumSearch, setShowHumSearch] = useState(false);
+
+    // Read category and search from URL on mount (e.g. /explore?category=Audio or /explore?search=name)
+    useEffect(() => {
+        const urlCategory = searchParams.get("category");
+        const urlSearch = searchParams.get("search");
+        const newFilters = {};
+        if (urlCategory) newFilters.category = urlCategory;
+        if (urlSearch) {
+            newFilters.search = urlSearch;
+            setSearchTerm(urlSearch);
+        }
+        if (Object.keys(newFilters).length > 0) {
+            dispatch(setFilters(newFilters));
+            setPage(1);
+        }
+    }, []); // only on mount
 
     const handleAdvancedSearchResult = (result) => {
         setSearchTerm(result);

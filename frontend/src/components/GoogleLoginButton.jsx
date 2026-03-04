@@ -64,10 +64,10 @@ const GoogleLoginButton = () => {
                 type="button"
                 onClick={handleGoogleLogin}
                 disabled={isProcessing}
-                className="w-full py-3 px-4 border-2 border-gray-200 dark:border-gray-700 
-                           rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 
-                           transition-all flex items-center justify-center gap-3 
-                           text-gray-700 dark:text-gray-300 font-medium
+                className="w-full py-3.5 px-4 border border-white/10 bg-white/[0.03]
+                           rounded-xl hover:bg-white/[0.07] hover:border-white/20
+                           transition-all duration-200 flex items-center justify-center gap-3 
+                           text-gray-300 font-medium
                            disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 {isProcessing ? (
@@ -116,7 +116,7 @@ const GoogleLoginButton = () => {
             </button>
 
             {error && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400 text-center">
+                <p className="mt-2 text-sm text-red-400 text-center">
                     {error}
                 </p>
             )}
