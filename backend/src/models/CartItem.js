@@ -29,7 +29,7 @@ const cartItemSchema = new mongoose.Schema(
         licenseType: {
             type: String,
             required: true,
-            enum: ["Personal", "Commercial", "Extended Commercial"],
+            enum: ["Personal", "Commercial"],
             default: "Personal",
         },
     },

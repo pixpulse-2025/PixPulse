@@ -54,7 +54,7 @@ const Privacy = () => {
 
                     <section>
                         <h2 className="text-xl font-bold text-white mb-3">8. Contact</h2>
-                        <p>For privacy-related questions, contact us at <a href="mailto:supportpixpulse@gmail.com" className="text-[#8B5CF6] hover:underline">supportpixpulse@gmail.com</a>.</p>
+                        <p>For privacy-related questions, contact us at <a href="mailto:pixpulse.team@gmail.com" className="text-[#8B5CF6] hover:underline">pixpulse.team@gmail.com</a>.</p>
                     </section>
                 </div>
             </div>

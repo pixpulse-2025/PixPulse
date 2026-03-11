@@ -121,7 +121,8 @@ const favoritesSlice = createSlice({
             .addCase(addToFavorites.fulfilled, (state, action) => {
                 state.loading = false;
                 // Add if not already there
-                const exists = state.favorites.some(fav => fav.artwork?._id === action.payload.data?.artwork?._id);
+                const newArtworkId = action.payload.data?.artwork?._id || action.payload.data?.artwork;
+                const exists = state.favorites.some(fav => (fav.artwork?._id || fav.artwork) === newArtworkId);
                 if (!exists) {
                     state.favorites = [action.payload.data, ...state.favorites];
                 }

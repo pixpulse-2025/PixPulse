@@ -16,6 +16,11 @@ if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+const avatarDir = "uploads/avatars";
+if (!fs.existsSync(avatarDir)) {
+    fs.mkdirSync(avatarDir, { recursive: true });
+}
+
 /**
  * Configure storage settings for Multer.
  * Defines the destination folder and the naming convention for uploaded files.
@@ -64,5 +69,33 @@ export const uploadArtwork = multer({
     fileFilter: fileFilter,
     limits: {
         fileSize: 50 * 1024 * 1024, // Maximum file size: 50MB
+    },
+});
+
+const avatarStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, avatarDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname));
+    },
+});
+
+const avatarFilter = (req, file, cb) => {
+    const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedExtensions.includes(ext)) {
+        cb(null, true);
+    } else {
+        cb(new Error("Unsupported image format"), false);
+    }
+};
+
+export const uploadAvatar = multer({
+    storage: avatarStorage,
+    fileFilter: avatarFilter,
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB limit format
     },
 });

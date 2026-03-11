@@ -1,25 +1,68 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { getAvatarUrl } from "../utils/imageUtils";
 import { useAuth } from "../hooks/useAuth";
 
 const Settings = () => {
-    const { user } = useAuth();
+    const { user, updateProfile } = useAuth();
     const [activeSection, setActiveSection] = useState("profile");
     const [formData, setFormData] = useState({
         name: user?.name || "",
         email: user?.email || "",
-        bio: "Creative designer focused on modern digital art.",
+        bio: user?.bio || "",
         website: "",
         location: "",
+        avatar: user?.avatar || ""
     });
+
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                name: user.name || "",
+                email: user.email || "",
+                bio: user.bio || "",
+                avatar: user.avatar || ""
+            }));
+        }
+    }, [user]);
+    const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState("");
+    const fileInputRef = useRef(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setAvatarFile(file);
+            setAvatarPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // Handle form submission
-        alert("Settings updated successfully!");
+        try {
+            const dataToSubmit = new FormData();
+            dataToSubmit.append("name", formData.name);
+            dataToSubmit.append("bio", formData.bio);
+            if (avatarFile) {
+                dataToSubmit.append("avatarFile", avatarFile);
+            } else if (formData.avatar) {
+                dataToSubmit.append("avatar", formData.avatar);
+            }
+
+            await updateProfile(dataToSubmit);
+            setAvatarPreview("");
+            setAvatarFile(null);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+            alert("Settings updated successfully!");
+        } catch (error) {
+            alert(error.response?.data?.message || "Failed to update profile");
+        }
     };
 
     const sections = [
@@ -74,6 +117,28 @@ const Settings = () => {
                                     </div>
 
                                     <div className="space-y-6">
+                                        <div className="flex items-center gap-6">
+                                            <div className="w-20 h-20 rounded-full border-2 border-white/10 overflow-hidden flex-shrink-0 bg-[#141821]">
+                                                <img 
+                                                    src={avatarPreview || getAvatarUrl(formData.avatar, formData.name)} 
+                                                    alt="Profile Avatar" 
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex-1">
+                                                <label className="block text-sm font-semibold text-gray-300 mb-2">Profile Picture</label>
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    name="avatarFile"
+                                                    ref={fileInputRef}
+                                                    onChange={handleFileChange}
+                                                    className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#8B5CF6] file:text-white hover:file:bg-[#7C3AED] transition-all cursor-pointer"
+                                                />
+                                                <p className="text-xs text-gray-500 mt-2">Recommended: Square image, max 5MB.</p>
+                                            </div>
+                                        </div>
+
                                         <div>
                                             <label className="block text-sm font-semibold text-gray-300 mb-2">Full Name</label>
                                             <input
@@ -93,13 +158,15 @@ const Settings = () => {
                                                 name="email"
                                                 value={formData.email}
                                                 onChange={handleChange}
-                                                className="input-field"
+                                                className="input-field opacity-50 cursor-not-allowed"
                                                 placeholder="your@email.com"
+                                                disabled
                                             />
+                                            <p className="text-xs text-gray-500 mt-1">Email cannot be changed.</p>
                                         </div>
 
                                         <div>
-                                            <label className="block text-sm font-semibold text-gray-300 mb-2">Bio</label>
+                                            <label className="block text-sm font-semibold text-gray-300 mb-2">Biography</label>
                                             <textarea
                                                 name="bio"
                                                 rows="4"

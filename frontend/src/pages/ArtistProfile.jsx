@@ -1,22 +1,58 @@
 import { useState, useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 import ArtworkGrid from "../components/artwork/ArtworkGrid";
-import { fetchMyUploads } from "../redux/slices/artworkSlice";
 import { getAvatarUrl } from "../utils/imageUtils";
 
-const Profile = () => {
-    const { user } = useAuth();
-    const dispatch = useDispatch();
-    const [activeTab, setActiveTab] = useState("gallery");
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
-    // Get artworks from redux state
-    const { myArtworks } = useSelector((state) => state.artwork);
-    
+const ArtistProfile = () => {
+    const { id } = useParams();
+    const [activeTab, setActiveTab] = useState("gallery");
+    const [artist, setArtist] = useState(null);
+    const [artworks, setArtworks] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     useEffect(() => {
-        dispatch(fetchMyUploads());
-    }, [dispatch]);
+        const fetchProfile = async () => {
+            try {
+                setLoading(true);
+                const response = await axios.get(`${API_URL}/users/profile/${id}`);
+                setArtist(response.data.data.user);
+                setArtworks(response.data.data.artworks);
+            } catch (err) {
+                console.error("Error fetching artist profile:", err);
+                setError(err.response?.data?.message || "Failed to load profile");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) {
+            fetchProfile();
+        }
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-[#0B0D10] pt-40 flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (error || !artist) {
+        return (
+            <div className="min-h-screen bg-[#0B0D10] flex items-center justify-center pt-32">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-white mb-4">Profile Not Found</h2>
+                    <p className="text-gray-400 mb-8">{error || "The artist profile you are looking for does not exist."}</p>
+                    <a href="/explore" className="btn-primary">Browse Artworks</a>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#0B0D10] pt-32 pb-20">
@@ -26,8 +62,8 @@ const Profile = () => {
                     <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
                         <div className="w-32 h-32 rounded-full border-4 border-[#141821] overflow-hidden flex-shrink-0">
                             <img
-                                src={getAvatarUrl(user?.avatar, user?.name)}
-                                alt={user?.name}
+                                src={getAvatarUrl(artist.avatar, artist.name)}
+                                alt={artist.name}
                                 className="w-full h-full object-cover"
                             />
                         </div>
@@ -35,31 +71,18 @@ const Profile = () => {
                         <div className="flex-1 text-center md:text-left space-y-6">
                             <div>
                                 <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                                    {user?.name}
+                                    {artist.name}
                                 </h1>
                                 <p className="text-base text-gray-400">
-                                    {(user?.role || "Member").charAt(0).toUpperCase() + (user?.role || "Member").slice(1)} • Member since {user?.createdAt ? new Date(user.createdAt).getFullYear() : '2025'}
+                                    {artist.role || "Artist"} • Joined {new Date(artist.createdAt).getFullYear()}
                                 </p>
                             </div>
 
                             <div className="flex flex-wrap items-center justify-center md:justify-start gap-8">
                                 <div className="text-center md:text-left">
-                                    <p className="text-2xl font-bold text-white">{myArtworks.length || 0}</p>
+                                    <p className="text-2xl font-bold text-white">{artworks.length}</p>
                                     <p className="text-sm text-gray-400">Artworks</p>
                                 </div>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row gap-3">
-                                {user?.role !== 'admin' && (
-                                    <Link to="/upload" className="btn-primary flex items-center justify-center gap-2">
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" /></svg>
-                                        Upload Artwork
-                                    </Link>
-                                )}
-                                <Link to="/settings" className="btn-secondary flex items-center justify-center gap-2">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                    Edit Profile
-                                </Link>
                             </div>
                         </div>
                     </div>
@@ -90,19 +113,13 @@ const Profile = () => {
                 <div className="min-h-[400px]">
                     {activeTab === "gallery" && (
                         <div>
-                            {myArtworks.length > 0 ? (
-                                <ArtworkGrid artworks={myArtworks} loading={false} />
+                            {artworks.length > 0 ? (
+                                <ArtworkGrid artworks={artworks} loading={false} />
                             ) : (
                                 <div className="card-surface py-20 text-center">
                                     <svg className="w-16 h-16 text-gray-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                                     <h3 className="text-xl font-bold text-white mb-2">No artworks yet</h3>
-                                    <p className="text-gray-400 mb-6">Start sharing your creative work with the community</p>
-                                    {user?.role !== 'admin' && (
-                                        <Link to="/upload" className="btn-primary inline-flex items-center gap-2">
-                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                                            Upload Your First Artwork
-                                        </Link>
-                                    )}
+                                    <p className="text-gray-400 mb-6">This artist hasn't uploaded any artworks.</p>
                                 </div>
                             )}
                         </div>
@@ -112,18 +129,18 @@ const Profile = () => {
                         <div className="max-w-3xl">
                             <div className="card-surface p-8 space-y-8">
                                 <div>
-                                    <h3 className="text-xl font-bold text-white mb-4">Bio</h3>
+                                    <h3 className="text-xl font-bold text-white mb-4">Biography</h3>
                                     <p className="text-base text-gray-300 leading-relaxed whitespace-pre-wrap">
-                                        {user?.bio || "No bio added yet. Tell the community about yourself in settings!"}
+                                        {artist.bio || "This artist hasn't written a biography yet."}
                                     </p>
                                 </div>
 
                                 <div>
-                                    <h3 className="text-xl font-bold text-white mb-4">Contact</h3>
+                                    <h3 className="text-xl font-bold text-white mb-4">Contact Details</h3>
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-3 text-gray-300">
                                             <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                                            <span className="text-sm">{user?.email}</span>
+                                            <a href={`mailto:${artist.email}`} className="text-sm hover:text-violet-400 transition-colors">{artist.email}</a>
                                         </div>
                                     </div>
                                 </div>
@@ -136,5 +153,4 @@ const Profile = () => {
     );
 };
 
-export default Profile;
-
+export default ArtistProfile;

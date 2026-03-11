@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import axios from "axios";
 
@@ -217,9 +218,9 @@ const Community = () => {
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between mb-1">
                                                         <div className="flex items-center gap-2">
-                                                            <h3 className="font-semibold text-white text-sm">
+                                                            <Link to={comment.user?._id ? `/artist/${comment.user._id}` : "#"} className="font-semibold text-white text-sm hover:text-violet-400 transition-colors">
                                                                 {comment.user?.name || "Unknown"}
-                                                            </h3>
+                                                            </Link>
                                                             <span className="text-xs text-gray-500">
                                                                 {timeAgo(comment.createdAt)}
                                                             </span>
@@ -244,8 +245,8 @@ const Community = () => {
                                                             onClick={() => handleLike(comment._id)}
                                                             disabled={!isAuthenticated}
                                                             className={`flex items-center gap-1.5 text-sm transition-colors ${isLiked
-                                                                    ? "text-[#8B5CF6]"
-                                                                    : "text-gray-500 hover:text-[#8B5CF6]"
+                                                                ? "text-[#8B5CF6]"
+                                                                : "text-gray-500 hover:text-[#8B5CF6]"
                                                                 } disabled:opacity-50 disabled:cursor-not-allowed`}
                                                         >
                                                             <svg className="w-4 h-4" fill={isLiked ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -328,7 +329,7 @@ const Community = () => {
                             </h2>
                             <div className="space-y-4">
                                 {topArtists.length > 0 ? topArtists.map((artist, i) => (
-                                    <div key={artist._id || i} className="flex items-center gap-3">
+                                    <Link to={`/artist/${artist._id}`} key={artist._id || i} className="group flex items-center gap-3 hover:bg-white/5 p-2 rounded-lg transition-colors -mx-2">
                                         <div className="relative flex-shrink-0">
                                             <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10">
                                                 <img
@@ -345,7 +346,7 @@ const Community = () => {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="font-semibold text-white text-sm truncate">{artist.name}</p>
+                                            <p className="font-semibold text-white text-sm truncate group-hover:text-violet-400 transition-colors">{artist.name}</p>
                                             <p className="text-xs text-gray-500 flex items-center gap-1">
                                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -355,7 +356,7 @@ const Community = () => {
                                             </p>
                                         </div>
                                         <span className="text-xs font-medium text-gray-400">{artist.totalArtworks || 0} works</span>
-                                    </div>
+                                    </Link>
                                 )) : (
                                     <p className="text-sm text-gray-500">No artists yet.</p>
                                 )}

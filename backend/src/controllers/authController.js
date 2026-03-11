@@ -26,7 +26,7 @@ const generateToken = (userId) => {
  * @route POST /api/auth/register
  * @access Public
  */
-export const register = async (req, res, next) => {
+export const register = async (req, res) => {
     try {
         const { name, email, password } = req.body;
 
@@ -84,7 +84,7 @@ export const register = async (req, res, next) => {
  * @route POST /api/auth/login
  * @access Public
  */
-export const login = async (req, res, next) => {
+export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -144,7 +144,7 @@ export const login = async (req, res, next) => {
  * @route GET /api/auth/me
  * @access Private
  */
-export const getMe = async (req, res, next) => {
+export const getMe = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
 
@@ -182,9 +182,15 @@ export const getMe = async (req, res, next) => {
  * @route PUT /api/auth/profile
  * @access Private
  */
-export const updateProfile = async (req, res, next) => {
+export const updateProfile = async (req, res) => {
     try {
         const { name, bio, avatar } = req.body;
+        
+        let newAvatar = avatar;
+        if (req.file) {
+            const baseUrl = process.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
+            newAvatar = `${baseUrl}/uploads/avatars/${req.file.filename}`;
+        }
 
         const user = await User.findById(req.user.id);
 
@@ -198,7 +204,7 @@ export const updateProfile = async (req, res, next) => {
         // Update fields
         if (name) user.name = name;
         if (bio !== undefined) user.bio = bio;
-        if (avatar) user.avatar = avatar;
+        if (newAvatar) user.avatar = newAvatar;
 
         await user.save();
 
@@ -229,7 +235,7 @@ export const updateProfile = async (req, res, next) => {
  * @route POST /api/auth/logout
  * @access Private
  */
-export const logout = async (req, res, next) => {
+export const logout = async (req, res) => {
     try {
         // In JWT auth, logout is typically handled client-side
         // This endpoint can be used for logging or cleanup

@@ -30,8 +30,8 @@ export const useAuth = () => {
     const googleLogin = useCallback((googleData) => dispatch(googleLoginAction(googleData)), [dispatch]);
     const register = useCallback((userData) => dispatch(registerAction(userData)), [dispatch]);
     const logout = useCallback(() => dispatch(logoutAction()), [dispatch]);
-    const loadUser = useCallback(() => dispatch(loadUserAction()), [dispatch]);
-    const updateProfile = useCallback((userData) => dispatch(updateProfileAction(userData)), [dispatch]);
+    const loadUser = useCallback(() => dispatch(loadUserAction()).unwrap(), [dispatch]);
+    const updateProfile = useCallback((userData) => dispatch(updateProfileAction(userData)).unwrap(), [dispatch]);
     const clearError = useCallback(() => dispatch(clearErrorAction()), [dispatch]);
     const clearRegisterSuccess = useCallback(() => dispatch(clearRegisterSuccessAction()), [dispatch]);
 

@@ -13,7 +13,7 @@ const __dirname = path.dirname(__filename);
  * @route GET /api/download/:artworkId
  * @access Private
  */
-export const secureDownload = async (req, res, next) => {
+export const secureDownload = async (req, res) => {
     try {
         const { artworkId } = req.params;
 
@@ -84,7 +84,7 @@ export const secureDownload = async (req, res, next) => {
             });
         }
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -94,7 +94,7 @@ export const secureDownload = async (req, res, next) => {
  * @route POST /api/download/token/:artworkId
  * @access Private
  */
-export const generateDownloadToken = async (req, res, next) => {
+export const generateDownloadToken = async (req, res) => {
     try {
         const { artworkId } = req.params;
 
@@ -152,7 +152,7 @@ export const generateDownloadToken = async (req, res, next) => {
             downloadUrl: `/api/download/file/${token}`,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -162,7 +162,7 @@ export const generateDownloadToken = async (req, res, next) => {
  * @route GET /api/download/file/:token
  * @access Public (but requires valid token)
  */
-export const downloadWithToken = async (req, res, next) => {
+export const downloadWithToken = async (req, res) => {
     try {
         const { token } = req.params;
 
@@ -219,7 +219,7 @@ export const downloadWithToken = async (req, res, next) => {
             $inc: { downloads: 1 },
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -229,7 +229,7 @@ export const downloadWithToken = async (req, res, next) => {
  * @route GET /api/download/check/:artworkId
  * @access Private
  */
-export const checkDownloadEligibility = async (req, res, next) => {
+export const checkDownloadEligibility = async (req, res) => {
     try {
         const { artworkId } = req.params;
 
@@ -288,6 +288,6 @@ export const checkDownloadEligibility = async (req, res, next) => {
             expiresAt: downloadLink?.expiresAt,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };

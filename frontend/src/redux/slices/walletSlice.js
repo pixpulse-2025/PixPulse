@@ -45,9 +45,9 @@ export const fetchWalletBalance = createAsyncThunk(
 // Deposit test funds
 export const depositFunds = createAsyncThunk(
     "wallet/deposit",
-    async (amount, { rejectWithValue }) => {
+    async ({ amount, password }, { rejectWithValue }) => {
         try {
-            const response = await axios.post(`${API_URL}/wallet/deposit`, { amount });
+            const response = await axios.post(`${API_URL}/wallet/deposit`, { amount, password });
             return response.data;
         } catch (error) {
             return rejectWithValue(

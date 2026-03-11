@@ -44,7 +44,7 @@ const Help = () => {
                 <div className="mt-16 bg-[#141821] border border-white/5 rounded-2xl p-8 text-center">
                     <h2 className="text-xl font-bold text-white mb-2">Still need help?</h2>
                     <p className="text-gray-400 mb-6">Reach out to our support team and we'll get back to you within 24 hours.</p>
-                    <a href="mailto:supportpixpulse@gmail.com" className="btn-primary px-8 py-3 inline-block">Contact Support</a>
+                    <a href="mailto:pixpulse.team@gmail.com" className="btn-primary px-8 py-3 inline-block">Contact Support</a>
                 </div>
             </div>
         </div>

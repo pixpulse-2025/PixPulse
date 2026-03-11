@@ -2,16 +2,20 @@ import express from "express";
 import { protect, admin } from "../middleware/authMiddleware.js";
 import {
     getTopCreators,
+    getPublicProfile
+} from "../controllers/userController.js";
+import {
     getAllUsers,
     getUserById,
     updateUser,
     deleteUser
-} from "../controllers/userController.js";
+} from "../controllers/adminController.js";
 
 const router = express.Router();
 
 // Public routes
 router.get("/top-creators", getTopCreators);
+router.get("/profile/:id", getPublicProfile);
 
 // Admin routes
 router.get("/", protect, admin, getAllUsers);

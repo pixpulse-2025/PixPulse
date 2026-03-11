@@ -2,6 +2,7 @@ import User from "../models/User.js";
 import Artwork from "../models/Artwork.js";
 import Order from "../models/Order.js";
 import Transaction from "../models/Transaction.js";
+import Report from "../models/Report.js";
 
 /**
  * Get all users (Admin only)
@@ -142,21 +143,37 @@ export const deleteUser = async (req, res) => {
  */
 export const getDashboardStats = async (req, res) => {
     try {
+        // Date for "this month"
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
         // Get user statistics
         const totalUsers = await User.countDocuments();
         const totalArtists = await User.countDocuments({ role: "artist" });
         const blockedUsers = await User.countDocuments({ isBlocked: true });
+        const newUsersThisMonth = await User.countDocuments({ createdAt: { $gte: startOfMonth } });
+        const totalAdmins = await User.countDocuments({ role: "admin" });
 
         // Get artwork statistics
         const totalArtworks = await Artwork.countDocuments();
         const pendingArtworks = await Artwork.countDocuments({ status: "pending" });
+        const paidArtworks = await Artwork.countDocuments({ priceType: "Paid" });
+        const freeArtworks = await Artwork.countDocuments({ priceType: "Free" });
 
         // Get order statistics
         const totalOrders = await Order.countDocuments();
-        const totalRevenue = await Order.aggregate([
-            { $match: { status: "completed" } },
-            { $group: { _id: null, total: { $sum: "$totalAmount" } } }
-        ]);
+        const completedOrders = await Order.find({ paymentStatus: "completed" });
+        const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+        
+        const ordersThisMonth = await Order.countDocuments({ 
+            createdAt: { $gte: startOfMonth },
+            paymentStatus: "completed"
+        });
+
+        // Get report statistics
+        const totalReports = await Report.countDocuments();
+        const pendingReports = await Report.countDocuments({ status: "pending" });
+        const resolvedReports = await Report.countDocuments({ status: "resolved" });
 
         // Get recent users
         const recentUsers = await User.find()
@@ -170,25 +187,42 @@ export const getDashboardStats = async (req, res) => {
             .sort({ createdAt: -1 })
             .limit(5);
 
+        // Get recent orders
+        const recentOrders = await Order.find()
+            .populate("user", "name email")
+            .sort({ createdAt: -1 })
+            .limit(5);
+
         res.status(200).json({
             success: true,
             data: {
                 users: {
                     total: totalUsers,
                     artists: totalArtists,
-                    blocked: blockedUsers
+                    blocked: blockedUsers,
+                    newThisMonth: newUsersThisMonth,
+                    admins: totalAdmins
                 },
                 artworks: {
                     total: totalArtworks,
-                    pending: pendingArtworks
+                    pending: pendingArtworks,
+                    paid: paidArtworks,
+                    free: freeArtworks
                 },
                 orders: {
                     total: totalOrders,
-                    revenue: totalRevenue[0]?.total || 0
+                    revenue: totalRevenue,
+                    thisMonth: ordersThisMonth
+                },
+                reports: {
+                    total: totalReports,
+                    pending: pendingReports,
+                    resolved: resolvedReports
                 },
                 recent: {
                     users: recentUsers,
-                    artworks: recentArtworks
+                    artworks: recentArtworks,
+                    orders: recentOrders
                 }
             }
         });
@@ -333,6 +367,120 @@ export const getAllOrders = async (req, res) => {
         res.status(500).json({
             success: false,
             message: "Failed to fetch orders"
+        });
+    }
+};
+
+/**
+ * Get platform analytics (Admin only)
+ * GET /api/admin/analytics
+ */
+export const getAnalytics = async (req, res) => {
+    try {
+        // 1. Top Creators (by artwork count and total views)
+        const topCreators = await Artwork.aggregate([
+            {
+                $group: {
+                    _id: "$artist",
+                    artworkCount: { $sum: 1 },
+                    totalViews: { $sum: "$views" },
+                    totalDownloads: { $sum: "$downloads" }
+                }
+            },
+            { $sort: { artworkCount: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "artist"
+                }
+            },
+            { $unwind: "$artist" },
+            {
+                $project: {
+                    "artist.password": 0,
+                    "artist.viewedBy": 0
+                }
+            }
+        ]);
+
+        // 2. Top Selling Artworks (by revenue)
+        const topSales = await Order.aggregate([
+            { $match: { paymentStatus: "completed" } },
+            { $unwind: "$items" },
+            {
+                $group: {
+                    _id: "$items.artwork",
+                    salesCount: { $sum: 1 },
+                    totalRevenue: { $sum: "$items.price" },
+                    title: { $first: "$items.title" }
+                }
+            },
+            { $sort: { totalRevenue: -1 } },
+            { $limit: 10 },
+            {
+                $lookup: {
+                    from: "artworks",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "artwork"
+                }
+            },
+            { $unwind: { path: "$artwork", preserveNullAndEmptyArrays: true } }
+        ]);
+
+        // 3. Revenue by Category
+        const revenueByCategory = await Order.aggregate([
+            { $match: { paymentStatus: "completed" } },
+            { $unwind: "$items" },
+            {
+                $lookup: {
+                    from: "artworks",
+                    localField: "items.artwork",
+                    foreignField: "_id",
+                    as: "artworkDetails"
+                }
+            },
+            { $unwind: { path: "$artworkDetails", preserveNullAndEmptyArrays: true } },
+            {
+                $group: {
+                    _id: { $ifNull: ["$artworkDetails.category", "Other"] },
+                    revenue: { $sum: "$items.price" }
+                }
+            },
+            { $project: { category: "$_id", revenue: 1, _id: 0 } },
+            { $sort: { revenue: -1 } }
+        ]);
+
+        // 4. General Stats
+        const totalRevenueResult = await Order.aggregate([
+            { $match: { paymentStatus: "completed" } },
+            { $group: { _id: null, total: { $sum: "$totalAmount" } } }
+        ]);
+
+        const totalOrders = await Order.countDocuments({ paymentStatus: "completed" });
+        const totalArtworks = await Artwork.countDocuments();
+        const totalUsers = await User.countDocuments();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                topCreators,
+                topSales,
+                revenueByCategory,
+                totalRevenue: totalRevenueResult[0]?.total || 0,
+                totalOrders,
+                totalArtworks,
+                totalUsers
+            }
+        });
+    } catch (error) {
+        console.error("Error fetching analytics:", error);
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch analytics"
         });
     }
 };

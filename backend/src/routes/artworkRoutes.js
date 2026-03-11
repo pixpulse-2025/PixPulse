@@ -24,7 +24,7 @@ const router = express.Router();
    ========================================================================== */
 
 // Fetch all public artworks with optional filters (search, category, etc.)
-router.get("/", getArtworks);
+router.get("/", identifyUser, getArtworks);
 
 // Fetch details of a single artwork by its ID (two routes for compatibility)
 // Fetch artworks uploaded by the currently logged-in user (MUST be before /:id)

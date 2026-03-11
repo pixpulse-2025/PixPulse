@@ -31,7 +31,9 @@ import AdminArtworks from "./pages/admin/Artworks";
 import AdminReports from "./pages/admin/Reports";
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminTransactions from "./pages/admin/Transactions";
+import AdminMessages from "./pages/admin/Messages";
 import Profile from "./pages/Profile";
+import ArtistProfile from "./pages/ArtistProfile";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import About from "./pages/About";
@@ -97,6 +99,7 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/artist/:id" element={<ArtistProfile />} />
         <Route
           path="/artwork/:id"
           element={
@@ -246,6 +249,14 @@ function App() {
           element={
             <AdminRoute>
               <AdminTransactions />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/admin/messages"
+          element={
+            <AdminRoute>
+              <AdminMessages />
             </AdminRoute>
           }
         />

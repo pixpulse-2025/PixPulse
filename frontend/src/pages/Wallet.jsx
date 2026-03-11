@@ -25,6 +25,7 @@ const Wallet = () => {
     const error = useSelector(selectWalletError);
 
     const [customAmount, setCustomAmount] = useState("");
+    const [password, setPassword] = useState("");
     const [showSuccess, setShowSuccess] = useState(false);
 
     useEffect(() => {
@@ -34,10 +35,12 @@ const Wallet = () => {
     }, [dispatch, user]);
 
     const handleDeposit = async (amount) => {
-        const result = await dispatch(depositFunds(amount));
+        if (!password) return;
+        const result = await dispatch(depositFunds({ amount, password }));
         if (depositFunds.fulfilled.match(result)) {
             setShowSuccess(true);
             setCustomAmount("");
+            setPassword("");
             setTimeout(() => setShowSuccess(false), 3000);
         }
     };
@@ -45,7 +48,7 @@ const Wallet = () => {
     const handleCustomDeposit = (e) => {
         e.preventDefault();
         const amount = parseFloat(customAmount);
-        if (amount > 0) {
+        if (amount > 0 && password) {
             handleDeposit(amount);
         }
     };
@@ -166,38 +169,53 @@ const Wallet = () => {
                                 {QUICK_AMOUNTS.map((amount) => (
                                     <button
                                         key={amount}
-                                        onClick={() => handleDeposit(amount)}
+                                        type="button"
+                                        onClick={() => setCustomAmount(amount.toString())}
                                         disabled={depositLoading}
-                                        className="py-3 rounded-xl bg-white/5 hover:bg-violet-500/20 border border-white/5 hover:border-violet-500/30 text-white font-semibold text-sm transition-all duration-200 active:scale-95 disabled:opacity-50"
+                                        className={`py-3 rounded-xl border font-semibold text-sm transition-all duration-200 active:scale-95 disabled:opacity-50 ${customAmount === amount.toString() ? 'bg-violet-500/20 border-violet-500/50 text-white' : 'bg-white/5 hover:bg-violet-500/20 border-white/5 hover:border-violet-500/30 text-white'}`}
                                     >
                                         ${amount}
                                     </button>
                                 ))}
                             </div>
 
-                            <form onSubmit={handleCustomDeposit} className="flex gap-2">
-                                <div className="relative flex-1">
+                            <form onSubmit={handleCustomDeposit} className="flex flex-col gap-3">
+                                <div className="relative">
                                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
                                     <input
                                         type="number"
                                         value={customAmount}
                                         onChange={(e) => setCustomAmount(e.target.value)}
-                                        placeholder="Custom"
+                                        placeholder="Amount"
                                         min="1"
                                         max="10000"
                                         step="0.01"
+                                        required
                                         className="w-full pl-7 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-transparent text-sm"
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                    </span>
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        placeholder="Confirm Password"
+                                        required
+                                        className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-transparent text-sm"
                                     />
                                 </div>
                                 <button
                                     type="submit"
-                                    disabled={!customAmount || depositLoading}
-                                    className="px-5 py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95"
+                                    disabled={!customAmount || !password || depositLoading}
+                                    className="w-full py-3 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 flex items-center justify-center"
                                 >
                                     {depositLoading ? (
                                         <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                                     ) : (
-                                        "Add"
+                                        "Add Funds"
                                     )}
                                 </button>
                             </form>

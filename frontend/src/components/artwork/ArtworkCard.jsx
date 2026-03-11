@@ -185,7 +185,17 @@ const ArtworkCard = ({ artwork }) => {
                         <span className="text-sm font-bold text-[#A78BFA] whitespace-nowrap">${artwork.price || '0.00'}</span>
                     </div>
                     <div className="flex justify-between items-center mt-1">
-                        <span className="text-xs text-gray-400 line-clamp-1">{artwork.artist?.name || 'Anonymous'}</span>
+                        {artwork.artist?._id ? (
+                            <Link
+                                to={`/artist/${artwork.artist._id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-xs text-gray-400 hover:text-violet-400 transition-colors line-clamp-1 pr-2"
+                            >
+                                {artwork.artist.name}
+                            </Link>
+                        ) : (
+                            <span className="text-xs text-gray-400 line-clamp-1">{artwork.artist?.name || 'Anonymous'}</span>
+                        )}
                         <button
                             onClick={handleFavorite}
                             className={`transition-all duration-300 ${isFavorite ? "text-red-500" : "text-gray-500 hover:text-red-400"}`}

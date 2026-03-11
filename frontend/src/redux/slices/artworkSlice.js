@@ -19,6 +19,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
  */
 const initialState = {
     artworks: [],
+    myArtworks: [],
     currentArtwork: null,
     loading: false,
     error: null,
@@ -208,6 +209,7 @@ const artworkSlice = createSlice({
                 state.loading = false;
                 state.uploadSuccess = true;
                 state.artworks = [action.payload.data, ...state.artworks];
+                state.myArtworks = [action.payload.data, ...state.myArtworks];
             })
             .addCase(uploadArtwork.rejected, (state, action) => {
                 state.loading = false;
@@ -222,7 +224,7 @@ const artworkSlice = createSlice({
             })
             .addCase(fetchMyUploads.fulfilled, (state, action) => {
                 state.loading = false;
-                state.artworks = action.payload.data || [];
+                state.myArtworks = action.payload.data || [];
             })
             .addCase(fetchMyUploads.rejected, (state, action) => {
                 state.loading = false;
@@ -240,6 +242,10 @@ const artworkSlice = createSlice({
                 if (index !== -1) {
                     state.artworks[index] = action.payload.data;
                 }
+                const myIndex = state.myArtworks.findIndex(art => art._id === action.payload.data._id);
+                if (myIndex !== -1) {
+                    state.myArtworks[myIndex] = action.payload.data;
+                }
             })
             .addCase(updateArtwork.rejected, (state, action) => {
                 state.loading = false;
@@ -252,11 +258,16 @@ const artworkSlice = createSlice({
                 if (index !== -1) {
                     state.artworks[index] = action.payload.data;
                 }
+                const myIndex = state.myArtworks.findIndex(art => art._id === action.payload.data._id);
+                if (myIndex !== -1) {
+                    state.myArtworks[myIndex] = action.payload.data;
+                }
             })
 
             // Delete Artwork
             .addCase(deleteArtwork.fulfilled, (state, action) => {
                 state.artworks = state.artworks.filter(art => art._id !== action.payload.id);
+                state.myArtworks = state.myArtworks.filter(art => art._id !== action.payload.id);
             });
     },
 });

@@ -10,6 +10,7 @@ const AdminUsers = () => {
     const [filter, setFilter] = useState("all"); // all, users, blocked
     const [searchTerm, setSearchTerm] = useState("");
     const [roleFilter, setRoleFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all"); // all, active, blocked
 
     // Modal states
     const [selectedUser, setSelectedUser] = useState(null);
@@ -142,9 +143,9 @@ const AdminUsers = () => {
         // Role filter
         if (roleFilter !== "all" && user.role !== roleFilter) return false;
 
-        // Status filter (legacy filter state, if needed, or remove)
-        // if (filter === "users") return user.role === "user"; // This seems redundant with roleFilter
-        // if (filter === "blocked") return user.isBlocked;
+        // Status filter
+        if (statusFilter === "active" && user.isBlocked) return false;
+        if (statusFilter === "blocked" && !user.isBlocked) return false;
 
         return true;
     });
@@ -157,8 +158,8 @@ const AdminUsers = () => {
             const joined = new Date(u.createdAt);
             return joined.getMonth() === now.getMonth() && joined.getFullYear() === now.getFullYear();
         }).length,
-
-        admins: users.filter(u => u.role === "admin").length
+        admins: users.filter(u => u.role === "admin").length,
+        artists: users.filter(u => u.role === "artist").length
     };
 
     if (loading) {
@@ -212,11 +213,11 @@ const AdminUsers = () => {
                         <div className="relative">
                             <div className="flex items-center gap-2 mb-3">
                                 <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center group-hover:scale-110 transition-transform">
-                                    <span className="text-lg">✨</span>
+                                    <span className="text-lg">🎨</span>
                                 </div>
-                                <p className="text-sm font-medium text-gray-400">New (Month)</p>
+                                <p className="text-sm font-medium text-gray-400">Total Artists</p>
                             </div>
-                            <p className="text-3xl font-bold text-emerald-400 tabular-nums">{stats.newThisMonth}</p>
+                            <p className="text-3xl font-bold text-emerald-400 tabular-nums">{stats.artists}</p>
                         </div>
                     </div>
                     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600/20 via-[#141821] to-violet-600/5 border border-white/5 p-6 group">
@@ -236,20 +237,38 @@ const AdminUsers = () => {
                 {/* Filters and Search */}
                 <div className="bg-[#141821] border border-white/5 rounded-2xl p-6 mb-6">
                     <div className="flex flex-col md:flex-row gap-4 justify-between">
-                        {/* Role Filter */}
-                        <div className="flex gap-2 text-sm md:text-base overflow-x-auto pb-2 md:pb-0">
-                            {["all", "user", "admin"].map((r) => (
-                                <button
-                                    key={r}
-                                    onClick={() => setRoleFilter(r)}
-                                    className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${roleFilter === r
-                                        ? "bg-[#8B5CF6] text-white"
-                                        : "bg-white/5 text-gray-400 hover:bg-white/10"
-                                        }`}
-                                >
-                                    {r.charAt(0).toUpperCase() + r.slice(1)}s
-                                </button>
-                            ))}
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            {/* Role Filter */}
+                            <div className="flex gap-2 text-sm overflow-x-auto pb-2 sm:pb-0">
+                                {["all", "user", "admin"].map((r) => (
+                                    <button
+                                        key={r}
+                                        onClick={() => setRoleFilter(r)}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${roleFilter === r
+                                            ? "bg-[#8B5CF6] text-white"
+                                            : "bg-white/5 text-gray-400 hover:bg-white/10"
+                                            }`}
+                                    >
+                                        {r.charAt(0).toUpperCase() + r.slice(1)}s
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Status Filter */}
+                            <div className="flex gap-2 text-sm overflow-x-auto pb-2 sm:pb-0 border-l border-white/5 pl-2 sm:pl-4">
+                                {["all", "active", "blocked"].map((s) => (
+                                    <button
+                                        key={s}
+                                        onClick={() => setStatusFilter(s)}
+                                        className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${statusFilter === s
+                                            ? "bg-white/20 text-white"
+                                            : "bg-white/5 text-gray-400 hover:bg-white/10"
+                                            }`}
+                                    >
+                                        {s.charAt(0).toUpperCase() + s.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Search */}

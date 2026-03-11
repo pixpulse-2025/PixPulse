@@ -8,12 +8,14 @@ import Transaction from "../models/Transaction.js";
 import CartItem from "../models/CartItem.js";
 import Order from "../models/Order.js";
 import Artwork from "../models/Artwork.js";
+import License from "../models/License.js";
+import { sendTransactionEmail } from "../utils/emailService.js";
 
 /**
  * GET /api/wallet/balance
  * Returns the current wallet balance and recent transactions.
  */
-export const getWalletBalance = async (req, res, next) => {
+export const getWalletBalance = async (req, res) => {
     try {
         const user = await User.findById(req.user._id);
 
@@ -30,7 +32,7 @@ export const getWalletBalance = async (req, res, next) => {
             },
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -38,14 +40,21 @@ export const getWalletBalance = async (req, res, next) => {
  * POST /api/wallet/deposit
  * Add test money to the wallet.
  */
-export const depositFunds = async (req, res, next) => {
+export const depositFunds = async (req, res) => {
     try {
-        const { amount } = req.body;
+        const { amount, password } = req.body;
 
         if (!amount || amount <= 0) {
             return res.status(400).json({
                 success: false,
                 message: "Please provide a valid amount",
+            });
+        }
+
+        if (!password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide your password to confirm deposit",
             });
         }
 
@@ -56,7 +65,16 @@ export const depositFunds = async (req, res, next) => {
             });
         }
 
-        const user = await User.findById(req.user._id);
+        const user = await User.findById(req.user._id).select("+password");
+
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid password",
+            });
+        }
+
         const previousBalance = user.walletBalance || 0;
         user.walletBalance = previousBalance + amount;
         await user.save();
@@ -71,6 +89,9 @@ export const depositFunds = async (req, res, next) => {
             status: "completed",
         });
 
+        // Send transaction email
+        await sendTransactionEmail(user.email, user.name, transaction);
+
         res.status(200).json({
             success: true,
             data: {
@@ -80,7 +101,7 @@ export const depositFunds = async (req, res, next) => {
             message: `$${amount.toFixed(2)} added to your wallet`,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -89,7 +110,7 @@ export const depositFunds = async (req, res, next) => {
  * Pay for cart items using wallet balance.
  * Creates an order, deducts from wallet, credits artist, clears cart.
  */
-export const purchaseWithWallet = async (req, res, next) => {
+export const purchaseWithWallet = async (req, res) => {
     try {
         // Get user's cart with artwork details
         const cartItems = await CartItem.find({ user: req.user._id }).populate("artwork");
@@ -142,6 +163,7 @@ export const purchaseWithWallet = async (req, res, next) => {
                 items: orderItems,
                 totalAmount,
                 paymentMethod: "wallet",
+                licenseType: cartItems[0]?.licenseType || "Personal",
                 billingDetails: {
                     email: req.user.email,
                     name: req.user.name,
@@ -186,7 +208,7 @@ export const purchaseWithWallet = async (req, res, next) => {
 
             // 3a: Record buyer's purchase transaction
             try {
-                await Transaction.create({
+                const tx = await Transaction.create({
                     user: req.user._id,
                     type: "purchase",
                     amount: -itemPrice,
@@ -197,6 +219,7 @@ export const purchaseWithWallet = async (req, res, next) => {
                     revenueBreakdown,
                     status: "completed",
                 });
+                await sendTransactionEmail(req.user.email, req.user.name, tx);
             } catch (txErr) {
                 console.error("⚠️ Purchase transaction record failed:", txErr.message);
             }
@@ -210,7 +233,7 @@ export const purchaseWithWallet = async (req, res, next) => {
                         { $inc: { walletBalance: artistShare } },
                         { new: true }
                     );
-                    await Transaction.create({
+                    const earnTx = await Transaction.create({
                         user: artistId,
                         type: "earning",
                         amount: artistShare,
@@ -222,6 +245,9 @@ export const purchaseWithWallet = async (req, res, next) => {
                         relatedUser: req.user._id,
                         status: "completed",
                     });
+                    if (updatedArtist) {
+                        await sendTransactionEmail(updatedArtist.email, updatedArtist.name, earnTx);
+                    }
                 } catch (earnErr) {
                     console.error("⚠️ Artist earning failed:", earnErr.message);
                 }
@@ -235,7 +261,7 @@ export const purchaseWithWallet = async (req, res, next) => {
                         { $inc: { walletBalance: adminShare } },
                         { new: true }
                     );
-                    await Transaction.create({
+                    const commTx = await Transaction.create({
                         user: primaryAdmin._id,
                         type: "admin_commission",
                         amount: adminShare,
@@ -247,17 +273,35 @@ export const purchaseWithWallet = async (req, res, next) => {
                         relatedUser: artistId || null,
                         status: "completed",
                     });
+                    if (updatedAdmin) {
+                        await sendTransactionEmail(updatedAdmin.email, updatedAdmin.name, commTx);
+                    }
                 } catch (commErr) {
                     console.error("⚠️ Admin commission record failed:", commErr.message);
                 }
             }
         }
 
-        // Step 4: Update artwork download counts
+        // Step 4: Update artwork download counts and generate licenses
         for (const item of orderItems) {
             await Artwork.findByIdAndUpdate(item.artwork, {
                 $inc: { downloads: 1 },
             }).catch(() => { });
+
+            try {
+                await License.create({
+                    user: req.user._id,
+                    order: order._id,
+                    artwork: item.artwork,
+                    buyerName: req.user.name || "Unknown",
+                    buyerEmail: req.user.email || "Unknown",
+                    productName: item.title || "Digital Product",
+                    orderIdString: order.orderNumber || order._id.toString(),
+                    licenseType: order.licenseType || "Personal",
+                });
+            } catch (licenseErr) {
+                console.error("⚠️ License generation failed:", licenseErr.message);
+            }
         }
 
         // Step 5: Clear user's cart
@@ -279,7 +323,7 @@ export const purchaseWithWallet = async (req, res, next) => {
         });
     } catch (error) {
         console.error("❌ purchaseWithWallet error:", error);
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -287,7 +331,7 @@ export const purchaseWithWallet = async (req, res, next) => {
  * GET /api/wallet/transactions
  * Get full transaction history with pagination.
  */
-export const getTransactions = async (req, res, next) => {
+export const getTransactions = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
@@ -312,6 +356,6 @@ export const getTransactions = async (req, res, next) => {
             },
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };

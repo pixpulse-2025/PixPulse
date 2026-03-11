@@ -21,6 +21,7 @@ import {
     updateProfileValidation,
     validate,
 } from "../middleware/validationMiddleware.js";
+import { uploadAvatar } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -53,7 +54,8 @@ router.post("/reset-password/:token", resetPassword);
 router.get("/me", protect, getMe);
 
 // Update current user's profile information with validation
-router.put("/profile", protect, updateProfileValidation, validate, updateProfile);
+// Using multer to handle optional avatarFile upload
+router.put("/profile", protect, uploadAvatar.single("avatarFile"), updateProfileValidation, validate, updateProfile);
 
 // Log out the current user (token invalidation should be handled on client side)
 router.post("/logout", protect, logout);

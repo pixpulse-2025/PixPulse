@@ -1,6 +1,7 @@
 import Order from "../models/Order.js";
 import CartItem from "../models/CartItem.js";
 import Artwork from "../models/Artwork.js";
+import License from "../models/License.js";
 
 /**
  * Creates a new order based on the user's current shopping cart.
@@ -8,7 +9,7 @@ import Artwork from "../models/Artwork.js";
  * @route POST /api/checkout
  * @access Private
  */
-export const createOrder = async (req, res, next) => {
+export const createOrder = async (req, res) => {
     try {
         const { billingDetails, paymentMethod } = req.body;
 
@@ -76,7 +77,7 @@ export const createOrder = async (req, res, next) => {
             message: "Order created successfully",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -86,7 +87,7 @@ export const createOrder = async (req, res, next) => {
  * @route POST /api/checkout/complete/:orderId
  * @access Private
  */
-export const completeOrder = async (req, res, next) => {
+export const completeOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
         const { paymentIntentId, transactionId } = req.body;
@@ -124,11 +125,25 @@ export const completeOrder = async (req, res, next) => {
         order.downloadLinks = downloadLinks;
         await order.save();
 
-        // Update artwork download count
+        // Update artwork download count and generate licenses
         for (const item of order.items) {
             await Artwork.findByIdAndUpdate(item.artwork, {
                 $inc: { downloads: 1 },
             });
+
+            try {
+                await License.create({
+                    user: req.user._id,
+                    order: order._id,
+                    artwork: item.artwork,
+                    buyerName: req.user.name,
+                    buyerEmail: req.user.email,
+                    productName: item.title,
+                    orderIdString: order.orderNumber,
+                });
+            } catch (licenseErr) {
+                console.error("⚠️ License generation failed:", licenseErr.message);
+            }
         }
 
         // Clear user's cart
@@ -143,7 +158,7 @@ export const completeOrder = async (req, res, next) => {
             message: "Order completed successfully",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -152,7 +167,7 @@ export const completeOrder = async (req, res, next) => {
  * @route GET /api/checkout/orders
  * @access Private
  */
-export const getMyOrders = async (req, res, next) => {
+export const getMyOrders = async (req, res) => {
     try {
         const orders = await Order.find({ user: req.user._id })
             .populate({
@@ -167,7 +182,7 @@ export const getMyOrders = async (req, res, next) => {
             data: orders,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -176,7 +191,7 @@ export const getMyOrders = async (req, res, next) => {
  * @route GET /api/checkout/orders/:orderId
  * @access Private
  */
-export const getOrderById = async (req, res, next) => {
+export const getOrderById = async (req, res) => {
     try {
         const { orderId } = req.params;
 
@@ -205,7 +220,7 @@ export const getOrderById = async (req, res, next) => {
             data: order,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -214,7 +229,7 @@ export const getOrderById = async (req, res, next) => {
  * @route PATCH /api/checkout/orders/:orderId/cancel
  * @access Private
  */
-export const cancelOrder = async (req, res, next) => {
+export const cancelOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
 
@@ -253,6 +268,6 @@ export const cancelOrder = async (req, res, next) => {
             message: "Order cancelled successfully",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };

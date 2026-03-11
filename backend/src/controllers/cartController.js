@@ -7,7 +7,7 @@ import Artwork from "../models/Artwork.js";
  * @route POST /api/cart/:artworkId
  * @access Private
  */
-export const addToCart = async (req, res, next) => {
+export const addToCart = async (req, res) => {
     try {
         const { artworkId } = req.params;
         const { licenseType } = req.body;
@@ -67,7 +67,7 @@ export const addToCart = async (req, res, next) => {
             data: cartItem,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -76,7 +76,7 @@ export const addToCart = async (req, res, next) => {
  * @route DELETE /api/cart/:itemId
  * @access Private
  */
-export const removeFromCart = async (req, res, next) => {
+export const removeFromCart = async (req, res) => {
     try {
         const { itemId } = req.params;
 
@@ -99,7 +99,7 @@ export const removeFromCart = async (req, res, next) => {
             message: "Item removed from cart",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -109,7 +109,7 @@ export const removeFromCart = async (req, res, next) => {
  * @route GET /api/cart
  * @access Private
  */
-export const getCart = async (req, res, next) => {
+export const getCart = async (req, res) => {
     try {
         const cartItems = await CartItem.find({ user: req.user._id })
             .populate({
@@ -131,7 +131,7 @@ export const getCart = async (req, res, next) => {
             data: cartItems,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -140,7 +140,7 @@ export const getCart = async (req, res, next) => {
  * @route DELETE /api/cart
  * @access Private
  */
-export const clearCart = async (req, res, next) => {
+export const clearCart = async (req, res) => {
     try {
         await CartItem.deleteMany({ user: req.user._id });
 
@@ -149,6 +149,6 @@ export const clearCart = async (req, res, next) => {
             message: "Cart cleared",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };

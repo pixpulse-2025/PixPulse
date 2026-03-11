@@ -23,102 +23,57 @@ const AdminDashboard = () => {
     const fetchDashboardStats = async () => {
         try {
             setLoading(true);
-
-            // Fetch all data in parallel
-            const [usersRes, artworksRes, ordersRes, reportsRes] = await Promise.all([
-                axios.get(`${API_URL}/users`).catch(() => ({ data: { data: [] } })),
-                axios.get(`${API_URL}/artworks`).catch(() => ({ data: { data: [] } })),
-                axios.get(`${API_URL}/admin/orders`).catch(() => ({ data: { data: [] } })),
-                axios.get(`${API_URL}/reports`).catch(() => ({ data: { data: [] } }))
-            ]);
-
-            // Calculate user stats
-            const users = usersRes.data.data || [];
-            const userStats = {
-                total: users.length,
-                admins: users.filter(u => u.role === 'admin').length,
-                newThisMonth: users.filter(u => {
-                    const created = new Date(u.createdAt);
-                    const now = new Date();
-                    return created.getMonth() === now.getMonth() &&
-                        created.getFullYear() === now.getFullYear();
-                }).length
-            };
-
-            // Calculate artwork stats
-            const artworks = artworksRes.data.artworks || artworksRes.data.data || [];
-            const artworkStats = {
-                total: artworks.length,
-                paid: artworks.filter(a => a.priceType === 'Paid').length,
-                free: artworks.filter(a => a.priceType === 'Free').length,
-                pending: artworks.filter(a => a.status === 'pending').length
-            };
-
-            // Calculate order stats
-            const orders = ordersRes.data.data || [];
-            const orderStats = {
-                total: orders.length,
-                revenue: ordersRes.data.revenueBreakdown ? ordersRes.data.revenueBreakdown.totalRevenue : orders.filter(o => o.paymentStatus === 'completed').reduce((sum, o) => sum + (o.totalAmount || 0), 0),
-                thisMonth: orders.filter(o => {
-                    const created = new Date(o.createdAt);
-                    const now = new Date();
-                    return created.getMonth() === now.getMonth() &&
-                        created.getFullYear() === now.getFullYear();
-                }).length
-            };
-
-            // Calculate report stats
-            const reports = reportsRes.data.data || [];
-            const reportStats = {
-                total: reports.length,
-                pending: reports.filter(r => r.status === 'pending').length,
-                resolved: reports.filter(r => r.status === 'resolved').length
-            };
-
-            setStats({
-                users: userStats,
-                artworks: artworkStats,
-                orders: orderStats,
-                reports: reportStats
+            const token = localStorage.getItem("token");
+            const { data } = await axios.get(`${API_URL}/admin/stats`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
-            // Create recent activity feed
-            const activities = [];
-
-            // Recent users
-            users.slice(0, 3).forEach(u => {
-                activities.push({
-                    type: 'user',
-                    message: `New user registered: ${u.name}`,
-                    time: u.createdAt,
-                    icon: '👤'
+            if (data.success) {
+                const s = data.data;
+                setStats({
+                    users: s.users,
+                    artworks: s.artworks,
+                    orders: s.orders,
+                    reports: s.reports
                 });
-            });
 
-            // Recent artworks
-            artworks.slice(0, 3).forEach(a => {
-                activities.push({
-                    type: 'artwork',
-                    message: `New artwork uploaded: ${a.title}`,
-                    time: a.createdAt,
-                    icon: '🎨'
+                // Create recent activity feed from consolidated data
+                const activities = [];
+
+                // Recent users
+                s.recent.users.forEach(u => {
+                    activities.push({
+                        type: 'user',
+                        message: `New user registered: ${u.name}`,
+                        time: u.createdAt,
+                        icon: '👤'
+                    });
                 });
-            });
 
-            // Recent orders
-            orders.slice(0, 3).forEach(o => {
-                activities.push({
-                    type: 'order',
-                    message: `New order: $${o.totalAmount}`,
-                    time: o.createdAt,
-                    icon: '💰'
+                // Recent artworks
+                s.recent.artworks.forEach(a => {
+                    activities.push({
+                        type: 'artwork',
+                        message: `New artwork uploaded: ${a.title}`,
+                        time: a.createdAt,
+                        icon: '🎨'
+                    });
                 });
-            });
 
-            // Sort by time and take top 10
-            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
-            setRecentActivity(activities.slice(0, 10));
+                // Recent orders
+                s.recent.orders.forEach(o => {
+                    activities.push({
+                        type: 'order',
+                        message: `New order: $${o.totalAmount.toFixed(2)}`,
+                        time: o.createdAt,
+                        icon: '💰'
+                    });
+                });
 
+                // Sort by time and take top 10
+                activities.sort((a, b) => new Date(b.time) - new Date(a.time));
+                setRecentActivity(activities.slice(0, 10));
+            }
         } catch (error) {
             console.error("Error fetching dashboard stats:", error);
         } finally {
@@ -357,19 +312,20 @@ const AdminDashboard = () => {
                         <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🚩</div>
                         <p className="font-medium text-white">Review Reports</p>
                     </Link>
-                    <Link
-                        to="/explore"
-                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
-                    >
-                        <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🏪</div>
-                        <p className="font-medium text-white">View Marketplace</p>
-                    </Link>
+
                     <Link
                         to="/admin/transactions"
                         className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
                     >
                         <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">💳</div>
                         <p className="font-medium text-white">Transactions</p>
+                    </Link>
+                    <Link
+                        to="/admin/messages"
+                        className="p-4 border border-white/10 rounded-xl hover:border-[#8B5CF6] transition-all text-center group bg-[#141821]"
+                    >
+                        <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">✉️</div>
+                        <p className="font-medium text-white">Messages</p>
                     </Link>
                 </div>
             </div>

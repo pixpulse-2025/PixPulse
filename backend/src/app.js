@@ -18,6 +18,9 @@ import userRoutes from "./routes/userRoutes.js";
 import sketchRoutes from "./routes/sketchRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
+import subscribeRoutes from "./routes/subscribeRoutes.js";
+import contactRoutes from "./routes/contactRoutes.js";
+import licenseRoutes from "./routes/licenseRoutes.js";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -116,6 +119,15 @@ app.use("/api/wallet", walletRoutes);
 // Community comments
 app.use("/api/comments", commentRoutes);
 
+// Subscribe to newsletter
+app.use("/api/subscribe", subscribeRoutes);
+
+// Contact Us form
+app.use("/api/contact", contactRoutes);
+
+// Licenses
+app.use("/api/licenses", licenseRoutes);
+
 /* ==========================================================================
    ERROR HANDLING MIDDLEWARE
    Catches 404 errors and handles all other exceptions globally.
@@ -127,3 +139,4 @@ app.use(notFound);
 app.use(errorHandler);
 
 export default app;
+

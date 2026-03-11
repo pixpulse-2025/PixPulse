@@ -246,7 +246,6 @@ const Upload = () => {
                                 >
                                     <option value="Personal">Personal</option>
                                     <option value="Commercial">Commercial</option>
-                                    <option value="Extended Commercial">Extended Commercial</option>
                                 </select>
                             </div>
                         </div>

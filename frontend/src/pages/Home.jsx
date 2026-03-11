@@ -89,9 +89,19 @@ const AudioWaveCard = ({ artwork, apiUrl }) => {
                 <h3 className="text-sm font-bold text-white truncate group-hover:text-violet-400 transition-colors leading-tight">
                     {artwork.title}
                 </h3>
-                <p className="text-xs text-gray-500 truncate leading-tight mt-0.5">
-                    {artwork.artist?.name || "Unknown Artist"}
-                </p>
+                {artwork.artist?._id ? (
+                    <Link
+                        to={`/artist/${artwork.artist._id}`}
+                        onClick={(e) => e.stopPropagation()}
+                        className="text-xs text-gray-500 hover:text-violet-400 transition-colors truncate leading-tight mt-0.5 block"
+                    >
+                        {artwork.artist.name}
+                    </Link>
+                ) : (
+                    <p className="text-xs text-gray-500 truncate leading-tight mt-0.5">
+                        {artwork.artist?.name || "Unknown Artist"}
+                    </p>
+                )}
             </div>
 
             {/* Waveform + Time */}
@@ -358,7 +368,7 @@ const Home = () => {
                     {featuredArtists.length > 0 ? (
                         <div className="flex flex-wrap justify-center gap-12 md:gap-20">
                             {featuredArtists.map((artist, i) => (
-                                <div key={i} className="flex flex-col items-center group cursor-default">
+                                <Link to={`/artist/${artist.id}`} key={i} className="flex flex-col items-center group cursor-pointer block">
                                     <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-violet-500 transition-all duration-300 mb-6 p-1">
                                         <img src={artist.img} alt={artist.name} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                                     </div>
@@ -367,7 +377,7 @@ const Home = () => {
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                         {artist.totalViews.toLocaleString()} views
                                     </p>
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     ) : (
@@ -414,14 +424,26 @@ const Home = () => {
                         <p className="text-gray-400 text-lg font-light">Join 50,000+ creators getting weekly design resources and inspiration.</p>
                     </div>
                     <form
-                        onSubmit={(e) => {
+                        onSubmit={async (e) => {
                             e.preventDefault();
                             if (!subscribeEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(subscribeEmail)) {
                                 setSubscribeStatus("error");
                                 return;
                             }
-                            setSubscribeStatus("success");
-                            setSubscribeEmail("");
+
+                            try {
+                                const response = await axios.post(`${API_URL}/subscribe`, { email: subscribeEmail });
+                                if (response.data.success) {
+                                    setSubscribeStatus("success");
+                                    setSubscribeEmail("");
+                                } else {
+                                    setSubscribeStatus("error");
+                                }
+                            } catch (error) {
+                                console.error("Subscribe error:", error);
+                                setSubscribeStatus("error");
+                            }
+
                             setTimeout(() => setSubscribeStatus(""), 4000);
                         }}
                         className="flex flex-col sm:flex-row gap-4"

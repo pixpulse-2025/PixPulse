@@ -10,7 +10,7 @@ import {
 
 const MyUploads = () => {
     const dispatch = useDispatch();
-    const { artworks, loading, error } = useSelector((state) => state.artwork);
+    const { myArtworks, loading, error } = useSelector((state) => state.artwork);
     const [editingId, setEditingId] = useState(null);
     const [editForm, setEditForm] = useState({});
 
@@ -45,7 +45,7 @@ const MyUploads = () => {
         }
     };
 
-    if (loading && artworks.length === 0) {
+    if (loading && myArtworks.length === 0) {
         return (
             <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pt-24 pb-12 flex items-center justify-center">
                 <div className="text-center">
@@ -63,7 +63,7 @@ const MyUploads = () => {
                     <div>
                         <h1 className="text-4xl font-bold text-white mb-2">My Uploads</h1>
                         <p className="text-gray-400">
-                            Manage your creative portfolio ({artworks.length} {artworks.length === 1 ? 'item' : 'items'})
+                            Manage your creative portfolio ({myArtworks.length} {myArtworks.length === 1 ? 'item' : 'items'})
                         </p>
                     </div>
                     <Link
@@ -81,7 +81,7 @@ const MyUploads = () => {
                     </div>
                 )}
 
-                {artworks.length === 0 ? (
+                {myArtworks.length === 0 ? (
                     <div className="card-surface rounded-3xl p-16 text-center">
                         <div className="text-6xl mb-4">🎨</div>
                         <h3 className="text-2xl font-bold text-white mb-2">No uploads yet</h3>
@@ -96,7 +96,7 @@ const MyUploads = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
-                        {artworks.map((artwork) => (
+                        {myArtworks.map((artwork) => (
                             <div key={artwork._id} className="card-surface rounded-2xl overflow-hidden">
                                 <div className="md:flex">
                                     {/* Preview Image */}

@@ -557,7 +557,7 @@ const ArtworkDetail = () => {
 
                             {/* Artist Info */}
                             <div className="pt-8 border-t border-text/10">
-                                <Link to={`/profile/${artwork.artist?._id}`} className="flex items-center gap-4 group">
+                                <Link to={`/artist/${artwork.artist?._id}`} className="flex items-center gap-4 group">
                                     <div className="w-14 h-14 rounded-2xl overflow-hidden border border-text/10 group-hover:scale-105 transition-transform">
                                         <img
                                             src={artwork.artist?.avatar || `https://ui-avatars.com/api/?name=${artwork.artist?.name}&background=random`}
@@ -595,7 +595,8 @@ const ArtworkDetail = () => {
                 >
                     <div className="relative max-w-7xl max-h-full flex items-center justify-center">
                         {(() => {
-                            const ext = imageUrl.split('.').pop().toLowerCase().split('?')[0];
+                            const previewSrc = coverUrl || mediaUrl || '';
+                            const ext = previewSrc.split('.').pop().toLowerCase().split('?')[0];
                             const isVideo = ['mp4', 'webm', 'ogg', 'mov'].includes(ext) || artwork.category === 'Video';
                             const isAudio = ['mp3', 'wav', 'mpeg'].includes(ext) || artwork.category === 'Audio';
 
@@ -604,7 +605,7 @@ const ArtworkDetail = () => {
                                     <video
                                         controls
                                         autoPlay
-                                        src={imageUrl}
+                                        src={mediaUrl}
                                         className="rounded-2xl shadow-2xl max-h-[90vh] w-auto max-w-full"
                                         onClick={(e) => e.stopPropagation()}
                                     />
@@ -617,14 +618,14 @@ const ArtworkDetail = () => {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 10l12-3" />
                                             </svg>
                                         </div>
-                                        <audio controls src={imageUrl} className="w-full" />
+                                        <audio controls src={mediaUrl} className="w-full" />
                                         <p className="text-white font-bold">{artwork.title}</p>
                                     </div>
                                 );
                             } else {
                                 return (
                                     <img
-                                        src={imageUrl}
+                                        src={coverUrl || mediaUrl}
                                         alt={artwork.title}
                                         className="rounded-2xl shadow-2xl max-h-[90vh] w-auto"
                                         onClick={(e) => e.stopPropagation()}

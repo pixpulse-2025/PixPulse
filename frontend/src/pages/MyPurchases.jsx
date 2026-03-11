@@ -11,6 +11,7 @@ const MyPurchases = () => {
     const { orders, loading, error } = useSelector((state) => state.orders);
     const [filter, setFilter] = useState("all");
     const [downloading, setDownloading] = useState(null);
+    const [downloadingLicense, setDownloadingLicense] = useState(null);
 
     useEffect(() => {
         dispatch(fetchMyOrders());
@@ -64,6 +65,44 @@ const MyPurchases = () => {
             alert(error.response?.data?.message || 'Download failed. Please try again.');
         } finally {
             setDownloading(null);
+        }
+    };
+
+    const handleDownloadLicense = async (orderId, artworkId, itemTitle) => {
+        try {
+            setDownloadingLicense(artworkId);
+            const response = await axios.get(`${API_URL}/licenses/${orderId}/${artworkId}/download`, {
+                responseType: 'blob',
+            });
+
+            const blob = new Blob([response.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            const safeTitle = (itemTitle || 'license').replace(/[^a-z0-9]/gi, '_');
+            link.setAttribute('download', `${safeTitle}_license.pdf`);
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("License download error:", error);
+            // When responseType is 'blob', error responses are also Blobs — read them as text
+            let message = 'License download failed. Please try again.';
+            if (error.response?.data instanceof Blob) {
+                try {
+                    const text = await error.response.data.text();
+                    const json = JSON.parse(text);
+                    message = json.message || message;
+                } catch (_) { /* ignore parse errors */ }
+            } else {
+                message = error.response?.data?.message || error.message || message;
+            }
+            alert(message);
+        } finally {
+            setDownloadingLicense(null);
         }
     };
 
@@ -257,14 +296,24 @@ const MyPurchases = () => {
                                                             <span className="text-sm text-gray-400">{artwork?.artist?.name || "Anonymous"}</span>
                                                         </div>
                                                         {order.paymentStatus === "completed" && (
-                                                            <button
-                                                                onClick={() => handleDownload(artwork?._id || item.artwork, item.title)}
-                                                                disabled={downloading === (artwork?._id || item.artwork)}
-                                                                className="inline-flex items-center gap-2 px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                            >
-                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                                                                {downloading === (artwork?._id || item.artwork) ? 'Downloading...' : 'Download'}
-                                                            </button>
+                                                            <div className="flex items-center gap-2">
+                                                                <button
+                                                                    onClick={() => handleDownloadLicense(order._id, artwork?._id || item.artwork, item.title)}
+                                                                    disabled={downloadingLicense === (artwork?._id || item.artwork)}
+                                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#141821] hover:bg-white/10 text-gray-300 text-sm font-semibold rounded-full border border-white/10 transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                                                    {downloadingLicense === (artwork?._id || item.artwork) ? 'Getting License...' : 'License'}
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDownload(artwork?._id || item.artwork, item.title)}
+                                                                    disabled={downloading === (artwork?._id || item.artwork)}
+                                                                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-sm font-semibold rounded-full shadow-md hover:shadow-lg transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                >
+                                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                                    {downloading === (artwork?._id || item.artwork) ? 'Downloading...' : 'Download'}
+                                                                </button>
+                                                            </div>
                                                         )}
                                                     </div>
                                                 </div>

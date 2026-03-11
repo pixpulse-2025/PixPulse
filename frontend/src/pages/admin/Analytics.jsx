@@ -20,92 +20,14 @@ const AdminAnalytics = () => {
     const fetchAnalytics = async () => {
         try {
             setLoading(true);
-
-            // Fetch data
-            const [usersRes, artworksRes, ordersRes] = await Promise.all([
-                axios.get(`${API_URL}/users`).catch(() => ({ data: { data: [] } })),
-                axios.get(`${API_URL}/artworks`).catch(() => ({ data: { data: [] } })),
-                axios.get(`${API_URL}/orders`).catch(() => ({ data: { data: [] } }))
-            ]);
-
-            const users = usersRes.data.data || [];
-            const artworks = artworksRes.data.data || [];
-            const orders = ordersRes.data.data || [];
-
-            // Calculate top creators (by number of artworks)
-            const creatorStats = {};
-            artworks.forEach(artwork => {
-                const artistId = artwork.artist?._id || artwork.artist;
-                if (!artistId) return;
-
-                if (!creatorStats[artistId]) {
-                    creatorStats[artistId] = {
-                        artist: artwork.artist,
-                        artworkCount: 0,
-                        totalViews: 0,
-                        totalDownloads: 0
-                    };
-                }
-
-                creatorStats[artistId].artworkCount++;
-                creatorStats[artistId].totalViews += artwork.views || 0;
-                creatorStats[artistId].totalDownloads += artwork.downloads || 0;
+            const token = localStorage.getItem("token");
+            const { data } = await axios.get(`${API_URL}/admin/analytics`, {
+                headers: { Authorization: `Bearer ${token}` }
             });
 
-            const topCreators = Object.values(creatorStats)
-                .sort((a, b) => b.artworkCount - a.artworkCount)
-                .slice(0, 10);
-
-            // Calculate top sales (artworks by revenue)
-            const salesStats = {};
-            orders.forEach(order => {
-                order.items?.forEach(item => {
-                    const artworkId = item.artwork?._id || item.artwork;
-                    if (!artworkId) return;
-
-                    if (!salesStats[artworkId]) {
-                        salesStats[artworkId] = {
-                            artwork: item.artwork,
-                            salesCount: 0,
-                            totalRevenue: 0
-                        };
-                    }
-
-                    salesStats[artworkId].salesCount++;
-                    salesStats[artworkId].totalRevenue += item.price || 0;
-                });
-            });
-
-            const topSales = Object.values(salesStats)
-                .sort((a, b) => b.totalRevenue - a.totalRevenue)
-                .slice(0, 10);
-
-            // Revenue by category
-            const categoryRevenue = {};
-            orders.forEach(order => {
-                order.items?.forEach(item => {
-                    const category = item.artwork?.category || 'Other';
-                    if (!categoryRevenue[category]) {
-                        categoryRevenue[category] = 0;
-                    }
-                    categoryRevenue[category] += item.price || 0;
-                });
-            });
-
-            const revenueByCategory = Object.entries(categoryRevenue)
-                .map(([category, revenue]) => ({ category, revenue }))
-                .sort((a, b) => b.revenue - a.revenue);
-
-            setAnalytics({
-                topCreators,
-                topSales,
-                revenueByCategory,
-                totalRevenue: orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
-                totalOrders: orders.length,
-                totalArtworks: artworks.length,
-                totalUsers: users.length
-            });
-
+            if (data.success) {
+                setAnalytics(data.data);
+            }
         } catch (error) {
             console.error("Error fetching analytics:", error);
         } finally {

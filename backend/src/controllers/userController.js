@@ -54,41 +54,13 @@ export const getTopCreators = async (req, res) => {
 };
 
 /**
- * Get all users (Admin only)
- * GET /api/users
+ * Get public profile of a user (including their uploaded artworks)
+ * GET /api/users/profile/:id
+ * Public
  */
-export const getAllUsers = async (req, res) => {
+export const getPublicProfile = async (req, res) => {
     try {
-        const users = await User.find()
-            .select("-password")
-            .sort({ createdAt: -1 });
-
-        res.status(200).json({
-            success: true,
-            data: users,
-            count: users.length
-        });
-    } catch (error) {
-        console.error("Error fetching users:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch users"
-        });
-    }
-};
-
-/**
- * Get user by ID (Admin only or Public Profile?)
- * Currently restricted to Admin in adminController, but for profiles we might want public.
- * Stick to Admin for now to match previous behavior, or allow public if needed.
- * But wait, getUserById is generic.
- * Providing limited public info is better for profiles.
- * For now, I'll keep it as "Admin Only" for this specific controller function to replicate admin functionality,
- * and if I need public profile, I'll add `getPublicProfile`.
- */
-export const getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id).select("-password");
+        const user = await User.findById(req.params.id).select("name avatar bio email role createdAt");
 
         if (!user) {
             return res.status(404).json({
@@ -97,96 +69,20 @@ export const getUserById = async (req, res) => {
             });
         }
 
-        res.status(200).json({
-            success: true,
-            data: user
-        });
-    } catch (error) {
-        console.error("Error fetching user:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to fetch user"
-        });
-    }
-};
-
-/**
- * Update user (Admin only)
- * PATCH /api/users/:id
- */
-export const updateUser = async (req, res) => {
-    try {
-        const { role, isBlocked } = req.body;
-        const updateData = {};
-
-        if (role !== undefined) updateData.role = role;
-        if (isBlocked !== undefined) updateData.isBlocked = isBlocked;
-
-        const user = await User.findByIdAndUpdate(
-            req.params.id,
-            updateData,
-            { new: true, runValidators: true }
-        ).select("-password");
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
+        const artworks = await Artwork.find({ artist: req.params.id, status: "published" }).sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,
-            data: user,
-            message: "User updated successfully"
+            data: {
+                user,
+                artworks
+            }
         });
     } catch (error) {
-        console.error("Error updating user:", error);
+        console.error("Error fetching public profile:", error);
         res.status(500).json({
             success: false,
-            message: "Failed to update user"
-        });
-    }
-};
-
-/**
- * Delete user (Admin only)
- * DELETE /api/users/:id
- */
-export const deleteUser = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
-
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
-
-        // Prevent deleting admin users
-        if (user.role === "admin") {
-            return res.status(403).json({
-                success: false,
-                message: "Cannot delete admin users"
-            });
-        }
-
-        // Delete user's artworks
-        await Artwork.deleteMany({ artist: req.params.id });
-
-        // Delete user
-        await User.findByIdAndDelete(req.params.id);
-
-        res.status(200).json({
-            success: true,
-            message: "User deleted successfully"
-        });
-    } catch (error) {
-        console.error("Error deleting user:", error);
-        res.status(500).json({
-            success: false,
-            message: "Failed to delete user"
+            message: "Failed to fetch public profile"
         });
     }
 };

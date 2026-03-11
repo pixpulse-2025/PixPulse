@@ -6,7 +6,7 @@ import Artwork from "../models/Artwork.js";
  * @route POST /api/favorites/:artworkId
  * @access Private
  */
-export const addToFavorites = async (req, res, next) => {
+export const addToFavorites = async (req, res) => {
     try {
         const { artworkId } = req.params;
 
@@ -43,7 +43,7 @@ export const addToFavorites = async (req, res, next) => {
             data: favorite,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -52,7 +52,7 @@ export const addToFavorites = async (req, res, next) => {
  * @route DELETE /api/favorites/:artworkId
  * @access Private
  */
-export const removeFromFavorites = async (req, res, next) => {
+export const removeFromFavorites = async (req, res) => {
     try {
         const { artworkId } = req.params;
 
@@ -73,7 +73,7 @@ export const removeFromFavorites = async (req, res, next) => {
             message: "Removed from favorites",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -82,7 +82,7 @@ export const removeFromFavorites = async (req, res, next) => {
  * @route GET /api/favorites
  * @access Private
  */
-export const getFavorites = async (req, res, next) => {
+export const getFavorites = async (req, res) => {
     try {
         const favorites = await Favorite.find({ user: req.user._id })
             .populate({
@@ -100,7 +100,7 @@ export const getFavorites = async (req, res, next) => {
             data: favorites,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -109,7 +109,7 @@ export const getFavorites = async (req, res, next) => {
  * @route GET /api/favorites/check/:artworkId
  * @access Private
  */
-export const checkFavorite = async (req, res, next) => {
+export const checkFavorite = async (req, res) => {
     try {
         const { artworkId } = req.params;
 
@@ -123,6 +123,6 @@ export const checkFavorite = async (req, res, next) => {
             isFavorited: !!favorite,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };

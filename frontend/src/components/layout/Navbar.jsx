@@ -83,18 +83,20 @@ const Navbar = () => {
 
             {user ? (
               <div className="flex items-center gap-8">
-                <Link
-                  to="/upload"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-sm font-semibold rounded-xl shadow-lg shadow-violet-500/20 transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
-                  Upload
-                </Link>
+                {user.role !== 'admin' && (
+                  <Link
+                    to="/upload"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#8B5CF6] hover:bg-[#7C3AED] text-white text-sm font-semibold rounded-xl shadow-lg shadow-violet-500/20 transition-all duration-200 active:scale-[0.98] hover:-translate-y-0.5"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                    Upload
+                  </Link>
+                )}
                 <div className="relative group/user">
                   <button className="flex items-center gap-3 p-1 rounded-full transition-colors">
                     <div className="w-10 h-10 rounded-full border-2 border-white/10 hover:border-[#8B5CF6] transition-colors overflow-hidden">
                       <img
-                        src={user.avatar || `https://ui-avatars.com/api/?name=${user.name}&background=8b5cf6&color=fff`}
+                        src={user.avatar ? (user.avatar.startsWith('http') || user.avatar.startsWith('data:') ? user.avatar : `http://localhost:5000${user.avatar}`) : `https://ui-avatars.com/api/?name=${user.name}&background=8b5cf6&color=fff`}
                         alt={user.name}
                         className="w-full h-full object-cover"
                       />
@@ -103,7 +105,9 @@ const Navbar = () => {
 
                   <div className="absolute right-0 mt-4 w-60 bg-[#0B0D10]/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl py-4 invisible group-hover/user:visible scale-95 group-hover/user:scale-100 opacity-0 group-hover/user:opacity-100 transition-all duration-200 z-[60]">
                     <div className="px-6 py-3 mb-2">
-                      <p className="text-[10px] font-black uppercase tracking-widest text-[#8B5CF6] mb-1">Artist Profile</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-[#8B5CF6] mb-1">
+                          {user.role === 'admin' ? 'Admin Profile' : user.role === 'artist' ? 'Artist Profile' : 'User Profile'}
+                      </p>
                       <p className="text-sm font-bold text-white truncate">{user.name}</p>
                     </div>
                     <div className="h-px bg-white/5 my-2 mx-4"></div>
@@ -159,7 +163,9 @@ const Navbar = () => {
 
             {user ? (
               <>
-                <Link to="/upload" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-[#8B5CF6] uppercase tracking-widest">Upload</Link>
+                {user.role !== 'admin' && (
+                  <Link to="/upload" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-[#8B5CF6] uppercase tracking-widest">Upload</Link>
+                )}
 
                 <Link to="/profile" onClick={() => setMobileMenuOpen(false)} className="text-xl font-bold text-white uppercase tracking-widest">Profile</Link>
                 <button

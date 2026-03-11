@@ -4,12 +4,16 @@ import {
     getDashboardStats,
     getAllTransactions,
     getAllOrders,
+    getAnalytics,
 } from "../controllers/adminController.js";
 
 const router = express.Router();
 
 // Admin dashboard stats
 router.get("/admin/stats", protect, admin, getDashboardStats);
+
+// Admin analytics
+router.get("/admin/analytics", protect, admin, getAnalytics);
 
 // Admin transaction history with revenue breakdown
 router.get("/admin/transactions", protect, admin, getAllTransactions);

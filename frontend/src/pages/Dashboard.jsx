@@ -122,7 +122,7 @@ const Dashboard = () => {
                         <div className="card-surface p-6 text-center">
                             <div className="relative w-24 h-24 mx-auto mb-4">
                                 <img
-                                    src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}&background=0369a1&color=fff`}
+                                    src={user?.avatar ? (user.avatar.startsWith('http') || user.avatar.startsWith('data:') ? user.avatar : `http://localhost:5000${user.avatar}`) : `https://ui-avatars.com/api/?name=${user?.name || 'User'}&background=0369a1&color=fff`}
                                     alt={user?.name}
                                     className="w-full h-full rounded-full border-4 border-[#141821] object-cover"
                                 />

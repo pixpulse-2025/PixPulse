@@ -11,7 +11,7 @@ import Artwork from "../models/Artwork.js";
  * @route POST /api/artworks
  * @access Private
  */
-export const createArtwork = async (req, res, next) => {
+export const createArtwork = async (req, res) => {
     try {
         const {
             title,
@@ -76,7 +76,7 @@ export const createArtwork = async (req, res, next) => {
             data: artwork,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -86,10 +86,15 @@ export const createArtwork = async (req, res, next) => {
  * @route GET /api/artworks
  * @access Public
  */
-export const getArtworks = async (req, res, next) => {
+export const getArtworks = async (req, res) => {
     try {
         const { category, subCategory, priceType, priceRange, sort, search } = req.query;
         let query = {};
+
+        // Only show public artworks unless the user is an admin
+        if (!req.user || req.user.role !== 'admin') {
+            query.isPublic = true;
+        }
 
         if (category && category !== 'all') query.category = category;
         if (subCategory && subCategory !== 'all') query.subCategory = subCategory;
@@ -164,7 +169,7 @@ export const getArtworks = async (req, res, next) => {
             artworks: artworks,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -174,7 +179,7 @@ export const getArtworks = async (req, res, next) => {
  * @route GET /api/artworks/:id
  * @access Public
  */
-export const getArtworkById = async (req, res, next) => {
+export const getArtworkById = async (req, res) => {
     try {
         const artwork = await Artwork.findById(req.params.id).populate("artist", "name avatar bio");
 
@@ -210,7 +215,7 @@ export const getArtworkById = async (req, res, next) => {
             data: artwork,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -219,7 +224,7 @@ export const getArtworkById = async (req, res, next) => {
  * @route GET /api/artworks/my-uploads
  * @access Private
  */
-export const getMyArtworks = async (req, res, next) => {
+export const getMyArtworks = async (req, res) => {
     try {
         const artworks = await Artwork.find({ artist: req.user._id }).sort("-createdAt");
 
@@ -229,7 +234,7 @@ export const getMyArtworks = async (req, res, next) => {
             data: artworks,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -239,7 +244,7 @@ export const getMyArtworks = async (req, res, next) => {
  * @route PUT /api/artworks/:id
  * @access Private
  */
-export const updateArtwork = async (req, res, next) => {
+export const updateArtwork = async (req, res) => {
     try {
         let artwork = await Artwork.findById(req.params.id);
 
@@ -251,7 +256,7 @@ export const updateArtwork = async (req, res, next) => {
         }
 
         // Check ownership
-        if (artwork.artist.toString() !== req.user._id.toString()) {
+        if (artwork.artist.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: "Not authorized to update this artwork",
@@ -284,7 +289,7 @@ export const updateArtwork = async (req, res, next) => {
             data: artwork,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -293,7 +298,7 @@ export const updateArtwork = async (req, res, next) => {
  * @route PATCH /api/artworks/:id/visibility
  * @access Private
  */
-export const toggleArtworkVisibility = async (req, res, next) => {
+export const toggleArtworkVisibility = async (req, res) => {
     try {
         const artwork = await Artwork.findById(req.params.id);
 
@@ -305,7 +310,7 @@ export const toggleArtworkVisibility = async (req, res, next) => {
         }
 
         // Check ownership
-        if (artwork.artist.toString() !== req.user._id.toString()) {
+        if (artwork.artist.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: "Not authorized to modify this artwork",
@@ -320,7 +325,7 @@ export const toggleArtworkVisibility = async (req, res, next) => {
             data: artwork,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -330,7 +335,7 @@ export const toggleArtworkVisibility = async (req, res, next) => {
  * @route DELETE /api/artworks/:id
  * @access Private
  */
-export const deleteArtwork = async (req, res, next) => {
+export const deleteArtwork = async (req, res) => {
     try {
         const artwork = await Artwork.findById(req.params.id);
 
@@ -342,7 +347,7 @@ export const deleteArtwork = async (req, res, next) => {
         }
 
         // Check ownership
-        if (artwork.artist.toString() !== req.user._id.toString()) {
+        if (artwork.artist.toString() !== req.user._id.toString() && req.user.role !== 'admin') {
             return res.status(403).json({
                 success: false,
                 message: "Not authorized to delete this artwork",
@@ -356,6 +361,6 @@ export const deleteArtwork = async (req, res, next) => {
             message: "Artwork deleted successfully",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };

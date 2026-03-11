@@ -6,7 +6,7 @@ import Artwork from "../models/Artwork.js";
  * @route POST /api/reports/:artworkId
  * @access Private
  */
-export const reportArtwork = async (req, res, next) => {
+export const reportArtwork = async (req, res) => {
     try {
         const { artworkId } = req.params;
         const { reason, description } = req.body;
@@ -53,7 +53,7 @@ export const reportArtwork = async (req, res, next) => {
             message: "Report submitted successfully. We will review it shortly.",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -62,7 +62,7 @@ export const reportArtwork = async (req, res, next) => {
  * @route GET /api/reports/my-reports
  * @access Private
  */
-export const getMyReports = async (req, res, next) => {
+export const getMyReports = async (req, res) => {
     try {
         const reports = await Report.find({ reporter: req.user._id })
             .populate("artwork", "title previewUrl")
@@ -74,7 +74,7 @@ export const getMyReports = async (req, res, next) => {
             data: reports,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -84,7 +84,7 @@ export const getMyReports = async (req, res, next) => {
  * @route GET /api/reports
  * @access Private/Admin
  */
-export const getAllReports = async (req, res, next) => {
+export const getAllReports = async (req, res) => {
     try {
         const { status } = req.query;
 
@@ -105,7 +105,7 @@ export const getAllReports = async (req, res, next) => {
             data: reports,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -115,7 +115,7 @@ export const getAllReports = async (req, res, next) => {
  * @route PATCH /api/reports/:reportId
  * @access Private/Admin
  */
-export const updateReportStatus = async (req, res, next) => {
+export const updateReportStatus = async (req, res) => {
     try {
         const { reportId } = req.params;
         const { status, adminNotes } = req.body;
@@ -151,7 +151,7 @@ export const updateReportStatus = async (req, res, next) => {
             message: "Report updated successfully",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -161,7 +161,7 @@ export const updateReportStatus = async (req, res, next) => {
  * @route DELETE /api/reports/:reportId
  * @access Private/Admin
  */
-export const deleteReport = async (req, res, next) => {
+export const deleteReport = async (req, res) => {
     try {
         const { reportId } = req.params;
 
@@ -181,7 +181,7 @@ export const deleteReport = async (req, res, next) => {
             message: "Report deleted successfully",
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };
 
@@ -191,7 +191,7 @@ export const deleteReport = async (req, res, next) => {
  * @route GET /api/reports/artwork/:artworkId
  * @access Private/Admin
  */
-export const getArtworkReports = async (req, res, next) => {
+export const getArtworkReports = async (req, res) => {
     try {
         const { artworkId } = req.params;
 
@@ -206,6 +206,6 @@ export const getArtworkReports = async (req, res, next) => {
             data: reports,
         });
     } catch (error) {
-        next(error);
+        if (!res.headersSent) res.status(500).json({ success: false, message: error.message || "Internal server error" });
     }
 };

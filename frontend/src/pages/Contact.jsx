@@ -1,18 +1,37 @@
 import { useState } from "react";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const Contact = () => {
     const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
     const [status, setStatus] = useState("");
 
-    const handleSubmit = (e) => {
+    const [loading, setLoading] = useState(false);
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.name || !form.email || !form.message) {
             setStatus("error");
             return;
         }
-        setStatus("success");
-        setForm({ name: "", email: "", subject: "", message: "" });
-        setTimeout(() => setStatus(""), 5000);
+
+        setLoading(true);
+        try {
+            const response = await axios.post(`${API_URL}/contact`, form);
+            if (response.data.success) {
+                setStatus("success");
+                setForm({ name: "", email: "", subject: "", message: "" });
+            } else {
+                setStatus("error");
+            }
+        } catch (error) {
+            console.error("Contact form error:", error);
+            setStatus("error");
+        } finally {
+            setLoading(false);
+            setTimeout(() => setStatus(""), 5000);
+        }
     };
 
     return (
@@ -64,8 +83,8 @@ const Contact = () => {
                             placeholder="Tell us more..."
                         />
                     </div>
-                    <button type="submit" className="btn-primary px-8 py-3 w-full sm:w-auto">
-                        Send Message
+                    <button type="submit" className="btn-primary px-8 py-3 w-full sm:w-auto" disabled={loading}>
+                        {loading ? "Sending..." : "Send Message"}
                     </button>
                 </form>
 
@@ -85,7 +104,7 @@ const Contact = () => {
                     <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
                         <svg className="w-6 h-6 text-[#8B5CF6] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
                         <h3 className="text-white font-semibold mb-1">Email</h3>
-                        <a href="mailto:supportpixpulse@gmail.com" className="text-gray-400 text-sm hover:text-[#8B5CF6] transition-colors">supportpixpulse@gmail.com</a>
+                        <a href="mailto:pixpulse.team@gmail.com" className="text-gray-400 text-sm hover:text-[#8B5CF6] transition-colors">pixpulse.team@gmail.com</a>
                     </div>
                     <div className="bg-[#141821] border border-white/5 rounded-xl p-6">
                         <svg className="w-6 h-6 text-[#8B5CF6] mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>

@@ -21,6 +21,10 @@ const errorHandler = (err, req, res, next) => {
   // If no specific status code was set, default to 500 (Internal Server Error)
   const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
 
+  // Always log the full error for diagnosis
+  console.error(`❌ [${req.method}] ${req.originalUrl} → ${statusCode}: ${err.message}`);
+  if (statusCode === 500) console.error(err.stack);
+
   res.status(statusCode).json({
     success: false,
     message: err.message,

@@ -19,7 +19,12 @@ const AdminArtworks = () => {
     const fetchArtworks = async () => {
         try {
             setLoading(true);
-            const { data } = await axios.get(`${API_URL}/artworks`);
+            const token = localStorage.getItem("token");
+            const { data } = await axios.get(`${API_URL}/artworks`, {
+                headers: {
+                    Authorization: token ? `Bearer ${token}` : ""
+                }
+            });
             setArtworks(data.artworks || data.data || []);
         } catch (error) {
             console.error("Error fetching artworks:", error);
@@ -34,8 +39,11 @@ const AdminArtworks = () => {
         }
 
         try {
-            await axios.patch(`${API_URL}/artworks/${artworkId}`, {
-                isPublic: !isPublic
+            const token = localStorage.getItem("token");
+            await axios.patch(`${API_URL}/artworks/${artworkId}/visibility`, {}, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
             });
 
             setArtworks(artworks.map(a =>
@@ -55,7 +63,12 @@ const AdminArtworks = () => {
         }
 
         try {
-            await axios.delete(`${API_URL}/artworks/${artworkId}`);
+            const token = localStorage.getItem("token");
+            await axios.delete(`${API_URL}/artworks/${artworkId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
             setArtworks(artworks.filter(a => a._id !== artworkId));
             alert('Artwork deleted successfully');
         } catch (error) {
