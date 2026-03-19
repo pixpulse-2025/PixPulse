@@ -68,4 +68,12 @@ export const updateProfileValidation = [
         .optional()
         .trim()
         .isLength({ max: 500 }).withMessage("Bio cannot exceed 500 characters"),
+    body("website")
+        .optional()
+        .trim()
+        .isLength({ max: 100 }).withMessage("Website URL cannot exceed 100 characters"),
+    body("location")
+        .optional()
+        .trim()
+        .isLength({ max: 100 }).withMessage("Location cannot exceed 100 characters"),
 ];

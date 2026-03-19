@@ -10,8 +10,6 @@ import {
     selectArtworkFilters
 } from "../redux/slices/artworkSlice";
 import ArtworkGrid from "../components/artwork/ArtworkGrid";
-import DrawSearchModal from "../components/search/DrawSearchModal";
-import HumSearchModal from "../components/search/HumSearchModal";
 
 
 const AudioListRow = ({ artwork }) => {
@@ -176,8 +174,7 @@ const Explore = () => {
 
     const [page, setPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState(filters.search || "");
-    const [showDrawSearch, setShowDrawSearch] = useState(false);
-    const [showHumSearch, setShowHumSearch] = useState(false);
+
 
     // Read category and search from URL on mount (e.g. /explore?category=Audio or /explore?search=name)
     useEffect(() => {
@@ -195,11 +192,7 @@ const Explore = () => {
         }
     }, []); // only on mount
 
-    const handleAdvancedSearchResult = (result) => {
-        setSearchTerm(result);
-        setPage(1);
-        dispatch(setFilters({ ...filters, search: result }));
-    };
+
     const observer = useRef();
 
     const lastArtworkElementRef = useCallback(node => {
@@ -287,25 +280,6 @@ const Explore = () => {
                                     />
                                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                                         <button
-                                            type="button"
-                                            onClick={() => setShowDrawSearch(true)}
-                                            className="p-2 text-gray-400 hover:text-[#8B5CF6] hover:bg-white/5 rounded-full transition-colors"
-                                            title="Draw to Search"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowHumSearch(true)}
-                                            className="p-2 text-gray-400 hover:text-[#8B5CF6] hover:bg-white/5 rounded-full transition-colors"
-                                            title="Hum to Search"
-                                        >
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
-                                        </button>
-
-                                        <div className="w-px h-6 bg-white/10 mx-1"></div>
-
-                                        <button
                                             type="submit"
                                             onClick={handleSearch}
                                             className="p-2.5 bg-[#8B5CF6] text-white rounded-full hover:bg-[#7C3AED] transition-all shadow-lg hover:shadow-violet-500/30 active:scale-95"
@@ -364,46 +338,43 @@ const Explore = () => {
                             </div>
                         )}
 
-                        <div className="flex flex-wrap items-center gap-3">
-                            <span className="text-sm font-medium text-gray-400">Sort by:</span>
-                            <select
-                                value={filters.sortBy}
-                                onChange={(e) => dispatch(setFilters({ sortBy: e.target.value }))}
-                                className="bg-[#141821] border border-white/10 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
-                            >
-                                <option value="popular">Popular</option>
-                                <option value="newest">Newest</option>
-                                <option value="oldest">Oldest</option>
-                                <option value="price_low">Price: Low to High</option>
-                                <option value="price_high">Price: High to Low</option>
-                                <option value="most-viewed">Most Viewed</option>
-                                <option value="most-downloaded">Most Downloaded</option>
-                                <option value="rating">Highest Rated</option>
-                            </select>
+                        <div className="flex flex-wrap items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" /></svg>
+                                <select
+                                    value={filters.sortBy}
+                                    onChange={(e) => dispatch(setFilters({ sortBy: e.target.value }))}
+                                    className="bg-[#141821] border border-white/10 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/50 focus:border-[#8B5CF6]/30 hover:border-white/20 transition-colors cursor-pointer appearance-none pr-8"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
+                                >
+                                    <option value="newest">Newest</option>
+                                    <option value="popular">Popular</option>
+                                    <option value="oldest">Oldest</option>
+                                    <option value="most-viewed">Most Viewed</option>
+                                    <option value="most-downloaded">Most Downloaded</option>
+                                    <option value="price_low">Price: Low → High</option>
+                                    <option value="price_high">Price: High → Low</option>
+                                </select>
+                            </div>
 
-                            <span className="text-sm font-medium text-gray-400">Price:</span>
-                            <select
-                                value={filters.priceRange || 'all'}
-                                onChange={(e) => dispatch(setFilters({ priceRange: e.target.value }))}
-                                className="bg-[#141821] border border-white/10 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
-                            >
-                                <option value="all">All Prices</option>
-                                <option value="free">Free</option>
-                                <option value="under-10">Under $10</option>
-                                <option value="10-50">$10 - $50</option>
-                                <option value="50-100">$50 - $100</option>
-                                <option value="over-100">Over $100</option>
-                            </select>
+                            <div className="w-px h-6 bg-white/10"></div>
 
-                            <span className="text-sm font-medium text-gray-400">Rating:</span>
-                            <select
-                                className="bg-[#141821] border border-white/10 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] focus:border-transparent"
-                            >
-                                <option value="all">All Ratings</option>
-                                <option value="5">⭐⭐⭐⭐⭐ Only</option>
-                                <option value="4">⭐⭐⭐⭐ & Up</option>
-                                <option value="3">⭐⭐⭐ & Up</option>
-                            </select>
+                            <div className="flex items-center gap-2">
+                                <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                <select
+                                    value={filters.priceRange || 'all'}
+                                    onChange={(e) => dispatch(setFilters({ priceRange: e.target.value }))}
+                                    className="bg-[#141821] border border-white/10 rounded-lg px-3 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-[#8B5CF6]/50 focus:border-[#8B5CF6]/30 hover:border-white/20 transition-colors cursor-pointer appearance-none pr-8"
+                                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 8px center' }}
+                                >
+                                    <option value="all">All Prices</option>
+                                    <option value="free">Free</option>
+                                    <option value="under-10">Under $10</option>
+                                    <option value="10-50">$10 – $50</option>
+                                    <option value="50-100">$50 – $100</option>
+                                    <option value="over-100">$100+</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -434,8 +405,7 @@ const Explore = () => {
                     )}
                 </div>
             </div>
-            <DrawSearchModal isOpen={showDrawSearch} onClose={() => setShowDrawSearch(false)} onSearch={handleAdvancedSearchResult} />
-            <HumSearchModal isOpen={showHumSearch} onClose={() => setShowHumSearch(false)} onSearch={handleAdvancedSearchResult} />
+
         </div >
     );
 };

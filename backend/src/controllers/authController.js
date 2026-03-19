@@ -67,6 +67,8 @@ export const register = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 avatar: user.avatar,
+                website: user.website,
+                location: user.location,
             },
         });
     } catch (error) {
@@ -128,6 +130,8 @@ export const login = async (req, res) => {
                 role: user.role,
                 avatar: user.avatar,
                 bio: user.bio,
+                website: user.website,
+                location: user.location,
             },
         });
     } catch (error) {
@@ -164,6 +168,8 @@ export const getMe = async (req, res) => {
                 role: user.role,
                 avatar: user.avatar,
                 bio: user.bio,
+                website: user.website,
+                location: user.location,
                 isVerified: user.isVerified,
                 createdAt: user.createdAt,
             },
@@ -184,7 +190,7 @@ export const getMe = async (req, res) => {
  */
 export const updateProfile = async (req, res) => {
     try {
-        const { name, bio, avatar } = req.body;
+        const { name, bio, avatar, website, location } = req.body;
         
         let newAvatar = avatar;
         if (req.file) {
@@ -205,6 +211,8 @@ export const updateProfile = async (req, res) => {
         if (name) user.name = name;
         if (bio !== undefined) user.bio = bio;
         if (newAvatar) user.avatar = newAvatar;
+        if (website !== undefined) user.website = website;
+        if (location !== undefined) user.location = location;
 
         await user.save();
 
@@ -218,13 +226,84 @@ export const updateProfile = async (req, res) => {
                 role: user.role,
                 avatar: user.avatar,
                 bio: user.bio,
+                website: user.website,
+                location: user.location,
             },
         });
     } catch (error) {
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({
+                success: false,
+                message: Object.values(error.errors).map(val => val.message).join(', ')
+            });
+        }
         console.error("Update profile error:", error);
         res.status(500).json({
             success: false,
             message: error.message || "Error updating profile",
+        });
+    }
+};
+
+/**
+ * Updates the user's password.
+ * @route PUT /api/auth/password
+ * @access Private
+ */
+export const updatePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide both current and new passwords",
+            });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({
+                success: false,
+                message: "New password must be at least 6 characters long",
+            });
+        }
+
+        const user = await User.findById(req.user.id).select("+password");
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found",
+            });
+        }
+
+        if (user.authProvider === "google") {
+            return res.status(400).json({
+                success: false,
+                message: "This account uses Google Sign-In. Password change is not applicable.",
+            });
+        }
+
+        const isMatch = await user.comparePassword(currentPassword);
+        if (!isMatch) {
+            return res.status(401).json({
+                success: false,
+                message: "Incorrect current password",
+            });
+        }
+
+        user.password = newPassword;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Password updated successfully",
+        });
+    } catch (error) {
+        console.error("Update password error:", error);
+        res.status(500).json({
+            success: false,
+            message: error.message || "Error updating password",
         });
     }
 };
@@ -306,6 +385,8 @@ export const googleAuth = async (req, res) => {
                 email: user.email,
                 role: user.role,
                 avatar: user.avatar,
+                website: user.website,
+                location: user.location,
             },
         });
     } catch (error) {

@@ -60,7 +60,7 @@ export const getTopCreators = async (req, res) => {
  */
 export const getPublicProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.params.id).select("name avatar bio email role createdAt");
+        const user = await User.findById(req.params.id).select("name avatar bio email role website location createdAt");
 
         if (!user) {
             return res.status(404).json({
@@ -69,7 +69,7 @@ export const getPublicProfile = async (req, res) => {
             });
         }
 
-        const artworks = await Artwork.find({ artist: req.params.id, status: "published" }).sort({ createdAt: -1 });
+        const artworks = await Artwork.find({ artist: req.params.id, isPublic: true }).sort({ createdAt: -1 });
 
         res.status(200).json({
             success: true,

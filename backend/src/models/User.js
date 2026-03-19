@@ -49,6 +49,14 @@ const userSchema = new mongoose.Schema(
             type: String,
             maxlength: [500, "Bio cannot exceed 500 characters"],
         },
+        website: {
+            type: String,
+            maxlength: [100, "Website URL cannot exceed 100 characters"],
+        },
+        location: {
+            type: String,
+            maxlength: [100, "Location cannot exceed 100 characters"],
+        },
         isVerified: {
             type: Boolean,
             default: false,

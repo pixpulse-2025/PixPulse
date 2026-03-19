@@ -122,7 +122,12 @@ const Wallet = () => {
             <div className="container mx-auto max-w-[1200px] px-6">
                 {/* Header */}
                 <div className="mb-10">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Wallet</h1>
+                    <div className="flex items-center gap-3 mb-2">
+                        <Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        </Link>
+                        <h1 className="text-3xl md:text-4xl font-bold text-white">Wallet</h1>
+                    </div>
                     <p className="text-gray-400">Manage your funds and view transaction history</p>
                 </div>
 

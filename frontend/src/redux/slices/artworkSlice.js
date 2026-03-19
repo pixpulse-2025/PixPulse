@@ -48,7 +48,7 @@ export const fetchArtworks = createAsyncThunk(
                 ...(category && category !== "all" && { category }),
                 ...(subCategory && subCategory !== "all" && { subCategory }),
                 ...(priceRange && priceRange !== "all" && { priceRange }),
-                ...(sortBy && { sortBy }),
+                ...(sortBy && { sort: sortBy }),
                 ...(search && { search }),
             });
 

@@ -61,7 +61,12 @@ const MyUploads = () => {
             <div className="container mx-auto px-6">
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold text-white mb-2">My Uploads</h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            </Link>
+                            <h1 className="text-4xl font-bold text-white">My Uploads</h1>
+                        </div>
                         <p className="text-gray-400">
                             Manage your creative portfolio ({myArtworks.length} {myArtworks.length === 1 ? 'item' : 'items'})
                         </p>

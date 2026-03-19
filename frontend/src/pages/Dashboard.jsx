@@ -38,8 +38,9 @@ const Dashboard = () => {
                 const ordersRes = await axios.get(`${API_URL}/checkout/orders`).catch(() => ({ data: { data: [] } }));
                 const orders = ordersRes.data.data || [];
 
-                // Calculate Stats
+                // Calculate total views and downloads
                 const totalViews = artworks.reduce((sum, art) => sum + (art.views || 0), 0);
+                const totalDownloads = artworks.reduce((sum, art) => sum + (art.downloads || 0), 0);
 
                 // Calculate revenue: sum of completed orders where user's artwork was bought
                 // For each artwork belonging to this user sold in any order, artist earns 90%
@@ -57,7 +58,7 @@ const Dashboard = () => {
                 setOverviewStats({
                     artworks: artworks.length,
                     views: totalViews,
-                    downloads: 0,
+                    downloads: totalDownloads,
                     revenue: totalRevenue
                 });
 
@@ -280,24 +281,7 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className="card-surface p-6">
-                            <h3 className="text-lg font-bold text-white mb-4">Quick Actions</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <Link to="/upload" className="btn-primary text-center">
-                                    Upload New Artwork
-                                </Link>
-                                <Link to="/explore" className="btn-secondary text-center">
-                                    Browse Marketplace
-                                </Link>
-                                <Link to="/settings" className="btn-secondary text-center">
-                                    Account Settings
-                                </Link>
-                                <Link to="/wallet" className="btn-secondary text-center">
-                                    Wallet
-                                </Link>
-                            </div>
-                        </div>
+
                     </main>
                 </div>
             </div>

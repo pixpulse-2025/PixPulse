@@ -9,6 +9,7 @@ import {
     login,
     getMe,
     updateProfile,
+    updatePassword,
     logout,
     googleAuth,
     forgotPassword,
@@ -54,8 +55,19 @@ router.post("/reset-password/:token", resetPassword);
 router.get("/me", protect, getMe);
 
 // Update current user's profile information with validation
-// Using multer to handle optional avatarFile upload
-router.put("/profile", protect, uploadAvatar.single("avatarFile"), updateProfileValidation, validate, updateProfile);
+// Using multer to handle optional avatarFile upload safely
+router.put("/profile", protect, (req, res, next) => {
+    uploadAvatar.single("avatarFile")(req, res, function (err) {
+        if (err) {
+            // Re-route multer errors or file filter errors correctly to the global handler
+            return next(err);
+        }
+        next();
+    });
+}, updateProfileValidation, validate, updateProfile);
+
+// Update user password
+router.put("/password", protect, updatePassword);
 
 // Log out the current user (token invalidation should be handled on client side)
 router.post("/logout", protect, logout);

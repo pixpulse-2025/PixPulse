@@ -130,7 +130,12 @@ const Upload = () => {
             <div className="container mx-auto px-6 max-w-4xl">
                 <div className="card-surface p-8 md:p-12">
                     <div className="mb-8">
-                        <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Upload Artwork</h1>
+                        <div className="flex items-center gap-3 mb-2">
+                            <Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                            </Link>
+                            <h1 className="text-3xl md:text-4xl font-bold text-white">Upload Artwork</h1>
+                        </div>
                         <p className="text-base text-gray-400">Share your creative work with the community</p>
                     </div>
 

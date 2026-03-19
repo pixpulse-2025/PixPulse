@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import { getAvatarUrl } from "../utils/imageUtils";
 import { useAuth } from "../hooks/useAuth";
+import axios from "axios";
+import Cropper from "react-easy-crop";
+import getCroppedImg from "../utils/cropImage";
 
 const Settings = () => {
     const { user, updateProfile } = useAuth();
@@ -9,10 +13,19 @@ const Settings = () => {
         name: user?.name || "",
         email: user?.email || "",
         bio: user?.bio || "",
-        website: "",
-        location: "",
+        website: user?.website || "",
+        location: user?.location || "",
         avatar: user?.avatar || ""
     });
+
+    const [passwordData, setPasswordData] = useState({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+    });
+    const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+    const [passwordMessage, setPasswordMessage] = useState({ type: "", text: "" });
+    const [showPasswordForm, setShowPasswordForm] = useState(false);
 
     useEffect(() => {
         if (user) {
@@ -21,6 +34,8 @@ const Settings = () => {
                 name: user.name || "",
                 email: user.email || "",
                 bio: user.bio || "",
+                website: user.website || "",
+                location: user.location || "",
                 avatar: user.avatar || ""
             }));
         }
@@ -29,6 +44,13 @@ const Settings = () => {
     const [avatarPreview, setAvatarPreview] = useState("");
     const fileInputRef = useRef(null);
 
+    // Cropper states
+    const [imageToCrop, setImageToCrop] = useState(null);
+    const [crop, setCrop] = useState({ x: 0, y: 0 });
+    const [zoom, setZoom] = useState(1);
+    const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+    const [showCropper, setShowCropper] = useState(false);
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
@@ -36,9 +58,36 @@ const Settings = () => {
     const handleFileChange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setAvatarFile(file);
-            setAvatarPreview(URL.createObjectURL(file));
+            const url = URL.createObjectURL(file);
+            setImageToCrop(url);
+            setShowCropper(true);
+            e.target.value = null; // reset input
         }
+    };
+
+    const onCropComplete = (croppedArea, croppedAreaPixels) => {
+        setCroppedAreaPixels(croppedAreaPixels);
+    };
+
+    const applyCrop = async () => {
+        try {
+            const croppedImageBlob = await getCroppedImg(imageToCrop, croppedAreaPixels);
+            const croppedFile = new File([croppedImageBlob], "avatar.jpg", { type: "image/jpeg" });
+            
+            setAvatarFile(croppedFile);
+            setAvatarPreview(URL.createObjectURL(croppedImageBlob));
+            
+            setShowCropper(false);
+            setImageToCrop(null);
+        } catch (e) {
+            console.error(e);
+            alert("Error cropping image");
+        }
+    };
+
+    const cancelCrop = () => {
+        setShowCropper(false);
+        setImageToCrop(null);
     };
 
     const handleSubmit = async (e) => {
@@ -47,6 +96,8 @@ const Settings = () => {
             const dataToSubmit = new FormData();
             dataToSubmit.append("name", formData.name);
             dataToSubmit.append("bio", formData.bio);
+            dataToSubmit.append("website", formData.website);
+            dataToSubmit.append("location", formData.location);
             if (avatarFile) {
                 dataToSubmit.append("avatarFile", avatarFile);
             } else if (formData.avatar) {
@@ -61,8 +112,54 @@ const Settings = () => {
             }
             alert("Settings updated successfully!");
         } catch (error) {
-            alert(error.response?.data?.message || "Failed to update profile");
+            const errorMessage = typeof error === 'string' ? error : (error.response?.data?.message || "Failed to update profile");
+            alert(errorMessage);
         }
+    };
+
+    const handlePasswordChange = (e) => {
+        setPasswordData({ ...passwordData, [e.target.name]: e.target.value });
+    };
+
+    const handlePasswordSubmit = async (e) => {
+        e.preventDefault();
+        setPasswordMessage({ type: "", text: "" });
+
+        if (passwordData.newPassword !== passwordData.confirmPassword) {
+            setPasswordMessage({ type: "error", text: "New passwords do not match" });
+            return;
+        }
+
+        try {
+            setIsUpdatingPassword(true);
+            const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+            const token = localStorage.getItem("token");
+            const response = await axios.put(`${API_URL}/auth/password`, {
+                currentPassword: passwordData.currentPassword,
+                newPassword: passwordData.newPassword
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (response.data.success) {
+                setPasswordMessage({ type: "success", text: "Password updated successfully" });
+                setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                setTimeout(() => {
+                    setShowPasswordForm(false);
+                    setPasswordMessage({ type: "", text: "" });
+                }, 3000);
+            }
+        } catch (error) {
+            setPasswordMessage({ type: "error", text: error.response?.data?.message || "Failed to update password" });
+        } finally {
+            setIsUpdatingPassword(false);
+        }
+    };
+
+    const handleDeleteAccount = () => {
+        alert("To delete your account, please contact support through the Contact Us page.");
     };
 
     const sections = [
@@ -74,11 +171,60 @@ const Settings = () => {
 
     return (
         <div className="min-h-screen bg-[#0B0D10] pt-32 pb-20">
+            {showCropper && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-[#141821] rounded-xl w-full max-w-lg shadow-2xl flex flex-col h-[500px]">
+                        <div className="p-4 border-b border-white/10 flex justify-between items-center z-10">
+                            <h3 className="text-xl font-bold text-white">Crop Profile Picture</h3>
+                            <button type="button" onClick={cancelCrop} className="text-gray-400 hover:text-white">✕</button>
+                        </div>
+                        <div className="relative flex-1 bg-black">
+                            <Cropper
+                                image={imageToCrop}
+                                crop={crop}
+                                zoom={zoom}
+                                aspect={1}
+                                cropShape="round"
+                                onCropChange={setCrop}
+                                onCropComplete={onCropComplete}
+                                onZoomChange={setZoom}
+                            />
+                        </div>
+                        <div className="p-6 bg-[#141821] rounded-b-xl border-t border-white/10 flex flex-col gap-4 z-10">
+                            <div className="flex items-center gap-4">
+                                <span className="text-sm font-semibold text-gray-400">Zoom</span>
+                                <input
+                                    type="range"
+                                    value={zoom}
+                                    min={1}
+                                    max={3}
+                                    step={0.1}
+                                    onChange={(e) => setZoom(e.target.value)}
+                                    className="flex-1 accent-[#8B5CF6]"
+                                />
+                            </div>
+                            <div className="flex justify-end gap-3 mt-2">
+                                <button type="button" onClick={cancelCrop} className="btn-secondary">
+                                    Cancel
+                                </button>
+                                <button type="button" onClick={applyCrop} className="btn-primary">
+                                    Crop & Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="container mx-auto max-w-[1400px] px-6">
                 <div className="mb-8">
-                    <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                        Settings
-                    </h1>
+                    <div className="flex items-center gap-3 mb-2">
+                        <Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        </Link>
+                        <h1 className="text-3xl md:text-4xl font-bold text-white">
+                            Settings
+                        </h1>
+                    </div>
                     <p className="text-base text-gray-400">
                         Manage your account settings and preferences
                     </p>
@@ -209,22 +355,85 @@ const Settings = () => {
                                 <div className="space-y-6">
                                     <div className="card-surface p-8">
                                         <h2 className="text-xl font-bold text-white mb-4">Account Settings</h2>
-                                        <div className="space-y-4">
-                                            <div className="flex items-center justify-between py-4 border-b border-white/5">
-                                                <div>
-                                                    <p className="font-semibold text-white">Change Password</p>
-                                                    <p className="text-sm text-gray-400">Update your password regularly for security</p>
-                                                </div>
-                                                <button type="button" className="btn-secondary text-sm">
-                                                    Update
-                                                </button>
+                                        
+                                        {/* Password Message */}
+                                        {passwordMessage.text && (
+                                            <div className={`p-4 mb-6 rounded-lg ${passwordMessage.type === 'error' ? 'bg-red-500/10 border border-red-500/20 text-red-400' : 'bg-green-500/10 border border-green-500/20 text-green-400'}`}>
+                                                {passwordMessage.text}
                                             </div>
+                                        )}
+
+                                        <div className="space-y-4">
+                                            <div className="flex flex-col py-4 border-b border-white/5">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-semibold text-white">Change Password</p>
+                                                        <p className="text-sm text-gray-400">Update your password regularly for security</p>
+                                                    </div>
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => setShowPasswordForm(!showPasswordForm)}
+                                                        className="btn-secondary text-sm"
+                                                    >
+                                                        {showPasswordForm ? "Cancel" : "Update"}
+                                                    </button>
+                                                </div>
+                                                
+                                                {showPasswordForm && (
+                                                    <div className="mt-6 bg-[#0B0D10] p-6 rounded-xl border border-white/5 space-y-4">
+                                                        <div>
+                                                            <label className="block text-sm font-semibold text-gray-300 mb-2">Current Password</label>
+                                                            <input
+                                                                type="password"
+                                                                name="currentPassword"
+                                                                value={passwordData.currentPassword}
+                                                                onChange={handlePasswordChange}
+                                                                className="input-field"
+                                                                placeholder="Enter current password"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-semibold text-gray-300 mb-2">New Password</label>
+                                                            <input
+                                                                type="password"
+                                                                name="newPassword"
+                                                                value={passwordData.newPassword}
+                                                                onChange={handlePasswordChange}
+                                                                className="input-field"
+                                                                placeholder="Enter new password"
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="block text-sm font-semibold text-gray-300 mb-2">Confirm New Password</label>
+                                                            <input
+                                                                type="password"
+                                                                name="confirmPassword"
+                                                                value={passwordData.confirmPassword}
+                                                                onChange={handlePasswordChange}
+                                                                className="input-field"
+                                                                placeholder="Confirm new password"
+                                                            />
+                                                        </div>
+                                                        <div className="pt-2 flex justify-end">
+                                                            <button 
+                                                                type="button"
+                                                                onClick={handlePasswordSubmit}
+                                                                disabled={isUpdatingPassword || !passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword}
+                                                                className="btn-primary text-sm px-4 py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                            >
+                                                                {isUpdatingPassword ? 'Updating...' : 'Save New Password'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            
                                             <div className="flex items-center justify-between py-4 border-b border-white/5">
                                                 <div>
                                                     <p className="font-semibold text-white">Two-Factor Authentication</p>
                                                     <p className="text-sm text-gray-400">Add an extra layer of security</p>
                                                 </div>
-                                                <button type="button" className="btn-secondary text-sm">
+                                                <button type="button" className="btn-secondary text-sm opacity-50 cursor-not-allowed" title="Coming soon">
                                                     Enable
                                                 </button>
                                             </div>
@@ -233,7 +442,11 @@ const Settings = () => {
                                                     <p className="font-semibold text-red-500">Delete Account</p>
                                                     <p className="text-sm text-gray-400">Permanently delete your account and data</p>
                                                 </div>
-                                                <button type="button" className="px-4 py-2 bg-red-500/10 text-red-500 font-semibold rounded-lg border border-red-500/20 hover:bg-red-500/20 text-sm">
+                                                <button 
+                                                    type="button" 
+                                                    onClick={handleDeleteAccount}
+                                                    className="px-4 py-2 bg-red-500/10 text-red-500 font-semibold rounded-lg border border-red-500/20 hover:bg-red-500/20 text-sm"
+                                                >
                                                     Delete
                                                 </button>
                                             </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
@@ -84,11 +85,16 @@ const AdminMessages = () => {
     return (
         <div className="min-h-screen bg-[#0B0D10] pt-24 pb-12">
             <div className="container mx-auto px-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-2">Contact Messages</h1>
-                        <p className="text-gray-400">View and manage inquiries from users.</p>
+                <div className="mb-8">
+                    <div className="flex items-center gap-3 mb-2">
+                        <Link to="/admin" className="text-gray-400 hover:text-white transition-colors">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                        </Link>
+                        <h1 className="text-3xl md:text-4xl font-bold text-white">
+                            Contact Messages
+                        </h1>
                     </div>
+                    <p className="text-base text-gray-400">View and manage inquiries from users.</p>
                 </div>
 
                 {error && (
