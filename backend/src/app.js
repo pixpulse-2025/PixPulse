@@ -15,7 +15,6 @@ import downloadRoutes from "./routes/downloadRoutes.js";
 import reportRoutes from "./routes/reportRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
-import sketchRoutes from "./routes/sketchRoutes.js";
 import walletRoutes from "./routes/walletRoutes.js";
 import commentRoutes from "./routes/commentRoutes.js";
 import subscribeRoutes from "./routes/subscribeRoutes.js";
@@ -109,9 +108,6 @@ app.use("/api/users", userRoutes);
 
 // Admin Dashboard routes (Statistics)
 app.use("/api", adminRoutes);
-
-// Sketch recognition (Draw to Search)
-app.use("/api/sketch", sketchRoutes);
 
 // Wallet system (Balance, Deposits, Purchases)
 app.use("/api/wallet", walletRoutes);

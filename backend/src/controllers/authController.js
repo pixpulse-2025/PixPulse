@@ -68,7 +68,10 @@ export const register = async (req, res) => {
                 role: user.role,
                 avatar: user.avatar,
                 website: user.website,
+                socialLinks: user.socialLinks,
                 location: user.location,
+                privacy: user.privacy,
+                notifications: user.notifications,
             },
         });
     } catch (error) {
@@ -131,7 +134,10 @@ export const login = async (req, res) => {
                 avatar: user.avatar,
                 bio: user.bio,
                 website: user.website,
+                socialLinks: user.socialLinks,
                 location: user.location,
+                privacy: user.privacy,
+                notifications: user.notifications,
             },
         });
     } catch (error) {
@@ -169,9 +175,12 @@ export const getMe = async (req, res) => {
                 avatar: user.avatar,
                 bio: user.bio,
                 website: user.website,
+                socialLinks: user.socialLinks,
                 location: user.location,
                 isVerified: user.isVerified,
                 createdAt: user.createdAt,
+                privacy: user.privacy,
+                notifications: user.notifications,
             },
         });
     } catch (error) {
@@ -190,7 +199,7 @@ export const getMe = async (req, res) => {
  */
 export const updateProfile = async (req, res) => {
     try {
-        const { name, bio, avatar, website, location } = req.body;
+        const { name, bio, avatar, website, location, artistType } = req.body;
         
         let newAvatar = avatar;
         if (req.file) {
@@ -210,9 +219,30 @@ export const updateProfile = async (req, res) => {
         // Update fields
         if (name) user.name = name;
         if (bio !== undefined) user.bio = bio;
+        if (artistType !== undefined) user.artistType = artistType;
         if (newAvatar) user.avatar = newAvatar;
         if (website !== undefined) user.website = website;
         if (location !== undefined) user.location = location;
+
+        if (req.body.socialLinks) {
+            try {
+                const linksData = typeof req.body.socialLinks === 'string' ? JSON.parse(req.body.socialLinks) : req.body.socialLinks;
+                user.socialLinks = { ...user.socialLinks, ...linksData };
+            } catch(e) {}
+        }
+
+        if (req.body.privacy) {
+            try {
+                const privacyData = typeof req.body.privacy === 'string' ? JSON.parse(req.body.privacy) : req.body.privacy;
+                user.privacy = { ...user.privacy, ...privacyData };
+            } catch(e) {}
+        }
+        if (req.body.notifications) {
+            try {
+                const notifData = typeof req.body.notifications === 'string' ? JSON.parse(req.body.notifications) : req.body.notifications;
+                user.notifications = { ...user.notifications, ...notifData };
+            } catch(e) {}
+        }
 
         await user.save();
 
@@ -224,10 +254,14 @@ export const updateProfile = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                artistType: user.artistType,
                 avatar: user.avatar,
                 bio: user.bio,
                 website: user.website,
+                socialLinks: user.socialLinks,
                 location: user.location,
+                privacy: user.privacy,
+                notifications: user.notifications,
             },
         });
     } catch (error) {
@@ -386,7 +420,10 @@ export const googleAuth = async (req, res) => {
                 role: user.role,
                 avatar: user.avatar,
                 website: user.website,
+                socialLinks: user.socialLinks,
                 location: user.location,
+                privacy: user.privacy,
+                notifications: user.notifications,
             },
         });
     } catch (error) {

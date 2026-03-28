@@ -1,0 +1,409 @@
+{
+  "targetArtwork": {
+    "_id": "69a7bfbc3a81dd35b67ae814",
+    "title": "cat pixel art",
+    "description": "cat pixel art",
+    "category": "Visual Art",
+    "subCategory": "Pixel Art",
+    "priceType": "Paid",
+    "price": 4.99,
+    "tags": [
+      "pixel",
+      "cat"
+    ],
+    "licenseType": "Personal",
+    "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+    "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+    "fileFormat": "image/png",
+    "fileSize": 38865,
+    "artist": "696a925310165afc0bb20f18",
+    "views": 3,
+    "viewedBy": [
+      "69676b39840ee0459973b301",
+      "69a7cda98e452a07d358f2d6",
+      "696a732ce610bb35a5d704a3"
+    ],
+    "downloads": 9,
+    "likes": [],
+    "isPublic": true,
+    "createdAt": "2026-03-04T05:14:36.035Z",
+    "updatedAt": "2026-03-23T19:47:46.647Z",
+    "__v": 3
+  },
+  "relatedOrders": [
+    {
+      "_id": "69a7d9f1ce5e5f7a3c195776",
+      "user": "69676b39840ee0459973b301",
+      "items": [
+        {
+          "artwork": "69a7b33df26acbd00d1a22b1",
+          "title": "sasuke fan art",
+          "price": 10,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772598077800-66595101.mp4",
+          "previewUrl": "/uploads/artworks/preview-1772598077810-83300128.png",
+          "_id": "69a7d9f1ce5e5f7a3c195777"
+        },
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "title": "cat pixel art",
+          "price": 4.99,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "_id": "69a7d9f1ce5e5f7a3c195778"
+        }
+      ],
+      "totalAmount": 14.99,
+      "paymentStatus": "completed",
+      "paymentMethod": "wallet",
+      "transactionId": "WLT-MMBP0YWV",
+      "billingDetails": {
+        "email": "tester_1705294686000@test.com",
+        "name": "Test User"
+      },
+      "downloadLinks": [
+        {
+          "artwork": "69a7b33df26acbd00d1a22b1",
+          "url": "/uploads/artworks/file-1772598077800-66595101.mp4",
+          "expiresAt": "2026-03-11T07:06:25.087Z",
+          "_id": "69a7d9f1ce5e5f7a3c195779"
+        },
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "url": "/uploads/artworks/file-1772601276021-873196040.png",
+          "expiresAt": "2026-03-11T07:06:25.087Z",
+          "_id": "69a7d9f1ce5e5f7a3c19577a"
+        }
+      ],
+      "status": "completed",
+      "createdAt": "2026-03-04T07:06:25.112Z",
+      "updatedAt": "2026-03-04T07:06:25.112Z",
+      "orderNumber": "ORD-MMBP0YXL-WSLQY",
+      "__v": 0
+    },
+    {
+      "_id": "69a7dec6ce5e5f7a3c19583d",
+      "user": "69a7cda98e452a07d358f2d6",
+      "items": [
+        {
+          "artwork": "696d29858561c29d87f3f365",
+          "title": "test 2",
+          "price": 2,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1768761733809-98971855.png",
+          "previewUrl": "/uploads/artworks/file-1768761733809-98971855.png",
+          "_id": "69a7dec6ce5e5f7a3c19583e"
+        },
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "title": "cat pixel art",
+          "price": 4.99,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "_id": "69a7dec6ce5e5f7a3c19583f"
+        }
+      ],
+      "totalAmount": 6.99,
+      "paymentStatus": "completed",
+      "paymentMethod": "wallet",
+      "transactionId": "WLT-MMBPRHFV",
+      "billingDetails": {
+        "email": "nahaltemp@gmail.com",
+        "name": "nahal"
+      },
+      "downloadLinks": [
+        {
+          "artwork": "696d29858561c29d87f3f365",
+          "url": "/uploads/artworks/file-1768761733809-98971855.png",
+          "expiresAt": "2026-03-11T07:27:02.155Z",
+          "_id": "69a7dec6ce5e5f7a3c195840"
+        },
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "url": "/uploads/artworks/file-1772601276021-873196040.png",
+          "expiresAt": "2026-03-11T07:27:02.155Z",
+          "_id": "69a7dec6ce5e5f7a3c195841"
+        }
+      ],
+      "status": "completed",
+      "createdAt": "2026-03-04T07:27:02.158Z",
+      "updatedAt": "2026-03-04T07:27:02.158Z",
+      "orderNumber": "ORD-MMBPRHFY-5HJ7I",
+      "__v": 0
+    },
+    {
+      "_id": "69a87a7f32d65f1c5ca556b6",
+      "user": "69676b39840ee0459973b301",
+      "items": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "title": "cat pixel art",
+          "price": 4.99,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "_id": "69a87a7f32d65f1c5ca556b7"
+        }
+      ],
+      "totalAmount": 4.99,
+      "paymentStatus": "completed",
+      "paymentMethod": "wallet",
+      "transactionId": "WLT-MMCDHY1Z",
+      "billingDetails": {
+        "email": "tester_1705294686000@test.com",
+        "name": "Test User"
+      },
+      "downloadLinks": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "url": "/uploads/artworks/file-1772601276021-873196040.png",
+          "expiresAt": "2026-03-11T18:31:27.912Z",
+          "_id": "69a87a7f32d65f1c5ca556b8"
+        }
+      ],
+      "status": "completed",
+      "createdAt": "2026-03-04T18:31:27.916Z",
+      "updatedAt": "2026-03-04T18:31:27.916Z",
+      "orderNumber": "ORD-MMCDHY24-YJJWD",
+      "__v": 0
+    },
+    {
+      "_id": "69a9cd712b778ea3d7c7d03f",
+      "user": "696a732ce610bb35a5d704a3",
+      "items": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "title": "cat pixel art",
+          "price": 4.99,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "_id": "69a9cd712b778ea3d7c7d040"
+        }
+      ],
+      "totalAmount": 4.99,
+      "paymentStatus": "completed",
+      "paymentMethod": "wallet",
+      "transactionId": "WLT-MMDT5Q5O",
+      "billingDetails": {
+        "email": "admin@pixpulse.com",
+        "name": "Admin User"
+      },
+      "downloadLinks": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "url": "/uploads/artworks/file-1772601276021-873196040.png",
+          "expiresAt": "2026-03-12T18:37:37.836Z",
+          "_id": "69a9cd712b778ea3d7c7d041"
+        }
+      ],
+      "status": "completed",
+      "createdAt": "2026-03-05T18:37:37.840Z",
+      "updatedAt": "2026-03-05T18:37:37.840Z",
+      "orderNumber": "ORD-MMDT5Q5T-NO7NT",
+      "__v": 0
+    },
+    {
+      "_id": "69b0f6c76ff93b42db0bf237",
+      "user": "69a7cda98e452a07d358f2d6",
+      "items": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "title": "cat pixel art",
+          "price": 4.99,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "_id": "69b0f6c76ff93b42db0bf238"
+        }
+      ],
+      "totalAmount": 4.99,
+      "paymentStatus": "completed",
+      "paymentMethod": "wallet",
+      "transactionId": "WLT-MMLKL601",
+      "billingDetails": {
+        "email": "nahaltemp@gmail.com",
+        "name": "nahal"
+      },
+      "downloadLinks": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "url": "/uploads/artworks/file-1772601276021-873196040.png",
+          "expiresAt": "2026-03-18T04:59:51.073Z",
+          "_id": "69b0f6c76ff93b42db0bf239"
+        }
+      ],
+      "status": "completed",
+      "createdAt": "2026-03-11T04:59:51.081Z",
+      "updatedAt": "2026-03-11T04:59:51.081Z",
+      "orderNumber": "ORD-MMLKL60A-D6IQE",
+      "__v": 0
+    },
+    {
+      "_id": "69b103072f459cb38a092732",
+      "user": "69676b39840ee0459973b301",
+      "items": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "title": "cat pixel art",
+          "price": 4.99,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "_id": "69b103072f459cb38a092733"
+        }
+      ],
+      "totalAmount": 4.99,
+      "paymentStatus": "completed",
+      "paymentMethod": "wallet",
+      "transactionId": "WLT-MMLMGEBW",
+      "billingDetails": {
+        "email": "tester_1705294686000@test.com",
+        "name": "Test User"
+      },
+      "downloadLinks": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "url": "/uploads/artworks/file-1772601276021-873196040.png",
+          "expiresAt": "2026-03-18T05:52:07.820Z",
+          "_id": "69b103072f459cb38a092734"
+        }
+      ],
+      "status": "completed",
+      "createdAt": "2026-03-11T05:52:07.827Z",
+      "updatedAt": "2026-03-11T05:52:07.827Z",
+      "orderNumber": "ORD-MMLMGEC3-AWWVT",
+      "__v": 0
+    },
+    {
+      "_id": "69c198d8b8a3a48079910a04",
+      "user": "69676b39840ee0459973b301",
+      "items": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "title": "cat pixel art",
+          "price": 4.99,
+          "licenseType": "Personal",
+          "fileUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "previewUrl": "/uploads/artworks/file-1772601276021-873196040.png",
+          "_id": "69c198d8b8a3a48079910a05"
+        }
+      ],
+      "totalAmount": 4.99,
+      "paymentStatus": "completed",
+      "paymentMethod": "wallet",
+      "transactionId": "WLT-MN3LL23Y",
+      "billingDetails": {
+        "email": "tester_1705294686000@test.com",
+        "name": "Test User 1"
+      },
+      "downloadLinks": [
+        {
+          "artwork": "69a7bfbc3a81dd35b67ae814",
+          "url": "/uploads/artworks/file-1772601276021-873196040.png",
+          "expiresAt": "2026-03-30T19:47:36.814Z",
+          "_id": "69c198d8b8a3a48079910a06"
+        }
+      ],
+      "status": "completed",
+      "createdAt": "2026-03-23T19:47:36.819Z",
+      "updatedAt": "2026-03-23T19:47:36.819Z",
+      "orderNumber": "ORD-MN3LL243-6XENO",
+      "__v": 0
+    }
+  ],
+  "allUsers": [
+    {
+      "_id": "69676a58840ee0459973b2fe",
+      "name": "Test User",
+      "email": "logtest_1768385112650@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "69676b39840ee0459973b301",
+      "name": "Test User 1",
+      "email": "tester_1705294686000@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "696a732ce610bb35a5d704a3",
+      "name": "Admin User",
+      "email": "admin@pixpulse.com",
+      "role": "admin"
+    },
+    {
+      "_id": "696a925310165afc0bb20f18",
+      "name": "Pixpulse_test",
+      "email": "pixpulsetest@gmail.com",
+      "role": "user"
+    },
+    {
+      "_id": "696b082ccc0bf6c0c3935392",
+      "name": "Debug User",
+      "email": "debug@example.com",
+      "role": "user"
+    },
+    {
+      "_id": "696c6c569d2dfc73fc7b4a7f",
+      "name": "Test User",
+      "email": "user@pixpulse.com",
+      "role": "user"
+    },
+    {
+      "_id": "696d0a851f4e3a55f7571ebb",
+      "name": "Test User",
+      "email": "test@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "69a7cda98e452a07d358f2d6",
+      "name": "nahal",
+      "email": "nahaltemp@gmail.com",
+      "role": "user"
+    },
+    {
+      "_id": "69b13e09873ba754385e6dd6",
+      "name": "Updated Name",
+      "email": "testuser1773223433417@example.com",
+      "role": "user"
+    },
+    {
+      "_id": "69ba716d7ea6ee5fefaddb9f",
+      "name": "tester",
+      "email": "tester1@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "69ba71864f7e81687c88656a",
+      "name": "Tester Updated",
+      "email": "tester1773826438794@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "69ba71cee5cec70b06278ef9",
+      "name": "Tester Updated",
+      "email": "tester1773826509950@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "69ba7246de285657fbf34b06",
+      "name": "Tester Empty",
+      "email": "tester1773826630395@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "69ba74a811475d62bf7b775e",
+      "name": "Tester Empty",
+      "email": "tester1773827240083@test.com",
+      "role": "user"
+    },
+    {
+      "_id": "69ba75bb1c518244f4865211",
+      "name": "tester9",
+      "email": "tester1773827514907@test.com",
+      "role": "user"
+    }
+  ]
+}

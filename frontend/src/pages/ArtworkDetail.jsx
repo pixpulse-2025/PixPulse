@@ -512,8 +512,8 @@ const ArtworkDetail = () => {
 
                             {/* Action Buttons */}
                             <div className="space-y-3">
-                                {artwork.price === 0 ? (
-                                    // Free artwork - show download button
+                                {(artwork.price === 0 || (user && artwork.artist && (user._id === (artwork.artist._id || artwork.artist)))) ? (
+                                    // Free artwork or user is the artist - show download button
                                     <button
                                         onClick={handleDownload}
                                         className="btn-primary w-full py-4 text-base font-bold flex items-center justify-center gap-2"
@@ -521,7 +521,7 @@ const ArtworkDetail = () => {
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                         </svg>
-                                        Download Free
+                                        {user && artwork.artist && (user._id === (artwork.artist._id || artwork.artist)) ? 'Download Your Art' : 'Download Free'}
                                     </button>
                                 ) : (
                                     // Paid artwork - show buy/cart buttons

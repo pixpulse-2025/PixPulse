@@ -25,6 +25,8 @@ const Dashboard = () => {
     });
     const [performance, setPerformance] = useState([]);
     const [recentActivity, setRecentActivity] = useState([]);
+    const [allActivity, setAllActivity] = useState([]);
+    const [showAllActivity, setShowAllActivity] = useState(false);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -93,6 +95,7 @@ const Dashboard = () => {
 
                 // Sort by time desc and take top 5
                 activities.sort((a, b) => b.rawTime - a.rawTime);
+                setAllActivity(activities);
                 setRecentActivity(activities.slice(0, 5));
 
             } catch (error) {
@@ -127,12 +130,9 @@ const Dashboard = () => {
                                     alt={user?.name}
                                     className="w-full h-full rounded-full border-4 border-[#141821] object-cover"
                                 />
-                                <button className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-[#075985] transition-colors">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                </button>
                             </div>
                             <h2 className="text-xl font-bold text-white truncate mb-1">{user?.name}</h2>
-                            <p className="text-sm text-gray-400 mb-4">{user?.role || "Member"}</p>
+                            <p className="text-sm text-gray-400 mb-4">{user?.artistType || user?.role || "Member"}</p>
                             <Link
                                 to="/settings"
                                 className="btn-secondary w-full text-sm"
@@ -254,11 +254,11 @@ const Dashboard = () => {
                             </div>
 
                             {/* Recent Activity */}
-                            <div className="card-surface p-6">
+                            <div className="card-surface p-6 h-full flex flex-col">
                                 <h3 className="text-lg font-bold text-white mb-4">Recent Activity</h3>
-                                <div className="space-y-4">
-                                    {recentActivity.length > 0 ? (
-                                        recentActivity.map((activity, index) => (
+                                <div className="space-y-4 overflow-y-auto max-h-[350px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                    {allActivity.length > 0 ? (
+                                        allActivity.map((activity, index) => (
                                             <div key={index} className="flex gap-3 pb-4 border-b border-white/5 last:border-0 last:pb-0">
                                                 <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${activity.type === 'uploaded' ? 'bg-[#8B5CF6]' : 'bg-green-500'}`} />
                                                 <div className="flex-1 min-w-0">
@@ -275,9 +275,6 @@ const Dashboard = () => {
                                         <p className="text-sm text-gray-500 text-center py-4">No recent activity</p>
                                     )}
                                 </div>
-                                <button className="btn-secondary w-full mt-4 text-sm">
-                                    View All Activity
-                                </button>
                             </div>
                         </div>
 

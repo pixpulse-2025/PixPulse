@@ -60,14 +60,14 @@ const AudioWaveCard = ({ artwork, apiUrl }) => {
     const progressPct = duration ? (currentTime / duration) * 100 : 0;
 
     return (
-        <div className="group relative flex items-center gap-4 px-4 py-3 rounded-2xl bg-[#141821] border border-white/5 hover:border-violet-500/30 transition-all duration-300 hover:bg-[#1a1f2e]">
+        <div className="group relative flex items-center gap-4 px-4 py-3 rounded-2xl bg-[#141821] border border-white/10 hover:border-white/5 transition-all duration-300 hover:bg-[#1a1f2e]">
             {/* Cover Art + Play Button */}
-            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-violet-600/20 to-indigo-600/20 flex-shrink-0">
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gradient-to-br from-cyan-600/20 to-blue-600/20 flex-shrink-0">
                 {coverUrl ? (
                     <img src={coverUrl} alt={artwork.title} className="w-full h-full object-cover" />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                        <svg className="w-5 h-5 text-violet-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-cyan-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19V6l12-3v13M9 10l12-3" />
                         </svg>
                     </div>
@@ -86,19 +86,19 @@ const AudioWaveCard = ({ artwork, apiUrl }) => {
 
             {/* Title & Artist */}
             <div className="min-w-0 w-36 md:w-44 flex-shrink-0">
-                <h3 className="text-sm font-bold text-white truncate group-hover:text-violet-400 transition-colors leading-tight">
+                <h3 className="text-sm font-bold text-white truncate group-hover:text-cyan-400 transition-colors leading-tight">
                     {artwork.title}
                 </h3>
                 {artwork.artist?._id ? (
                     <Link
                         to={`/artist/${artwork.artist._id}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="text-xs text-gray-500 hover:text-violet-400 transition-colors truncate leading-tight mt-0.5 block"
+                        className="text-xs text-cyan-400/60 hover:text-cyan-400 transition-colors truncate leading-tight mt-0.5 block"
                     >
                         {artwork.artist.name}
                     </Link>
                 ) : (
-                    <p className="text-xs text-gray-500 truncate leading-tight mt-0.5">
+                    <p className="text-xs text-cyan-400/60 truncate leading-tight mt-0.5">
                         {artwork.artist?.name || "Unknown Artist"}
                     </p>
                 )}
@@ -119,9 +119,9 @@ const AudioWaveCard = ({ artwork, apiUrl }) => {
                             <div
                                 key={i}
                                 className={`flex-1 rounded-full transition-all duration-100 ${isCurrent
-                                    ? 'bg-violet-400 shadow-[0_0_6px_rgba(139,92,246,0.5)]'
+                                    ? 'bg-[#C8ACD6] shadow-[0_0_6px_rgba(139,92,246,0.5)]'
                                     : isPlayed
-                                        ? 'bg-violet-500/80'
+                                        ? 'bg-[#433D8B]/80'
                                         : 'bg-white/12 group-hover:bg-white/20'
                                     }`}
                                 style={{
@@ -134,7 +134,7 @@ const AudioWaveCard = ({ artwork, apiUrl }) => {
                     })}
                 </div>
                 {/* Time */}
-                <span className="text-[10px] font-mono text-gray-500 flex-shrink-0 w-16 text-right tabular-nums">
+                <span className="text-[10px] font-mono text-cyan-400/60 flex-shrink-0 w-16 text-right tabular-nums">
                     {formatTime(currentTime)}/{formatTime(duration)}
                 </span>
             </div>
@@ -146,7 +146,7 @@ const AudioWaveCard = ({ artwork, apiUrl }) => {
                 </span>
                 <Link
                     to={`/artwork/${artwork._id}`}
-                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-violet-500 text-white transition-all text-xs font-semibold border border-white/5 hover:border-violet-500"
+                    className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-all text-xs font-semibold border border-white/10 hover:border-white/30"
                 >
                     View
                 </Link>
@@ -249,98 +249,120 @@ const Home = () => {
     return (
         <div className="flex-grow min-h-screen bg-[#0B0D10] text-[#E5E7EB] selection:bg-[#8B5CF6] selection:text-white font-sans overflow-x-hidden">
             {/* Hero Section */}
-            <section className="relative min-h-[90vh] flex items-center pt-20 px-6 overflow-hidden">
+            <section className="relative min-h-[70vh] flex items-center py-20 px-6 overflow-hidden">
                 {/* Cinematic Glows */}
-                <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-violet-900/10 to-transparent pointer-events-none" />
+                <div className="absolute top-0 inset-x-0 h-[500px] bg-gradient-to-b from-cyan-900/10 to-transparent pointer-events-none" />
                 <motion.div
                     style={{ y: y1 }}
-                    className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen"
+                    className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none mix-blend-screen"
                 />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none mix-blend-screen" />
 
-                <div className="container mx-auto max-w-[1400px] z-20 relative">
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="max-w-4xl space-y-10"
-                    >
-                        <div className="space-y-6">
-                            <h1 className="text-6xl md:text-8xl font-black tracking-tight leading-[0.95] text-white">
-                                The Marketplace for <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-indigo-400">
-                                    Digital Creators.
-                                </span>
-                            </h1>
-                            <p className="text-xl md:text-2xl text-gray-400 max-w-xl font-light leading-relaxed">
-                                Buy and sell high-quality assets. Audio, Visuals, and Presets for the modern era.
-                            </p>
-                        </div>
+                <div className="container mx-auto max-w-[1400px] z-20 relative h-full flex items-center">
+                    <div className="w-full lg:w-[45%] z-20 relative py-10">
+                        <motion.div
+                            initial={{ opacity: 0, y: 30 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8, ease: "easeOut" }}
+                            className="space-y-10"
+                        >
+                            <div className="space-y-6">
+                                <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] text-white text-left">
+                                    The Marketplace <br className="hidden sm:block" /> 
+                                    for <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                                        Digital Creators.
+                                    </span>
+                                </h1>
+                                <p className="text-xl md:text-2xl text-cyan-400/80 max-w-xl font-light leading-relaxed">
+                                    Buy and sell high-quality assets. Audio, Visuals, and Presets for the modern era.
+                                </p>
+                            </div>
 
-                        <div className="flex flex-col sm:flex-row gap-6">
-                            <Link
-                                to="/explore"
-                                className="btn-primary text-center text-lg px-10 py-4"
-                            >
-                                Explore Collection
-                            </Link>
-                            {!isAuthenticated && (
+                            <div className="flex flex-col sm:flex-row gap-6">
                                 <Link
-                                    to="/register"
-                                    className="btn-secondary text-center text-lg px-10 py-4"
+                                    to="/explore"
+                                    className="btn-primary text-center text-lg px-10 py-4"
                                 >
-                                    Join Community
+                                    Explore Collection
                                 </Link>
-                            )}
+                                {!isAuthenticated && (
+                                    <Link
+                                        to="/register"
+                                        className="btn-secondary text-center text-lg px-10 py-4"
+                                    >
+                                        Join Community
+                                    </Link>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+
+                    {/* Right Side Visual Grid */}
+                    <div className="hidden lg:block absolute top-[5%] bottom-[-5%] right-0 w-[50%] z-10 overflow-hidden pointer-events-none">
+                        {/* Blur/Fade Gradient to blend the grid into the background on the left */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0D10] via-[#0B0D10]/80 to-transparent z-20 w-1/3" />
+                        <div className="absolute inset-y-0 right-0 bg-gradient-to-l from-[#0B0D10] to-transparent z-20 w-1/6" />
+                        
+                        {/* Masonry-style Image Grid */}
+                        <div className="absolute top-0 right-0 w-full h-full flex gap-4 rotate-[-4deg] opacity-70">
+                            {/* Column 1 */}
+                            <motion.div 
+                                className="flex flex-col gap-4 w-1/3 pt-20"
+                                animate={{ y: ["0%", "-20%"] }}
+                                transition={{ duration: 25, repeat: Infinity, ease: "linear", repeatType: "mirror" }}
+                            >
+                                {marqueeItems.slice(0, 3).map((item, i) => (
+                                    <Link key={i} to={item.id ? `/artwork/${item.id}` : "/explore"}>
+                                        <img src={item.img} className="w-full rounded-2xl object-cover aspect-[4/5] opacity-50 shadow-2xl hover:opacity-100 transition-opacity" alt={item.title || ""} />
+                                    </Link>
+                                ))}
+                            </motion.div>
+                            {/* Column 2 */}
+                            <motion.div 
+                                className="flex flex-col gap-4 w-1/3 pt-0"
+                                animate={{ y: ["-10%", "10%"] }}
+                                transition={{ duration: 30, repeat: Infinity, ease: "linear", repeatType: "mirror" }}
+                            >
+                                {marqueeItems.slice(3, 6).map((item, i) => (
+                                    <Link key={i} to={item.id ? `/artwork/${item.id}` : "/explore"}>
+                                        <img src={item.img} className="w-full rounded-2xl object-cover aspect-square opacity-70 shadow-2xl hover:opacity-100 transition-opacity" alt={item.title || ""} />
+                                    </Link>
+                                ))}
+                                {marqueeItems[0] && (
+                                    <Link to={marqueeItems[0].id ? `/artwork/${marqueeItems[0].id}` : "/explore"}>
+                                        <img src={marqueeItems[0].img} className="w-full rounded-2xl object-cover aspect-[4/3] opacity-70 shadow-2xl hover:opacity-100 transition-opacity" alt={marqueeItems[0].title || ""} />
+                                    </Link>
+                                )}
+                            </motion.div>
+                            {/* Column 3 */}
+                            <motion.div 
+                                className="flex flex-col gap-4 w-1/3 pt-40"
+                                animate={{ y: ["0%", "-30%"] }}
+                                transition={{ duration: 35, repeat: Infinity, ease: "linear", repeatType: "mirror" }}
+                            >
+                                {marqueeItems.slice(6, 10).map((item, i) => (
+                                    <Link key={i} to={item.id ? `/artwork/${item.id}` : "/explore"}>
+                                        <img src={item.img} className="w-full rounded-2xl object-cover aspect-[3/4] opacity-50 shadow-2xl hover:opacity-100 transition-opacity" alt={item.title || ""} />
+                                    </Link>
+                                ))}
+                            </motion.div>
                         </div>
-                    </motion.div>
+                    </div>
                 </div>
             </section>
-
-            {/* Most Viewed Showcase */}
-            <div className="relative py-16 bg-[#0B0D10] overflow-hidden border-y border-white/5">
-                <motion.div
-                    animate={{ x: ["0%", "-50%"] }}
-                    transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
-                    className="flex gap-6 items-center w-max"
-                >
-                    {[...marqueeItems, ...marqueeItems].map((item, i) => (
-                        <Link
-                            key={i}
-                            to={item.id ? `/artwork/${item.id}` : "/explore"}
-                            className="group relative w-[300px] md:w-[420px] aspect-[16/10] rounded-2xl overflow-hidden border border-white/5 hover:border-violet-500/40 transition-all duration-500 flex-shrink-0 hover:shadow-[0_0_40px_rgba(139,92,246,0.15)]"
-                        >
-                            <img
-                                src={item.img}
-                                className="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-700"
-                                alt={item.title}
-                            />
-                            {/* Dark gradient from below */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
-
-                            {/* Metadata overlay */}
-                            <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                                <h3 className="text-white font-bold text-base truncate">{item.title}</h3>
-                            </div>
-                        </Link>
-                    ))}
-                </motion.div>
-            </div>
-
-
 
             {/* Visual Arts Section */}
             <section className="py-24 px-6 relative">
                 <div className="absolute inset-0 bg-[#0B0D10]" />
 
                 <div className="container mx-auto max-w-[1400px] relative z-10">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-white/5 pb-6">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-white/10 pb-6">
                         <div className="space-y-2">
                             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
                                 Trending Visual Art
                             </h2>
                         </div>
-                        <Link to="/explore?category=Visual Art" className="text-lg font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                        <Link to="/explore?category=Visual Art" className="text-lg font-medium text-cyan-400 hover:text-cyan-300 transition-colors">
                             View All Visuals &rarr;
                         </Link>
                     </div>
@@ -355,25 +377,25 @@ const Home = () => {
                                 <ArtworkCard key={artwork._id} artwork={artwork} />
                             ))
                         ) : (
-                            <p className="col-span-full text-center text-gray-500">No visual artworks found.</p>
+                            <p className="col-span-full text-center text-cyan-400/60">No visual artworks found.</p>
                         )}
                     </div>
                 </div>
             </section>
 
             {/* Featured Artists Section */}
-            <section className="py-24 px-6 bg-[#141821] border-y border-white/5">
+            <section className="py-24 px-6 bg-[#141821] border-y border-white/10">
                 <div className="container mx-auto max-w-[1400px]">
                     <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-white tracking-tight">Featured Artists</h2>
                     {featuredArtists.length > 0 ? (
                         <div className="flex flex-wrap justify-center gap-12 md:gap-20">
                             {featuredArtists.map((artist, i) => (
                                 <Link to={`/artist/${artist.id}`} key={i} className="flex flex-col items-center group cursor-pointer block">
-                                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-violet-500 transition-all duration-300 mb-6 p-1">
+                                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-white/30 transition-all duration-300 mb-6 p-1">
                                         <img src={artist.img} alt={artist.name} className="w-full h-full rounded-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-violet-400 transition-colors">{artist.name}</h3>
-                                    <p className="text-gray-400 text-sm flex items-center gap-1.5">
+                                    <h3 className="text-2xl font-bold text-white mb-1 group-hover:text-cyan-400 transition-colors">{artist.name}</h3>
+                                    <p className="text-cyan-400/80 text-sm flex items-center gap-1.5">
                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                                         {artist.totalViews.toLocaleString()} views
                                     </p>
@@ -381,7 +403,7 @@ const Home = () => {
                             ))}
                         </div>
                     ) : (
-                        <p className="text-center text-gray-500">No featured artists yet.</p>
+                        <p className="text-center text-cyan-400/60">No featured artists yet.</p>
                     )}
                 </div>
             </section>
@@ -389,13 +411,13 @@ const Home = () => {
             {/* Audio Section */}
             <section className="py-24 px-6 bg-[#0B0D10]">
                 <div className="container mx-auto max-w-[1400px]">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-white/5 pb-6">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8 border-b border-white/10 pb-6">
                         <div className="space-y-2">
                             <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight">
                                 Trending Music Art
                             </h2>
                         </div>
-                        <Link to="/explore?category=Audio" className="text-lg font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                        <Link to="/explore?category=Audio" className="text-lg font-medium text-cyan-400 hover:text-cyan-300 transition-colors">
                             Browse Library &rarr;
                         </Link>
                     </div>
@@ -410,7 +432,7 @@ const Home = () => {
                                 <AudioWaveCard key={artwork._id} artwork={artwork} apiUrl={API_URL} />
                             ))
                         ) : (
-                            <p className="col-span-full text-center text-gray-500">No audio tracks found.</p>
+                            <p className="col-span-full text-center text-cyan-400/60">No audio tracks found.</p>
                         )}
                     </div>
                 </div>
@@ -421,7 +443,7 @@ const Home = () => {
                 <div className="container mx-auto max-w-2xl text-center">
                     <div className="space-y-6 mb-10">
                         <h3 className="text-4xl font-bold text-white tracking-tight">Stay Inspired</h3>
-                        <p className="text-gray-400 text-lg font-light">Join 50,000+ creators getting weekly design resources and inspiration.</p>
+                        <p className="text-cyan-400/80 text-lg font-light">Join 50,000+ creators getting weekly design resources and inspiration.</p>
                     </div>
                     <form
                         onSubmit={async (e) => {
@@ -453,7 +475,7 @@ const Home = () => {
                             placeholder="Email address"
                             value={subscribeEmail}
                             onChange={(e) => { setSubscribeEmail(e.target.value); setSubscribeStatus(""); }}
-                            className={`flex-1 px-6 py-4 rounded-xl bg-[#141821] border text-white focus:outline-none focus:border-violet-500 transition-all ${subscribeStatus === "error" ? "border-red-500/50" : "border-white/10"
+                            className={`flex-1 px-6 py-4 rounded-xl bg-[#141821] border text-white focus:outline-none focus:border-cyan-500/50 transition-all ${subscribeStatus === "error" ? "border-red-500/50" : "border-white/10"
                                 }`}
                         />
                         <button type="submit" className="btn-primary whitespace-nowrap px-8">

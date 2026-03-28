@@ -226,26 +226,6 @@ const Wallet = () => {
                             </form>
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className="rounded-2xl bg-[#141821] border border-white/5 p-6">
-                            <h2 className="text-lg font-bold text-white mb-4">Quick Actions</h2>
-                            <div className="space-y-2">
-                                <Link
-                                    to="/cart"
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-all group"
-                                >
-                                    <svg className="w-5 h-5 text-gray-500 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                                    <span className="text-sm font-medium">View Cart</span>
-                                </Link>
-                                <Link
-                                    to="/explore"
-                                    className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-all group"
-                                >
-                                    <svg className="w-5 h-5 text-gray-500 group-hover:text-violet-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                                    <span className="text-sm font-medium">Browse Artworks</span>
-                                </Link>
-                            </div>
-                        </div>
                     </div>
 
                     {/* Transaction History */}
@@ -263,7 +243,7 @@ const Wallet = () => {
                                     <p className="text-gray-600 text-sm mt-1">Add funds or make a purchase to get started</p>
                                 </div>
                             ) : (
-                                <div className="divide-y divide-white/5">
+                                <div className="divide-y divide-white/5 overflow-y-auto max-h-[500px] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                     {transactions.map((tx) => (
                                         <div key={tx._id} className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors">
                                             {getTypeIcon(tx.type)}

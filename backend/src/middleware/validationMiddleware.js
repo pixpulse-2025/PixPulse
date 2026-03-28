@@ -64,6 +64,10 @@ export const updateProfileValidation = [
         .optional()
         .trim()
         .isLength({ min: 2, max: 50 }).withMessage("Name must be between 2 and 50 characters"),
+    body("artistType")
+        .optional()
+        .trim()
+        .isLength({ max: 50 }).withMessage("Artist type cannot exceed 50 characters"),
     body("bio")
         .optional()
         .trim()

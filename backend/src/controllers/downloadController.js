@@ -3,6 +3,7 @@ import Artwork from "../models/Artwork.js";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
+import mongoose from "mongoose";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,20 +28,38 @@ export const secureDownload = async (req, res) => {
         }
 
         // Check if user owns this artwork (either purchased or is the artist)
-        const isArtist = artwork.artist.toString() === req.user._id.toString();
+        const userId = req.user._id;
+        const artistId = artwork.artist;
+        let isArtist = false;
+        
+        // Use Mongoose equals() for safe ObjectId comparison
+        if (artistId && userId) {
+            if (artistId.equals ? artistId.equals(userId) : String(artistId) === String(userId)) {
+                isArtist = true;
+            }
+        }
+        
+        // Admin or Free artwork bypass
+        if (req.user.role === 'admin' || artwork.price === 0) {
+            isArtist = true;
+        }
 
         if (!isArtist) {
             // Check if user has purchased this artwork
             const order = await Order.findOne({
                 user: req.user._id,
-                "items.artwork": artworkId,
                 paymentStatus: "completed",
+                $or: [
+                    { "items.artwork": artworkId },
+                    { "items.artwork": new mongoose.Types.ObjectId(artworkId) }
+                ]
             });
 
             if (!order) {
                 return res.status(403).json({
                     success: false,
                     message: "You must purchase this artwork to download it",
+                    _debug: { isArtist, userId, artistId, artworkId }
                 });
             }
 
@@ -108,19 +127,35 @@ export const generateDownloadToken = async (req, res) => {
         }
 
         // Check ownership
-        const isArtist = artwork.artist.toString() === req.user._id.toString();
+        const userId = req.user._id;
+        const artistId = artwork.artist;
+        let isArtist = false;
+        
+        if (artistId && userId) {
+            if (artistId.equals ? artistId.equals(userId) : String(artistId) === String(userId)) {
+                isArtist = true;
+            }
+        }
+        
+        if (req.user.role === 'admin' || artwork.price === 0) {
+            isArtist = true;
+        }
 
         if (!isArtist) {
             const order = await Order.findOne({
                 user: req.user._id,
-                "items.artwork": artworkId,
                 paymentStatus: "completed",
+                $or: [
+                    { "items.artwork": artworkId },
+                    { "items.artwork": new mongoose.Types.ObjectId(artworkId) }
+                ]
             });
 
             if (!order) {
                 return res.status(403).json({
                     success: false,
                     message: "You must purchase this artwork to download it",
+                    _debug: { isArtist, userId, artistId, artworkId }
                 });
             }
 
@@ -242,7 +277,19 @@ export const checkDownloadEligibility = async (req, res) => {
         }
 
         // Check if user is the artist
-        const isArtist = artwork.artist.toString() === req.user._id.toString();
+        const userId = req.user._id;
+        const artistId = artwork.artist;
+        let isArtist = false;
+        
+        if (artistId && userId) {
+            if (artistId.equals ? artistId.equals(userId) : String(artistId) === String(userId)) {
+                isArtist = true;
+            }
+        }
+        
+        if (req.user.role === 'admin' || artwork.price === 0) {
+            isArtist = true;
+        }
 
         if (isArtist) {
             return res.status(200).json({
@@ -255,8 +302,11 @@ export const checkDownloadEligibility = async (req, res) => {
         // Check if purchased
         const order = await Order.findOne({
             user: req.user._id,
-            "items.artwork": artworkId,
             paymentStatus: "completed",
+            $or: [
+                { "items.artwork": artworkId },
+                { "items.artwork": new mongoose.Types.ObjectId(artworkId) }
+            ]
         });
 
         if (!order) {
@@ -264,6 +314,7 @@ export const checkDownloadEligibility = async (req, res) => {
                 success: true,
                 eligible: false,
                 reason: "not_purchased",
+                _debug: { isArtist, userId, artistId, artworkId }
             });
         }
 

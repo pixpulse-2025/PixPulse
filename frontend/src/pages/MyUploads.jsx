@@ -7,12 +7,16 @@ import {
     toggleArtworkVisibility,
     deleteArtwork,
 } from "../redux/slices/artworkSlice";
+import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const MyUploads = () => {
     const dispatch = useDispatch();
     const { myArtworks, loading, error } = useSelector((state) => state.artwork);
     const [editingId, setEditingId] = useState(null);
     const [editForm, setEditForm] = useState({});
+    const [downloading, setDownloading] = useState(null);
 
     useEffect(() => {
         dispatch(fetchMyUploads());
@@ -42,6 +46,43 @@ const MyUploads = () => {
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this artwork?")) {
             dispatch(deleteArtwork(id));
+        }
+    };
+
+    const handleDownload = async (artworkId, artworkTitle) => {
+        try {
+            setDownloading(artworkId);
+            const response = await axios.get(`${API_URL}/download/${artworkId}`, {
+                responseType: 'blob',
+            });
+
+            const blob = new Blob([response.data]);
+            const url = window.URL.createObjectURL(blob);
+            const mimeType = response.headers['content-type'];
+            let extension = 'jpg';
+
+            if (mimeType) {
+                const mimeMap = {
+                    'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp',
+                    'video/mp4': 'mp4', 'video/webm': 'webm', 'video/quicktime': 'mov',
+                    'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/ogg': 'ogg', 'application/pdf': 'pdf'
+                };
+                if (mimeMap[mimeType]) extension = mimeMap[mimeType];
+            }
+
+            const link = document.createElement('a');
+            link.href = url;
+            const safeTitle = (artworkTitle || 'artwork').replace(/[^a-z0-9]/gi, '_');
+            link.setAttribute('download', `${safeTitle}.${extension}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error(error);
+            alert(error.response?.data?.message || 'Download failed. Please try again.');
+        } finally {
+            setDownloading(null);
         }
     };
 
@@ -102,152 +143,119 @@ const MyUploads = () => {
                 ) : (
                     <div className="grid grid-cols-1 gap-6">
                         {myArtworks.map((artwork) => (
-                            <div key={artwork._id} className="card-surface rounded-2xl overflow-hidden">
-                                <div className="md:flex">
-                                    {/* Preview Image */}
-                                    <div className="md:w-64 h-48 md:h-auto bg-[#141821] border-r border-white/5 flex-shrink-0">
-                                        <img
-                                            src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`}
-                                            alt={artwork.title}
-                                            className="w-full h-full object-cover"
-                                            onError={(e) => {
-                                                e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
-                                            }}
-                                        />
+                            <div key={artwork._id} className="flex flex-col md:flex-row gap-4 p-4 card-surface rounded-xl border border-white/5 hover:border-white/10 transition-all">
+                                {/* Thumbnail */}
+                                <div className="w-full md:w-32 md:h-32 h-48 flex-shrink-0 rounded-lg overflow-hidden bg-gray-900 border border-white/5 relative group">
+                                    <img
+                                        src={`http://localhost:5000${artwork.previewUrl || artwork.fileUrl}`}
+                                        alt={artwork.title}
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                                        onError={(e) => {
+                                            e.target.src = "http://localhost:5000/uploads/placeholders/default-preview.png";
+                                        }}
+                                    />
+                                    {/* Status Badge */}
+                                    <div className="absolute top-2 left-2">
+                                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider backdrop-blur-md ${artwork.isPublic ? "bg-green-500/80 text-white" : "bg-black/80 text-gray-300"}`}>
+                                            {artwork.isPublic ? "Public" : "Hidden"}
+                                        </span>
                                     </div>
+                                </div>
 
-                                    {/* Content */}
-                                    <div className="flex-1 p-6">
-                                        {editingId === artwork._id ? (
-                                            <div className="space-y-4">
-                                                <input
-                                                    type="text"
-                                                    value={editForm.title}
-                                                    onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
-                                                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
-                                                    placeholder="Title"
-                                                />
-                                                <textarea
-                                                    value={editForm.description}
-                                                    onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                                                    className="w-full px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
-                                                    rows="3"
-                                                    placeholder="Description"
-                                                />
-                                                <div className="flex gap-4">
-                                                    <select
-                                                        value={editForm.priceType}
-                                                        onChange={(e) => setEditForm({ ...editForm, priceType: e.target.value })}
-                                                        className="px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
-                                                    >
-                                                        <option value="Free">Free</option>
-                                                        <option value="Paid">Paid</option>
-                                                    </select>
-                                                    {editForm.priceType === "Paid" && (
-                                                        <input
-                                                            type="number"
-                                                            value={editForm.price}
-                                                            onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
-                                                            className="px-4 py-2 rounded-lg border border-white/10 bg-[#141821] text-white"
-                                                            placeholder="Price"
-                                                        />
-                                                    )}
-                                                </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => handleSaveEdit(artwork._id)}
-                                                        className="btn-primary inline-flex items-center gap-2 px-5 py-2.5"
-                                                    >
-                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-                                                        Save
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setEditingId(null)}
-                                                        className="px-4 py-2 bg-white/5 text-gray-300 rounded-lg hover:bg-white/10"
-                                                    >
-                                                        Cancel
-                                                    </button>
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                    {editingId === artwork._id ? (
+                                        <div className="space-y-3">
+                                            <input
+                                                type="text"
+                                                value={editForm.title}
+                                                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                                                className="w-full px-3 py-1.5 rounded bg-[#141821] border border-white/10 text-white text-sm"
+                                                placeholder="Title"
+                                            />
+                                            <textarea
+                                                value={editForm.description}
+                                                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                                                className="w-full px-3 py-1.5 rounded bg-[#141821] border border-white/10 text-white text-sm"
+                                                rows="2"
+                                                placeholder="Description"
+                                            />
+                                            <div className="flex gap-3">
+                                                <select
+                                                    value={editForm.priceType}
+                                                    onChange={(e) => setEditForm({ ...editForm, priceType: e.target.value })}
+                                                    className="w-32 px-3 py-1.5 rounded bg-[#141821] border border-white/10 text-white text-sm"
+                                                >
+                                                    <option value="Free">Free</option>
+                                                    <option value="Paid">Paid</option>
+                                                </select>
+                                                {editForm.priceType === "Paid" && (
+                                                    <input
+                                                        type="number"
+                                                        value={editForm.price}
+                                                        onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                                                        className="w-32 px-3 py-1.5 rounded bg-[#141821] border border-white/10 text-white text-sm"
+                                                        placeholder="Price"
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="flex gap-2 pt-1">
+                                                <button onClick={() => handleSaveEdit(artwork._id)} className="btn-primary flex items-center gap-1.5 px-4 py-1.5 text-sm h-8">
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg> Save
+                                                </button>
+                                                <button onClick={() => setEditingId(null)} className="px-4 py-1.5 bg-white/5 text-gray-300 rounded hover:bg-white/10 text-sm h-8 font-medium">
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col h-full justify-between gap-4 md:flex-row md:items-start">
+                                            <div className="min-w-0 flex-1">
+                                                <h3 className="text-lg font-bold text-white mb-0.5 truncate" title={artwork.title}>
+                                                    {artwork.title}
+                                                </h3>
+                                                <p className="text-sm text-[#8B5CF6] mb-2 truncate">
+                                                    {artwork.category} • {artwork.subCategory}
+                                                </p>
+                                                <p className="text-sm text-gray-400 line-clamp-2 md:line-clamp-2">
+                                                    {artwork.description || <span className="italic opacity-50">No description provided</span>}
+                                                </p>
+                                                
+                                                <div className="flex items-center gap-4 mt-3 text-xs font-semibold">
+                                                    <span className="flex items-center gap-1 text-gray-500">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                        {artwork.views || 0}
+                                                    </span>
+                                                    <span className="flex items-center gap-1 text-gray-500">
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                        {artwork.downloads || 0}
+                                                    </span>
+                                                    <span className="w-1 h-1 rounded-full bg-white/10"></span>
+                                                    <span className={`${artwork.priceType === "Free" ? "text-green-400" : "text-emerald-400"}`}>
+                                                        {artwork.priceType === "Free" ? "FREE" : `$${artwork.price?.toFixed(2) || '0.00'}`}
+                                                    </span>
                                                 </div>
                                             </div>
-                                        ) : (
-                                            <>
-                                                <div className="flex items-start justify-between mb-4">
-                                                    <div className="flex-1">
-                                                        <h3 className="text-xl font-bold text-white mb-1">
-                                                            {artwork.title}
-                                                        </h3>
-                                                        <p className="text-sm text-gray-400 mb-2">
-                                                            {artwork.category} • {artwork.subCategory}
-                                                        </p>
-                                                        <p className="text-gray-300 mb-3">
-                                                            {artwork.description}
-                                                        </p>
-                                                        {artwork.tags && artwork.tags.length > 0 && (
-                                                            <div className="flex flex-wrap gap-2 mb-3">
-                                                                {artwork.tags.map((tag, idx) => (
-                                                                    <span
-                                                                        key={idx}
-                                                                        className="px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 text-xs rounded-full"
-                                                                    >
-                                                                        {tag}
-                                                                    </span>
-                                                                ))}
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="flex items-center gap-2 ml-4">
-                                                        <span
-                                                            className={`px-3 py-1 rounded-full text-xs font-bold ${artwork.isPublic
-                                                                ? "bg-green-100 dark:bg-green-900/20 text-green-600"
-                                                                : "bg-gray-100 dark:bg-gray-800 text-gray-600"
-                                                                }`}
-                                                        >
-                                                            {artwork.isPublic ? "Public" : "Hidden"}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="flex items-center justify-between">
-                                                    <div className="flex items-center gap-6 text-sm text-gray-400">
-                                                        <span className="flex items-center gap-1">
-                                                            👁️ {artwork.views || 0} views
-                                                        </span>
-                                                        <span className="flex items-center gap-1">
-                                                            📥 {artwork.downloads || 0} downloads
-                                                        </span>
-                                                        <span className="flex items-center gap-1">
-                                                            {artwork.priceType === "Free" ? (
-                                                                <span className="text-green-600 font-bold">FREE</span>
-                                                            ) : (
-                                                                <span className="text-primary-600 font-bold">${artwork.price}</span>
-                                                            )}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => handleEdit(artwork)}
-                                                            className="px-4 py-2 text-sm font-medium text-[#8B5CF6] hover:bg-[#8B5CF6]/10 rounded-lg transition-colors"
-                                                        >
-                                                            ✏️ Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleToggleVisibility(artwork._id)}
-                                                            className="px-4 py-2 text-sm font-medium text-gray-400 hover:bg-white/5 rounded-lg transition-colors"
-                                                        >
-                                                            {artwork.isPublic ? "👁️ Hide" : "👁️‍🗨️ Unhide"}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(artwork._id)}
-                                                            className="px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
-                                                        >
-                                                            🗑️ Delete
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </>
-                                        )}
-                                    </div>
+                                            <div className="flex md:flex-col gap-2 flex-shrink-0">
+                                                <button onClick={() => handleDownload(artwork._id, artwork.title)} disabled={downloading === artwork._id} className="flex-1 md:flex-none flex items-center justify-center gap-2 p-2 bg-[#141821] border border-white/5 hover:bg-green-500/20 text-gray-400 hover:text-green-500 hover:border-green-500/50 rounded-lg transition-all disabled:opacity-50" title="Download Original">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                </button>
+                                                <button onClick={() => handleEdit(artwork)} className="flex-1 md:flex-none flex items-center justify-center gap-2 p-2 bg-[#141821] border border-white/5 hover:bg-[#8B5CF6]/20 text-gray-400 hover:text-[#8B5CF6] hover:border-[#8B5CF6]/50 rounded-lg transition-all" title="Edit Artwork">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                                </button>
+                                                <button onClick={() => handleToggleVisibility(artwork._id)} className={`flex-1 md:flex-none flex items-center justify-center gap-2 p-2 bg-[#141821] border border-white/5 transition-all rounded-lg ${artwork.isPublic ? 'hover:bg-amber-500/20 text-gray-400 hover:text-amber-500 hover:border-amber-500/50' : 'hover:bg-green-500/20 text-gray-400 hover:text-green-500 hover:border-green-500/50'}`} title={artwork.isPublic ? "Hide Artwork" : "Publish Artwork"}>
+                                                    {artwork.isPublic ? (
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                                                    ) : (
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                                                    )}
+                                                </button>
+                                                <button onClick={() => handleDelete(artwork._id)} className="flex-1 md:flex-none flex items-center justify-center gap-2 p-2 bg-[#141821] border border-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 hover:border-red-500/50 rounded-lg transition-all" title="Delete Artwork">
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         ))}

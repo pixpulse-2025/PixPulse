@@ -41,6 +41,11 @@ const userSchema = new mongoose.Schema(
             enum: ["user", "artist", "admin"],
             default: "user",
         },
+        artistType: {
+            type: String,
+            maxlength: [50, "Artist type cannot exceed 50 characters"],
+            default: "",
+        },
         avatar: {
             type: String,
             default: "https://ui-avatars.com/api/?name=User&background=random",
@@ -52,6 +57,11 @@ const userSchema = new mongoose.Schema(
         website: {
             type: String,
             maxlength: [100, "Website URL cannot exceed 100 characters"],
+        },
+        socialLinks: {
+            instagram: { type: String, maxlength: 100, default: "" },
+            dribbble: { type: String, maxlength: 100, default: "" },
+            facebook: { type: String, maxlength: 100, default: "" }
         },
         location: {
             type: String,
@@ -79,6 +89,15 @@ const userSchema = new mongoose.Schema(
             type: String,
             enum: ['local', 'google'],
             default: 'local',
+        },
+        privacy: {
+            showEmail: { type: Boolean, default: false }
+        },
+        notifications: {
+            emailNotifications: { type: Boolean, default: true },
+            pushNotifications: { type: Boolean, default: true },
+            marketingEmails: { type: Boolean, default: true },
+            weeklyDigest: { type: Boolean, default: true }
         },
         resetPasswordToken: String,
         resetPasswordExpire: Date,

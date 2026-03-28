@@ -12,10 +12,14 @@ const Settings = () => {
     const [formData, setFormData] = useState({
         name: user?.name || "",
         email: user?.email || "",
+        artistType: user?.artistType || "",
         bio: user?.bio || "",
         website: user?.website || "",
+        socialLinks: user?.socialLinks || { instagram: "", dribbble: "", facebook: "" },
         location: user?.location || "",
-        avatar: user?.avatar || ""
+        avatar: user?.avatar || "",
+        privacy: user?.privacy || { showEmail: false },
+        notifications: user?.notifications || { emailNotifications: true, pushNotifications: true, marketingEmails: true, weeklyDigest: true }
     });
 
     const [passwordData, setPasswordData] = useState({
@@ -33,10 +37,14 @@ const Settings = () => {
                 ...prev,
                 name: user.name || "",
                 email: user.email || "",
+                artistType: user.artistType || "",
                 bio: user.bio || "",
                 website: user.website || "",
+                socialLinks: user.socialLinks || { instagram: "", dribbble: "", facebook: "" },
                 location: user.location || "",
-                avatar: user.avatar || ""
+                avatar: user.avatar || "",
+                privacy: user.privacy || { showEmail: false },
+                notifications: user.notifications || { emailNotifications: true, pushNotifications: true, marketingEmails: true, weeklyDigest: true }
             }));
         }
     }, [user]);
@@ -53,6 +61,39 @@ const Settings = () => {
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
+    };
+
+    const handleSocialLinkChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            socialLinks: {
+                ...prev.socialLinks,
+                [name]: value
+            }
+        }));
+    };
+
+    const handlePrivacyChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            privacy: {
+                ...prev.privacy,
+                [name]: type === 'checkbox' ? checked : value
+            }
+        }));
+    };
+
+    const handleNotificationChange = (e) => {
+        const { name, checked } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            notifications: {
+                ...prev.notifications,
+                [name]: checked
+            }
+        }));
     };
 
     const handleFileChange = (e) => {
@@ -95,9 +136,13 @@ const Settings = () => {
         try {
             const dataToSubmit = new FormData();
             dataToSubmit.append("name", formData.name);
+            dataToSubmit.append("artistType", formData.artistType || "");
             dataToSubmit.append("bio", formData.bio);
             dataToSubmit.append("website", formData.website);
+            dataToSubmit.append("socialLinks", JSON.stringify(formData.socialLinks));
             dataToSubmit.append("location", formData.location);
+            dataToSubmit.append("privacy", JSON.stringify(formData.privacy));
+            dataToSubmit.append("notifications", JSON.stringify(formData.notifications));
             if (avatarFile) {
                 dataToSubmit.append("avatarFile", avatarFile);
             } else if (formData.avatar) {
@@ -298,6 +343,18 @@ const Settings = () => {
                                         </div>
 
                                         <div>
+                                            <label className="block text-sm font-semibold text-gray-300 mb-2">Artist Type / Tags</label>
+                                            <input
+                                                type="text"
+                                                name="artistType"
+                                                value={formData.artistType}
+                                                onChange={handleChange}
+                                                className="input-field"
+                                                placeholder="e.g. 3D Modeler, Concept Artist, UI/UX"
+                                            />
+                                        </div>
+
+                                        <div>
                                             <label className="block text-sm font-semibold text-gray-300 mb-2">Email Address</label>
                                             <input
                                                 type="email"
@@ -345,6 +402,28 @@ const Settings = () => {
                                                     className="input-field"
                                                     placeholder="City, Country"
                                                 />
+                                            </div>
+                                        </div>
+
+                                        <div className="pt-4 border-t border-white/5">
+                                            <h3 className="text-lg font-bold text-white mb-4">Social Links</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                {["instagram", "dribbble", "facebook"].map((platform) => (
+                                                    <div key={platform}>
+                                                        <label className="block text-sm font-semibold text-gray-300 mb-2 capitalize">{platform}</label>
+                                                        <div className="relative">
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">@</span>
+                                                            <input
+                                                                type="text"
+                                                                name={platform}
+                                                                value={formData.socialLinks[platform]}
+                                                                onChange={handleSocialLinkChange}
+                                                                className="input-field pl-8"
+                                                                placeholder={`Your ${platform} handle`}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
                                     </div>
@@ -461,22 +540,17 @@ const Settings = () => {
                                     <div className="space-y-4">
                                         <div className="flex items-center justify-between py-4 border-b border-white/5">
                                             <div>
-                                                <p className="font-semibold text-white">Profile Visibility</p>
-                                                <p className="text-sm text-gray-400">Control who can see your profile</p>
-                                            </div>
-                                            <select className="bg-[#141821] border border-white/10 text-white rounded-lg px-3 py-2 text-sm font-medium">
-                                                <option>Public</option>
-                                                <option>Private</option>
-                                                <option>Friends Only</option>
-                                            </select>
-                                        </div>
-                                        <div className="flex items-center justify-between py-4 border-b border-white/5">
-                                            <div>
                                                 <p className="font-semibold text-white">Show Email</p>
                                                 <p className="text-sm text-gray-400">Display your email on your profile</p>
                                             </div>
                                             <label className="relative inline-flex items-center cursor-pointer">
-                                                <input type="checkbox" className="sr-only peer" />
+                                                <input 
+                                                    type="checkbox" 
+                                                    name="showEmail"
+                                                    checked={formData.privacy.showEmail}
+                                                    onChange={handlePrivacyChange}
+                                                    className="sr-only peer" 
+                                                />
                                                 <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#8B5CF6]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8B5CF6]"></div>
                                             </label>
                                         </div>
@@ -488,11 +562,22 @@ const Settings = () => {
                                 <div className="card-surface p-8">
                                     <h2 className="text-xl font-bold text-white mb-4">Notification Preferences</h2>
                                     <div className="space-y-4">
-                                        {["Email Notifications", "Push Notifications", "Marketing Emails", "Weekly Digest"].map((item) => (
-                                            <div key={item} className="flex items-center justify-between py-4 border-b border-white/5 last:border-0">
-                                                <p className="font-semibold text-white">{item}</p>
+                                        {[
+                                            { label: "Email Notifications", name: "emailNotifications" }, 
+                                            { label: "Push Notifications", name: "pushNotifications" }, 
+                                            { label: "Marketing Emails", name: "marketingEmails" }, 
+                                            { label: "Weekly Digest", name: "weeklyDigest" }
+                                        ].map((item) => (
+                                            <div key={item.name} className="flex items-center justify-between py-4 border-b border-white/5 last:border-0">
+                                                <p className="font-semibold text-white">{item.label}</p>
                                                 <label className="relative inline-flex items-center cursor-pointer">
-                                                    <input type="checkbox" className="sr-only peer" defaultChecked />
+                                                    <input 
+                                                        type="checkbox" 
+                                                        name={item.name}
+                                                        checked={formData.notifications[item.name]}
+                                                        onChange={handleNotificationChange}
+                                                        className="sr-only peer" 
+                                                    />
                                                     <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-[#8B5CF6]/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#8B5CF6]"></div>
                                                 </label>
                                             </div>
@@ -501,8 +586,8 @@ const Settings = () => {
                                 </div>
                             )}
 
-                            {activeSection === "profile" && (
-                                <div className="flex justify-end gap-3">
+                            {["profile", "privacy", "notifications"].includes(activeSection) && (
+                                <div className="flex justify-end gap-3 pt-6 border-t border-white/5">
                                     <button type="button" className="btn-secondary">
                                         Cancel
                                     </button>
